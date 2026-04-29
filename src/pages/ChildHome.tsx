@@ -91,13 +91,14 @@ const ChildHome = () => {
 
       const token = localStorage.getItem("jk_child_token");
       const { data, error } = await supabase.functions.invoke("child-submit", {
-        body: { token, activity_id: selected.id, photo_url: pub.publicUrl },
+        body: { token, activity_id: selected.id, photo_url: pub.publicUrl, comment: comment.trim() || null },
       });
       if (error || !data?.ok) throw new Error(data?.error || error?.message || "Erro");
 
       toast.success("Enviado! Aguardando aprovação 🎉");
       setSelected(null);
       setFile(null);
+      setComment("");
       refresh();
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao enviar");
