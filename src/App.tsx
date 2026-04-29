@@ -13,6 +13,7 @@ import Children from "./pages/app/Children.tsx";
 import Activities from "./pages/app/Activities.tsx";
 import Pending from "./pages/app/Pending.tsx";
 import Payments from "./pages/app/Payments.tsx";
+import CalendarPage from "./pages/app/Calendar.tsx";
 import ChildSubmit from "./pages/ChildSubmit.tsx";
 
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ const App = () => (
               <Route path="atividades" element={<Activities />} />
               <Route path="pendencias" element={<Pending />} />
               <Route path="pagamentos" element={<Payments />} />
+              <Route path="calendario" element={<CalendarPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
