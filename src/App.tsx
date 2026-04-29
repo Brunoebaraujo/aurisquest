@@ -16,7 +16,8 @@ import Payments from "./pages/app/Payments.tsx";
 import CalendarPage from "./pages/app/Calendar.tsx";
 import Missions from "./pages/app/Missions.tsx";
 import ChildProfile from "./pages/app/ChildProfile.tsx";
-import ChildSubmit from "./pages/ChildSubmit.tsx";
+import ChildLogin from "./pages/ChildLogin.tsx";
+import ChildHome from "./pages/ChildHome.tsx";
 
 const queryClient = new QueryClient();
 
@@ -30,7 +31,10 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/enviar/:childId" element={<ChildSubmit />} />
+            <Route path="/entrar" element={<ChildLogin />} />
+            <Route path="/c" element={<ChildHome />} />
+            {/* legado: redireciona para nova tela de login */}
+            <Route path="/enviar/:childId" element={<ChildLogin />} />
             <Route path="/app" element={<AppLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="criancas" element={<Children />} />
