@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ChevronLeft, ChevronRight, CalendarDays, Clock, CheckCircle2, XCircle, Wallet } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, Clock, CheckCircle2, XCircle, Wallet, Trash2 } from "lucide-react";
 import { formatBRL } from "@/lib/format";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 type Child = { id: string; name: string };
 type Activity = { id: string; name: string };
@@ -302,6 +304,7 @@ const CalendarPage = () => {
         children={children}
         activities={activities}
         paidMap={paidMap}
+        onDeleted={(id) => setSubmissions(prev => prev.filter(s => s.id !== id))}
       />
     </div>
   );
@@ -315,11 +318,19 @@ type DayDetailsProps = {
   children: Child[];
   activities: Activity[];
   paidMap: { fullyPaid: Map<string, boolean>; partial: Map<string, number> };
+  onDeleted: (id: string) => void;
 };
 
-const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, activities, paidMap }: DayDetailsProps) => {
+const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, activities, paidMap, onDeleted }: DayDetailsProps) => {
   const childName = (id: string) => children.find(c => c.id === id)?.name ?? "—";
   const activityName = (id: string) => activities.find(a => a.id === id)?.name ?? "Atividade";
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("submissions").delete().eq("id", id);
+    if (error) { toast.error("Não foi possível remover: " + error.message); return; }
+    toast.success("Atividade removida");
+    onDeleted(id);
+  };
 
   const sorted = [...submissions].sort((a, b) =>
     new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
@@ -415,6 +426,27 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
                     <p className="text-xs text-muted-foreground mt-2 italic">"{s.review_note}"</p>
                   )}
                 </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive shrink-0" title="Remover atividade">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Remover esta atividade?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Vai apagar permanentemente "{activityName(s.activity_id)}" de {childName(s.child_id)} ({formatBRL(s.reward_amount_cents)}). Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(s.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Remover
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             );
           })}
