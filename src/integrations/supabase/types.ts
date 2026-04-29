@@ -120,6 +120,152 @@ export type Database = {
         }
         Relationships: []
       }
+      mission_awards: {
+        Row: {
+          awarded_at: string
+          bonus_amount_cents: number
+          child_id: string
+          family_id: string
+          id: string
+          mission_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          bonus_amount_cents?: number
+          child_id: string
+          family_id: string
+          id?: string
+          mission_id: string
+        }
+        Update: {
+          awarded_at?: string
+          bonus_amount_cents?: number
+          child_id?: string
+          family_id?: string
+          id?: string
+          mission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_awards_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_awards_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_awards_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mission_participants: {
+        Row: {
+          child_id: string
+          family_id: string
+          mission_id: string
+        }
+        Insert: {
+          child_id: string
+          family_id: string
+          mission_id: string
+        }
+        Update: {
+          child_id?: string
+          family_id?: string
+          mission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_participants_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_participants_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mission_participants_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      missions: {
+        Row: {
+          active: boolean
+          activity_id: string
+          bonus_amount_cents: number
+          created_at: string
+          description: string | null
+          family_id: string
+          goal_target: number
+          goal_type: Database["public"]["Enums"]["mission_goal_type"]
+          id: string
+          medal_url: string | null
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          activity_id: string
+          bonus_amount_cents?: number
+          created_at?: string
+          description?: string | null
+          family_id: string
+          goal_target: number
+          goal_type: Database["public"]["Enums"]["mission_goal_type"]
+          id?: string
+          medal_url?: string | null
+          name: string
+        }
+        Update: {
+          active?: boolean
+          activity_id?: string
+          bonus_amount_cents?: number
+          created_at?: string
+          description?: string | null
+          family_id?: string
+          goal_target?: number
+          goal_type?: Database["public"]["Enums"]["mission_goal_type"]
+          id?: string
+          medal_url?: string | null
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missions_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payments: {
         Row: {
           amount_cents: number
@@ -275,9 +421,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      compute_streak: {
+        Args: { _activity_id: string; _child_id: string }
+        Returns: number
+      }
       get_user_family_id: { Args: { _user_id: string }; Returns: string }
     }
     Enums: {
+      mission_goal_type: "total" | "streak"
       submission_status: "pendente" | "aprovado" | "recusado"
     }
     CompositeTypes: {
@@ -406,6 +557,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      mission_goal_type: ["total", "streak"],
       submission_status: ["pendente", "aprovado", "recusado"],
     },
   },
