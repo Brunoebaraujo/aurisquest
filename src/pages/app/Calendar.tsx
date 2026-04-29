@@ -426,6 +426,27 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
                     <p className="text-xs text-muted-foreground mt-2 italic">"{s.review_note}"</p>
                   )}
                 </div>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive shrink-0" title="Remover atividade">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Remover esta atividade?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Vai apagar permanentemente "{activityName(s.activity_id)}" de {childName(s.child_id)} ({formatBRL(s.reward_amount_cents)}). Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(s.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Remover
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </div>
             );
           })}
