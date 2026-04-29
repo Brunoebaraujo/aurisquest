@@ -79,7 +79,7 @@ const Auth = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-card/95 shadow-glow mb-4">
             <Trophy className="w-8 h-8 text-accent" />
           </div>
-          <h1 className="text-4xl font-display font-bold mb-2 drop-shadow-lg">Recompensinhas</h1>
+          <h1 className="text-4xl font-display font-bold mb-2 drop-shadow-lg">Jornada Kids</h1>
           <p className="text-primary-foreground/90 flex items-center justify-center gap-1">
             <Sparkles className="w-4 h-4" /> Recompense as conquistas em casa
           </p>
