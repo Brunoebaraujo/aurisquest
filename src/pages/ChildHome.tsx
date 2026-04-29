@@ -68,10 +68,10 @@ const ChildHome = () => {
     setFamilySubs(d.family_submissions ?? []);
     setRanking(d.ranking ?? []);
 
-    const earned = (d.submissions ?? [])
-      .filter((s: any) => s.status === "aprovado")
-      .reduce((sum: number, s: any) => sum + (s.reward_amount_cents ?? 0), 0);
-    setBalance(earned);
+    const totals = d.totals ?? { pending_cents: 0, approved_cents: 0 };
+    setPendingCents(totals.pending_cents ?? 0);
+    setApprovedCents(totals.approved_cents ?? 0);
+    setPaidCents(d.paid_cents ?? 0);
     setLoading(false);
   }, [logout]);
 
