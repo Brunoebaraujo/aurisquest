@@ -14,16 +14,271 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activities: {
+        Row: {
+          active: boolean
+          category: string | null
+          created_at: string
+          description: string | null
+          family_id: string
+          frequency_hint: string | null
+          id: string
+          name: string
+          reward_amount_cents: number
+        }
+        Insert: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          family_id: string
+          frequency_hint?: string | null
+          id?: string
+          name: string
+          reward_amount_cents?: number
+        }
+        Update: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          description?: string | null
+          family_id?: string
+          frequency_hint?: string | null
+          id?: string
+          name?: string
+          reward_amount_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activities_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      children: {
+        Row: {
+          active: boolean
+          avatar_url: string | null
+          created_at: string
+          family_id: string
+          id: string
+          name: string
+          password_hash: string | null
+          username: string | null
+        }
+        Insert: {
+          active?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          family_id: string
+          id?: string
+          name: string
+          password_hash?: string | null
+          username?: string | null
+        }
+        Update: {
+          active?: boolean
+          avatar_url?: string | null
+          created_at?: string
+          family_id?: string
+          id?: string
+          name?: string
+          password_hash?: string | null
+          username?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "children_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      families: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount_cents: number
+          child_id: string
+          created_at: string
+          created_by: string
+          family_id: string
+          id: string
+          note: string | null
+          paid_at: string
+        }
+        Insert: {
+          amount_cents: number
+          child_id: string
+          created_at?: string
+          created_by: string
+          family_id: string
+          id?: string
+          note?: string | null
+          paid_at?: string
+        }
+        Update: {
+          amount_cents?: number
+          child_id?: string
+          created_at?: string
+          created_by?: string
+          family_id?: string
+          id?: string
+          note?: string | null
+          paid_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          family_id: string | null
+          full_name: string | null
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          family_id?: string | null
+          full_name?: string | null
+          id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          family_id?: string | null
+          full_name?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      submissions: {
+        Row: {
+          activity_id: string
+          child_id: string
+          completed_at: string
+          created_at: string
+          family_id: string
+          id: string
+          photo_url: string | null
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reward_amount_cents: number
+          status: Database["public"]["Enums"]["submission_status"]
+          submitted_at: string
+        }
+        Insert: {
+          activity_id: string
+          child_id: string
+          completed_at?: string
+          created_at?: string
+          family_id: string
+          id?: string
+          photo_url?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reward_amount_cents?: number
+          status?: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string
+        }
+        Update: {
+          activity_id?: string
+          child_id?: string
+          completed_at?: string
+          created_at?: string
+          family_id?: string
+          id?: string
+          photo_url?: string | null
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reward_amount_cents?: number
+          status?: Database["public"]["Enums"]["submission_status"]
+          submitted_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "activities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "submissions_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_family_id: { Args: { _user_id: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      submission_status: "pendente" | "aprovado" | "recusado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +405,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      submission_status: ["pendente", "aprovado", "recusado"],
+    },
   },
 } as const
