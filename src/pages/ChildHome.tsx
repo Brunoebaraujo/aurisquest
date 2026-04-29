@@ -245,8 +245,19 @@ const ChildHome = () => {
                     <img src={URL.createObjectURL(file)} alt="prévia" className="w-full max-h-64 object-cover rounded-2xl" />
                   )}
 
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Comentário (opcional)</label>
+                    <Textarea
+                      placeholder="Conta pra gente como foi! 😊"
+                      value={comment}
+                      onChange={e => setComment(e.target.value.slice(0, 500))}
+                      rows={3}
+                    />
+                    <div className="text-[10px] text-muted-foreground text-right mt-1">{comment.length}/500</div>
+                  </div>
+
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1" onClick={() => { setSelected(null); setFile(null); }}>Cancelar</Button>
+                    <Button variant="outline" className="flex-1" onClick={() => { setSelected(null); setFile(null); setComment(""); }}>Cancelar</Button>
                     <Button variant="reward" className="flex-1" onClick={submit} disabled={busy || !file}>
                       {busy ? "Enviando..." : "Enviar para aprovação"}
                     </Button>
