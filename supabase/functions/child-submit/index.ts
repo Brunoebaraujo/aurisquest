@@ -52,6 +52,7 @@ Deno.serve(async (req) => {
       status: "pendente",
       reward_amount_cents: activity.reward_amount_cents,
       completed_at: new Date().toISOString(),
+      review_note: comment,
     }).select().single();
 
     if (error) return json({ error: error.message }, 500);
