@@ -34,7 +34,9 @@ const ChildHome = () => {
   const [familyChildren, setFamilyChildren] = useState<FamilyChild[]>([]);
   const [familySubs, setFamilySubs] = useState<FamilySubmission[]>([]);
   const [ranking, setRanking] = useState<RankItem[]>([]);
-  const [balance, setBalance] = useState(0);
+  const [pendingCents, setPendingCents] = useState(0);
+  const [approvedCents, setApprovedCents] = useState(0);
+  const [paidCents, setPaidCents] = useState(0);
   const [selected, setSelected] = useState<Activity | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [comment, setComment] = useState("");
@@ -66,10 +68,10 @@ const ChildHome = () => {
     setFamilySubs(d.family_submissions ?? []);
     setRanking(d.ranking ?? []);
 
-    const earned = (d.submissions ?? [])
-      .filter((s: any) => s.status === "aprovado")
-      .reduce((sum: number, s: any) => sum + (s.reward_amount_cents ?? 0), 0);
-    setBalance(earned);
+    const totals = d.totals ?? { pending_cents: 0, approved_cents: 0 };
+    setPendingCents(totals.pending_cents ?? 0);
+    setApprovedCents(totals.approved_cents ?? 0);
+    setPaidCents(d.paid_cents ?? 0);
     setLoading(false);
   }, [logout]);
 
@@ -185,12 +187,35 @@ const ChildHome = () => {
           </Button>
         </div>
 
-        <Card className="border-0 shadow-card rounded-3xl bg-gradient-reward text-accent-foreground">
-          <CardContent className="p-5 text-center">
-            <div className="text-sm opacity-80">Total ganho (aprovado)</div>
-            <div className="text-4xl font-display font-bold">{formatBRL(balance)}</div>
-          </CardContent>
-        </Card>
+        <div className="grid grid-cols-3 gap-3">
+          <Card className="border-0 shadow-card rounded-2xl bg-card">
+            <CardContent className="p-3 text-center">
+              <div className="flex items-center justify-center gap-1 text-warning mb-1">
+                <Clock className="w-4 h-4" />
+                <span className="text-[10px] font-semibold uppercase tracking-wide">Pendente</span>
+              </div>
+              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight">{formatBRL(pendingCents)}</div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-card rounded-2xl bg-gradient-reward text-accent-foreground">
+            <CardContent className="p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-1 opacity-90">
+                <Sparkles className="w-4 h-4" />
+                <span className="text-[10px] font-semibold uppercase tracking-wide">A receber</span>
+              </div>
+              <div className="text-lg sm:text-xl font-display font-bold leading-tight">{formatBRL(Math.max(approvedCents - paidCents, 0))}</div>
+            </CardContent>
+          </Card>
+          <Card className="border-0 shadow-card rounded-2xl bg-card">
+            <CardContent className="p-3 text-center">
+              <div className="flex items-center justify-center gap-1 text-success mb-1">
+                <CheckCircle2 className="w-4 h-4" />
+                <span className="text-[10px] font-semibold uppercase tracking-wide">Recebido</span>
+              </div>
+              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight">{formatBRL(paidCents)}</div>
+            </CardContent>
+          </Card>
+        </div>
 
         <Tabs defaultValue="atividades" className="w-full">
           <TabsList className="grid grid-cols-3 w-full bg-card/95 rounded-2xl p-1 h-auto">
