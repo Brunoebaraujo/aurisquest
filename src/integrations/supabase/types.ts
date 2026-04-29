@@ -58,6 +58,36 @@ export type Database = {
           },
         ]
       }
+      child_sessions: {
+        Row: {
+          child_id: string
+          created_at: string
+          expires_at: string
+          family_id: string
+          id: string
+          last_used_at: string
+          token_hash: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          expires_at?: string
+          family_id: string
+          id?: string
+          last_used_at?: string
+          token_hash: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          expires_at?: string
+          family_id?: string
+          id?: string
+          last_used_at?: string
+          token_hash?: string
+        }
+        Relationships: []
+      }
       children: {
         Row: {
           active: boolean
@@ -67,6 +97,7 @@ export type Database = {
           id: string
           name: string
           password_hash: string | null
+          password_set_at: string | null
           username: string | null
         }
         Insert: {
@@ -77,6 +108,7 @@ export type Database = {
           id?: string
           name: string
           password_hash?: string | null
+          password_set_at?: string | null
           username?: string | null
         }
         Update: {
@@ -87,6 +119,7 @@ export type Database = {
           id?: string
           name?: string
           password_hash?: string | null
+          password_set_at?: string | null
           username?: string | null
         }
         Relationships: [
@@ -425,7 +458,24 @@ export type Database = {
         Args: { _activity_id: string; _child_id: string }
         Returns: number
       }
+      get_child_dashboard: { Args: { _token: string }; Returns: Json }
       get_user_family_id: { Args: { _user_id: string }; Returns: string }
+      list_active_children_public: {
+        Args: never
+        Returns: {
+          avatar_url: string
+          has_password: boolean
+          id: string
+          name: string
+        }[]
+      }
+      validate_child_token: {
+        Args: { _token: string }
+        Returns: {
+          child_id: string
+          family_id: string
+        }[]
+      }
     }
     Enums: {
       mission_goal_type: "total" | "streak"
