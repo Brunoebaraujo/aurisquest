@@ -226,9 +226,11 @@ const CalendarPage = () => {
               const isEmpty = !b;
 
               return (
-                <div
+                <button
+                  type="button"
                   key={cell.key}
-                  className={`aspect-square rounded-xl p-1.5 flex flex-col justify-between border transition-smooth hover:scale-[1.02] ${
+                  onClick={() => { setOpenDayKey(cell.key); setOpenDayDate(cell.date); }}
+                  className={`aspect-square rounded-xl p-1.5 flex flex-col justify-between border transition-smooth hover:scale-[1.02] hover:shadow-card text-left cursor-pointer ${
                     isEmpty ? "bg-muted/40 border-border/50" : "bg-card border-border shadow-soft"
                   } ${isToday ? "ring-2 ring-primary" : ""}`}
                   title={
@@ -246,7 +248,7 @@ const CalendarPage = () => {
                     {hasUnpaid && <span className="w-2 h-2 rounded-full bg-destructive shadow-sm" />}
                     {hasPaid && <span className="w-2 h-2 rounded-full bg-success shadow-sm" />}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
