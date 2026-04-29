@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-import * as bcrypt from "https://deno.land/x/bcrypt@v0.4.1/mod.ts";
+import bcrypt from "npm:bcryptjs@2.4.3";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
     const { data: child } = await admin.from("children").select("id, family_id").eq("id", childId).maybeSingle();
     if (!child || child.family_id !== profile.family_id) return json({ error: "not_found" }, 404);
 
-    const hash = await bcrypt.hash(password);
+    const hash = await bcrypt.hash(password, 10);
     const { error: upErr } = await admin
       .from("children")
       .update({ password_hash: hash, password_set_at: new Date().toISOString() })
