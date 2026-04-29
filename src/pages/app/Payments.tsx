@@ -66,6 +66,20 @@ const Payments = () => {
     load();
   };
 
+  const cleanupPhotos = async () => {
+    setCleaning(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("cleanup-old-photos");
+      if (error) throw error;
+      const n = (data as any)?.deleted ?? 0;
+      toast.success(n > 0 ? `${n} foto(s) antiga(s) removida(s)!` : "Nenhuma foto com mais de 6 meses encontrada.");
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro ao limpar fotos");
+    } finally {
+      setCleaning(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
