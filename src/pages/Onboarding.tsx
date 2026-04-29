@@ -62,7 +62,7 @@ const Onboarding = () => {
 
     await refreshProfile();
     setBusy(false);
-    toast.success("Tudo pronto! Boas-vindas à Recompensinhas 🎉");
+    toast.success("Tudo pronto! Boas-vindas à Jornada Kids 🎉");
     nav("/app");
   };
 
