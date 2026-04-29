@@ -34,7 +34,9 @@ const ChildHome = () => {
   const [familyChildren, setFamilyChildren] = useState<FamilyChild[]>([]);
   const [familySubs, setFamilySubs] = useState<FamilySubmission[]>([]);
   const [ranking, setRanking] = useState<RankItem[]>([]);
-  const [balance, setBalance] = useState(0);
+  const [pendingCents, setPendingCents] = useState(0);
+  const [approvedCents, setApprovedCents] = useState(0);
+  const [paidCents, setPaidCents] = useState(0);
   const [selected, setSelected] = useState<Activity | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [comment, setComment] = useState("");
