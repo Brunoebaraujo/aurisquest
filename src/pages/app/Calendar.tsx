@@ -304,6 +304,7 @@ const CalendarPage = () => {
         children={children}
         activities={activities}
         paidMap={paidMap}
+        onDeleted={(id) => setSubmissions(prev => prev.filter(s => s.id !== id))}
       />
     </div>
   );
