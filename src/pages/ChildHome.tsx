@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Trophy, Camera, Sparkles, CheckCircle2, Clock, XCircle, LogOut, Award,
   CalendarDays, ChevronLeft, ChevronRight, Medal, Crown,
@@ -36,6 +37,7 @@ const ChildHome = () => {
   const [balance, setBalance] = useState(0);
   const [selected, setSelected] = useState<Activity | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -90,13 +92,14 @@ const ChildHome = () => {
 
       const token = localStorage.getItem("jk_child_token");
       const { data, error } = await supabase.functions.invoke("child-submit", {
-        body: { token, activity_id: selected.id, photo_url: pub.publicUrl },
+        body: { token, activity_id: selected.id, photo_url: pub.publicUrl, comment: comment.trim() || null },
       });
       if (error || !data?.ok) throw new Error(data?.error || error?.message || "Erro");
 
       toast.success("Enviado! Aguardando aprovação 🎉");
       setSelected(null);
       setFile(null);
+      setComment("");
       refresh();
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao enviar");
@@ -242,8 +245,19 @@ const ChildHome = () => {
                     <img src={URL.createObjectURL(file)} alt="prévia" className="w-full max-h-64 object-cover rounded-2xl" />
                   )}
 
+                  <div>
+                    <label className="text-sm font-medium mb-1 block">Comentário (opcional)</label>
+                    <Textarea
+                      placeholder="Conta pra gente como foi! 😊"
+                      value={comment}
+                      onChange={e => setComment(e.target.value.slice(0, 500))}
+                      rows={3}
+                    />
+                    <div className="text-[10px] text-muted-foreground text-right mt-1">{comment.length}/500</div>
+                  </div>
+
                   <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1" onClick={() => { setSelected(null); setFile(null); }}>Cancelar</Button>
+                    <Button variant="outline" className="flex-1" onClick={() => { setSelected(null); setFile(null); setComment(""); }}>Cancelar</Button>
                     <Button variant="reward" className="flex-1" onClick={submit} disabled={busy || !file}>
                       {busy ? "Enviando..." : "Enviar para aprovação"}
                     </Button>
