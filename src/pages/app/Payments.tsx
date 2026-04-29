@@ -87,10 +87,30 @@ const Payments = () => {
           <h2 className="text-2xl font-display font-bold">Pagamentos</h2>
           <p className="text-muted-foreground text-sm">Saldos e histórico de resgates.</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="hero"><Plus className="w-4 h-4" /> Registrar pagamento</Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" disabled={cleaning}>
+                <ImageOff className="w-4 h-4" /> {cleaning ? "Limpando..." : "Limpar fotos antigas"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Limpar fotos com mais de 6 meses?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  As fotos das atividades enviadas há mais de 6 meses serão apagadas permanentemente do armazenamento. O histórico de aprovações e o saldo das crianças não serão afetados — apenas as imagens.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={cleanupPhotos}>Limpar fotos</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button variant="hero"><Plus className="w-4 h-4" /> Registrar pagamento</Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Registrar pagamento</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-3">
