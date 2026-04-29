@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Wallet, Plus, Trash2 } from "lucide-react";
+import { Wallet, Plus, Trash2, ImageOff } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { formatBRL, formatDate } from "@/lib/format";
 
@@ -22,6 +23,7 @@ const Payments = () => {
   const [childId, setChildId] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [cleaning, setCleaning] = useState(false);
 
   const load = async () => {
     if (!profile?.family_id) return;
@@ -64,6 +66,20 @@ const Payments = () => {
     load();
   };
 
+  const cleanupPhotos = async () => {
+    setCleaning(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("cleanup-old-photos");
+      if (error) throw error;
+      const n = (data as any)?.deleted ?? 0;
+      toast.success(n > 0 ? `${n} foto(s) antiga(s) removida(s)!` : "Nenhuma foto com mais de 6 meses encontrada.");
+    } catch (e: any) {
+      toast.error(e.message ?? "Erro ao limpar fotos");
+    } finally {
+      setCleaning(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -71,10 +87,30 @@ const Payments = () => {
           <h2 className="text-2xl font-display font-bold">Pagamentos</h2>
           <p className="text-muted-foreground text-sm">Saldos e histórico de resgates.</p>
         </div>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button variant="hero"><Plus className="w-4 h-4" /> Registrar pagamento</Button>
-          </DialogTrigger>
+        <div className="flex items-center gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" disabled={cleaning}>
+                <ImageOff className="w-4 h-4" /> {cleaning ? "Limpando..." : "Limpar fotos antigas"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Limpar fotos com mais de 6 meses?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  As fotos das atividades enviadas há mais de 6 meses serão apagadas permanentemente do armazenamento. O histórico de aprovações e o saldo das crianças não serão afetados — apenas as imagens.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction onClick={cleanupPhotos}>Limpar fotos</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button variant="hero"><Plus className="w-4 h-4" /> Registrar pagamento</Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Registrar pagamento</DialogTitle></DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-3">
@@ -96,7 +132,8 @@ const Payments = () => {
               <Button type="submit" variant="hero" className="w-full">Salvar</Button>
             </form>
           </DialogContent>
-        </Dialog>
+          </Dialog>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
