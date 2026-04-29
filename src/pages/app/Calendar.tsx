@@ -42,7 +42,10 @@ const dayKey = (d: Date) =>
 const CalendarPage = () => {
   const { profile } = useAuth();
   const [children, setChildren] = useState<Child[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedChild, setSelectedChild] = useState<string>("all");
+  const [openDayKey, setOpenDayKey] = useState<string | null>(null);
+  const [openDayDate, setOpenDayDate] = useState<Date | null>(null);
   const [cursor, setCursor] = useState(() => {
     const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d;
   });
@@ -51,17 +54,21 @@ const CalendarPage = () => {
 
   useEffect(() => {
     if (!profile?.family_id) return;
-    supabase.from("children").select("id, name").eq("family_id", profile.family_id).eq("active", true)
-      .then(({ data }) => setChildren(data ?? []));
+    Promise.all([
+      supabase.from("children").select("id, name").eq("family_id", profile.family_id).eq("active", true),
+      supabase.from("activities").select("id, name").eq("family_id", profile.family_id),
+    ]).then(([c, a]) => {
+      setChildren(c.data ?? []);
+      setActivities(a.data ?? []);
+    });
   }, [profile?.family_id]);
 
   useEffect(() => {
     const load = async () => {
       if (!profile?.family_id) return;
-      // Load ALL approved submissions and payments (need history for chronological allocation)
       const [subRes, payRes] = await Promise.all([
         supabase.from("submissions")
-          .select("id, child_id, status, reward_amount_cents, completed_at")
+          .select("id, child_id, activity_id, status, reward_amount_cents, completed_at, photo_url, review_note")
           .eq("family_id", profile.family_id),
         supabase.from("payments")
           .select("child_id, amount_cents, paid_at")
