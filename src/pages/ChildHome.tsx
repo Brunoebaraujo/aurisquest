@@ -36,6 +36,7 @@ const ChildHome = () => {
   const [balance, setBalance] = useState(0);
   const [selected, setSelected] = useState<Activity | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
 
