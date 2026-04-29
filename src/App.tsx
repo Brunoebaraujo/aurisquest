@@ -14,6 +14,8 @@ import Activities from "./pages/app/Activities.tsx";
 import Pending from "./pages/app/Pending.tsx";
 import Payments from "./pages/app/Payments.tsx";
 import CalendarPage from "./pages/app/Calendar.tsx";
+import Missions from "./pages/app/Missions.tsx";
+import ChildProfile from "./pages/app/ChildProfile.tsx";
 import ChildSubmit from "./pages/ChildSubmit.tsx";
 
 const queryClient = new QueryClient();
@@ -32,7 +34,9 @@ const App = () => (
             <Route path="/app" element={<AppLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="criancas" element={<Children />} />
+              <Route path="criancas/:childId" element={<ChildProfile />} />
               <Route path="atividades" element={<Activities />} />
+              <Route path="missoes" element={<Missions />} />
               <Route path="pendencias" element={<Pending />} />
               <Route path="pagamentos" element={<Payments />} />
               <Route path="calendario" element={<CalendarPage />} />

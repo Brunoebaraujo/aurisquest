@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Copy, ExternalLink, User as UserIcon } from "lucide-react";
+import { Plus, Copy, ExternalLink, User as UserIcon, Award } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 
@@ -87,6 +87,9 @@ const Children = () => {
                 <Switch checked={c.active} onCheckedChange={(v) => toggleActive(c.id, v)} />
               </div>
               <div className="flex flex-col gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link to={`/app/criancas/${c.id}`}><Award className="w-4 h-4" /> Ver perfil e medalhas</Link>
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => copyLink(c.id)}>
                   <Copy className="w-4 h-4" /> Copiar link da criança
                 </Button>
