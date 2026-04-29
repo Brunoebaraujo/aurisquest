@@ -4,16 +4,22 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, CalendarDays, Clock, CheckCircle2, XCircle, Wallet } from "lucide-react";
 import { formatBRL } from "@/lib/format";
 
 type Child = { id: string; name: string };
+type Activity = { id: string; name: string };
 type Submission = {
   id: string;
   child_id: string;
+  activity_id: string;
   status: "pendente" | "aprovado" | "recusado";
   reward_amount_cents: number;
   completed_at: string;
+  photo_url: string | null;
+  review_note: string | null;
 };
 type Payment = { child_id: string; amount_cents: number; paid_at: string };
 
@@ -36,7 +42,10 @@ const dayKey = (d: Date) =>
 const CalendarPage = () => {
   const { profile } = useAuth();
   const [children, setChildren] = useState<Child[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [selectedChild, setSelectedChild] = useState<string>("all");
+  const [openDayKey, setOpenDayKey] = useState<string | null>(null);
+  const [openDayDate, setOpenDayDate] = useState<Date | null>(null);
   const [cursor, setCursor] = useState(() => {
     const d = new Date(); d.setDate(1); d.setHours(0, 0, 0, 0); return d;
   });
@@ -45,17 +54,21 @@ const CalendarPage = () => {
 
   useEffect(() => {
     if (!profile?.family_id) return;
-    supabase.from("children").select("id, name").eq("family_id", profile.family_id).eq("active", true)
-      .then(({ data }) => setChildren(data ?? []));
+    Promise.all([
+      supabase.from("children").select("id, name").eq("family_id", profile.family_id).eq("active", true),
+      supabase.from("activities").select("id, name").eq("family_id", profile.family_id),
+    ]).then(([c, a]) => {
+      setChildren(c.data ?? []);
+      setActivities(a.data ?? []);
+    });
   }, [profile?.family_id]);
 
   useEffect(() => {
     const load = async () => {
       if (!profile?.family_id) return;
-      // Load ALL approved submissions and payments (need history for chronological allocation)
       const [subRes, payRes] = await Promise.all([
         supabase.from("submissions")
-          .select("id, child_id, status, reward_amount_cents, completed_at")
+          .select("id, child_id, activity_id, status, reward_amount_cents, completed_at, photo_url, review_note")
           .eq("family_id", profile.family_id),
         supabase.from("payments")
           .select("child_id, amount_cents, paid_at")
@@ -213,9 +226,11 @@ const CalendarPage = () => {
               const isEmpty = !b;
 
               return (
-                <div
+                <button
+                  type="button"
                   key={cell.key}
-                  className={`aspect-square rounded-xl p-1.5 flex flex-col justify-between border transition-smooth hover:scale-[1.02] ${
+                  onClick={() => { setOpenDayKey(cell.key); setOpenDayDate(cell.date); }}
+                  className={`aspect-square rounded-xl p-1.5 flex flex-col justify-between border transition-smooth hover:scale-[1.02] hover:shadow-card text-left cursor-pointer ${
                     isEmpty ? "bg-muted/40 border-border/50" : "bg-card border-border shadow-soft"
                   } ${isToday ? "ring-2 ring-primary" : ""}`}
                   title={
@@ -233,7 +248,7 @@ const CalendarPage = () => {
                     {hasUnpaid && <span className="w-2 h-2 rounded-full bg-destructive shadow-sm" />}
                     {hasPaid && <span className="w-2 h-2 rounded-full bg-success shadow-sm" />}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -275,7 +290,137 @@ const CalendarPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      <DayDetailsDialog
+        open={!!openDayKey}
+        onOpenChange={(o) => { if (!o) { setOpenDayKey(null); setOpenDayDate(null); } }}
+        date={openDayDate}
+        submissions={submissions.filter(s => {
+          if (selectedChild !== "all" && s.child_id !== selectedChild) return false;
+          return openDayKey ? dayKey(new Date(s.completed_at)) === openDayKey : false;
+        })}
+        children={children}
+        activities={activities}
+        paidMap={paidMap}
+      />
     </div>
+  );
+};
+
+type DayDetailsProps = {
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  date: Date | null;
+  submissions: Submission[];
+  children: Child[];
+  activities: Activity[];
+  paidMap: { fullyPaid: Map<string, boolean>; partial: Map<string, number> };
+};
+
+const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, activities, paidMap }: DayDetailsProps) => {
+  const childName = (id: string) => children.find(c => c.id === id)?.name ?? "—";
+  const activityName = (id: string) => activities.find(a => a.id === id)?.name ?? "Atividade";
+
+  const sorted = [...submissions].sort((a, b) =>
+    new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
+  );
+
+  const totals = sorted.reduce(
+    (acc, s) => {
+      if (s.status === "pendente") acc.pending += s.reward_amount_cents;
+      else if (s.status === "aprovado") {
+        const fully = paidMap.fullyPaid.get(s.id);
+        const partial = paidMap.partial.get(s.id) ?? 0;
+        if (fully) acc.paid += s.reward_amount_cents;
+        else { acc.paid += partial; acc.unpaid += s.reward_amount_cents - partial; }
+      } else acc.refused += s.reward_amount_cents;
+      return acc;
+    },
+    { pending: 0, unpaid: 0, paid: 0, refused: 0 }
+  );
+
+  const dateLabel = date
+    ? date.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "long", year: "numeric" })
+    : "";
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="font-display text-2xl capitalize">{dateLabel}</DialogTitle>
+          <DialogDescription>
+            {sorted.length === 0
+              ? "Nenhuma atividade registrada neste dia."
+              : `${sorted.length} ${sorted.length === 1 ? "ocorrência" : "ocorrências"} no dia.`}
+          </DialogDescription>
+        </DialogHeader>
+
+        {sorted.length > 0 && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="rounded-xl bg-warning/10 p-2"><div className="text-[10px] text-warning-foreground/70">Pendente</div><div className="font-display font-bold">{formatBRL(totals.pending)}</div></div>
+            <div className="rounded-xl bg-destructive/10 p-2"><div className="text-[10px] text-destructive">A pagar</div><div className="font-display font-bold">{formatBRL(totals.unpaid)}</div></div>
+            <div className="rounded-xl bg-success/10 p-2"><div className="text-[10px] text-success">Pago</div><div className="font-display font-bold">{formatBRL(totals.paid)}</div></div>
+            <div className="rounded-xl bg-muted p-2"><div className="text-[10px] text-muted-foreground">Recusado</div><div className="font-display font-bold">{formatBRL(totals.refused)}</div></div>
+          </div>
+        )}
+
+        <div className="space-y-3">
+          {sorted.map(s => {
+            const isApproved = s.status === "aprovado";
+            const fully = paidMap.fullyPaid.get(s.id);
+            const partial = paidMap.partial.get(s.id) ?? 0;
+            const payState = isApproved
+              ? (fully ? "pago" : partial > 0 ? "parcial" : "a pagar")
+              : null;
+            const dotClass =
+              s.status === "pendente" ? "bg-warning"
+              : s.status === "recusado" ? "bg-muted-foreground"
+              : payState === "pago" ? "bg-success"
+              : payState === "parcial" ? "bg-gradient-to-r from-success to-destructive"
+              : "bg-destructive";
+
+            return (
+              <div key={s.id} className="flex gap-3 p-3 rounded-xl border bg-card shadow-soft">
+                {s.photo_url ? (
+                  <img src={s.photo_url} alt="" className="w-16 h-16 rounded-lg object-cover shrink-0" />
+                ) : (
+                  <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center text-muted-foreground text-xs shrink-0">sem foto</div>
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="font-semibold truncate">{activityName(s.activity_id)}</div>
+                      <div className="text-xs text-muted-foreground">{childName(s.child_id)} • {new Date(s.completed_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</div>
+                    </div>
+                    <div className="font-display font-bold text-primary whitespace-nowrap">{formatBRL(s.reward_amount_cents)}</div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <Badge variant="outline" className="gap-1">
+                      <span className={`w-2 h-2 rounded-full ${dotClass}`} />
+                      {s.status === "pendente" && (<><Clock className="w-3 h-3" /> Pendente</>)}
+                      {s.status === "aprovado" && (<><CheckCircle2 className="w-3 h-3" /> Aprovado</>)}
+                      {s.status === "recusado" && (<><XCircle className="w-3 h-3" /> Recusado</>)}
+                    </Badge>
+                    {isApproved && payState === "pago" && (
+                      <Badge className="bg-success text-success-foreground gap-1"><Wallet className="w-3 h-3" /> Pago</Badge>
+                    )}
+                    {isApproved && payState === "parcial" && (
+                      <Badge className="bg-warning text-warning-foreground gap-1"><Wallet className="w-3 h-3" /> Pago {formatBRL(partial)} de {formatBRL(s.reward_amount_cents)}</Badge>
+                    )}
+                    {isApproved && payState === "a pagar" && (
+                      <Badge className="bg-destructive text-destructive-foreground gap-1"><Wallet className="w-3 h-3" /> A pagar</Badge>
+                    )}
+                  </div>
+                  {s.review_note && (
+                    <p className="text-xs text-muted-foreground mt-2 italic">"{s.review_note}"</p>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
