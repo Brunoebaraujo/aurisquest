@@ -4,16 +4,22 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ChevronLeft, ChevronRight, CalendarDays } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { ChevronLeft, ChevronRight, CalendarDays, Clock, CheckCircle2, XCircle, Wallet } from "lucide-react";
 import { formatBRL } from "@/lib/format";
 
 type Child = { id: string; name: string };
+type Activity = { id: string; name: string };
 type Submission = {
   id: string;
   child_id: string;
+  activity_id: string;
   status: "pendente" | "aprovado" | "recusado";
   reward_amount_cents: number;
   completed_at: string;
+  photo_url: string | null;
+  review_note: string | null;
 };
 type Payment = { child_id: string; amount_cents: number; paid_at: string };
 
