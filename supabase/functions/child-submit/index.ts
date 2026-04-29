@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
     const token = String(body.token ?? "");
     const activityId = String(body.activity_id ?? "");
     const photoUrl = body.photo_url ? String(body.photo_url) : null;
+    const comment = body.comment ? String(body.comment).slice(0, 500) : null;
     if (!token || !activityId) return json({ error: "invalid_input" }, 400);
 
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
