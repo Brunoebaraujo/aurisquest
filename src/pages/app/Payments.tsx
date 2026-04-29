@@ -23,6 +23,7 @@ const Payments = () => {
   const [childId, setChildId] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [cleaning, setCleaning] = useState(false);
 
   const load = async () => {
     if (!profile?.family_id) return;
