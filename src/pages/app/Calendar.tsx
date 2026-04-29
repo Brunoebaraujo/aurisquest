@@ -318,11 +318,19 @@ type DayDetailsProps = {
   children: Child[];
   activities: Activity[];
   paidMap: { fullyPaid: Map<string, boolean>; partial: Map<string, number> };
+  onDeleted: (id: string) => void;
 };
 
-const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, activities, paidMap }: DayDetailsProps) => {
+const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, activities, paidMap, onDeleted }: DayDetailsProps) => {
   const childName = (id: string) => children.find(c => c.id === id)?.name ?? "—";
   const activityName = (id: string) => activities.find(a => a.id === id)?.name ?? "Atividade";
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("submissions").delete().eq("id", id);
+    if (error) { toast.error("Não foi possível remover: " + error.message); return; }
+    toast.success("Atividade removida");
+    onDeleted(id);
+  };
 
   const sorted = [...submissions].sort((a, b) =>
     new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime()
