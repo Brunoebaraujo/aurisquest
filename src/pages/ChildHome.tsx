@@ -20,6 +20,13 @@ type FamilySubmission = Submission & { child_id: string };
 type FamilyChild = { id: string; name: string; avatar_url: string | null };
 type AwardItem = { id: string; mission_name: string; medal_url: string | null; awarded_at: string };
 type RankItem = { child_id: string; name: string; avatar_url: string | null; approved_count: number; earned_cents: number; pending_count: number; medals_count: number };
+type MissionParticipant = { child_id: string; name: string; avatar_url: string | null; progress: number; achieved: boolean };
+type MissionItem = {
+  id: string; name: string; description: string | null;
+  goal_type: "total" | "streak"; goal_target: number;
+  bonus_amount_cents: number; activity_id: string; activity_name: string | null;
+  medal_url: string | null; participants: MissionParticipant[];
+};
 
 const monthNames = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const weekdays = ["D","S","T","Q","Q","S","S"];
