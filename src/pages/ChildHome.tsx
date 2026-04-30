@@ -41,6 +41,7 @@ const ChildHome = () => {
   const [familyChildren, setFamilyChildren] = useState<FamilyChild[]>([]);
   const [familySubs, setFamilySubs] = useState<FamilySubmission[]>([]);
   const [ranking, setRanking] = useState<RankItem[]>([]);
+  const [missions, setMissions] = useState<MissionItem[]>([]);
   const [pendingCents, setPendingCents] = useState(0);
   const [approvedCents, setApprovedCents] = useState(0);
   const [paidCents, setPaidCents] = useState(0);
