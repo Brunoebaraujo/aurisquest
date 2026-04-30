@@ -20,6 +20,13 @@ type FamilySubmission = Submission & { child_id: string };
 type FamilyChild = { id: string; name: string; avatar_url: string | null };
 type AwardItem = { id: string; mission_name: string; medal_url: string | null; awarded_at: string };
 type RankItem = { child_id: string; name: string; avatar_url: string | null; approved_count: number; earned_cents: number; pending_count: number; medals_count: number };
+type MissionParticipant = { child_id: string; name: string; avatar_url: string | null; progress: number; achieved: boolean };
+type MissionItem = {
+  id: string; name: string; description: string | null;
+  goal_type: "total" | "streak"; goal_target: number;
+  bonus_amount_cents: number; activity_id: string; activity_name: string | null;
+  medal_url: string | null; participants: MissionParticipant[];
+};
 
 const monthNames = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 const weekdays = ["D","S","T","Q","Q","S","S"];
@@ -34,6 +41,7 @@ const ChildHome = () => {
   const [familyChildren, setFamilyChildren] = useState<FamilyChild[]>([]);
   const [familySubs, setFamilySubs] = useState<FamilySubmission[]>([]);
   const [ranking, setRanking] = useState<RankItem[]>([]);
+  const [missions, setMissions] = useState<MissionItem[]>([]);
   const [pendingCents, setPendingCents] = useState(0);
   const [approvedCents, setApprovedCents] = useState(0);
   const [paidCents, setPaidCents] = useState(0);
@@ -67,6 +75,7 @@ const ChildHome = () => {
     setFamilyChildren(d.family_children ?? []);
     setFamilySubs(d.family_submissions ?? []);
     setRanking(d.ranking ?? []);
+    setMissions(d.missions ?? []);
 
     const totals = d.totals ?? { pending_cents: 0, approved_cents: 0 };
     setPendingCents(totals.pending_cents ?? 0);
@@ -192,7 +201,7 @@ const ChildHome = () => {
             <CardContent className="p-3 text-center">
               <div className="flex items-center justify-center gap-1 text-warning mb-1">
                 <Clock className="w-4 h-4" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide">Pendente</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pendente</span>
               </div>
               <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight">{formatBRL(pendingCents)}</div>
             </CardContent>
@@ -201,21 +210,79 @@ const ChildHome = () => {
             <CardContent className="p-3 text-center">
               <div className="flex items-center justify-center gap-1 mb-1 opacity-90">
                 <Sparkles className="w-4 h-4" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide">A receber</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide">Total Aprovado</span>
               </div>
-              <div className="text-lg sm:text-xl font-display font-bold leading-tight">{formatBRL(Math.max(approvedCents - paidCents, 0))}</div>
+              <div className="text-lg sm:text-xl font-display font-bold leading-tight">{formatBRL(approvedCents)}</div>
             </CardContent>
           </Card>
           <Card className="border-0 shadow-card rounded-2xl bg-card">
             <CardContent className="p-3 text-center">
               <div className="flex items-center justify-center gap-1 text-success mb-1">
                 <CheckCircle2 className="w-4 h-4" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide">Recebido</span>
+                <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pago</span>
               </div>
               <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight">{formatBRL(paidCents)}</div>
             </CardContent>
           </Card>
         </div>
+
+        {missions.length > 0 && (
+          <Card className="border-0 shadow-card rounded-3xl">
+            <CardContent className="p-5">
+              <h2 className="font-display font-bold text-lg mb-3 flex items-center gap-2">
+                <Award className="w-5 h-5 text-accent" /> Missões ativas
+              </h2>
+              <div className="space-y-4">
+                {missions.map(m => (
+                  <div key={m.id} className="rounded-2xl border-2 border-border p-4 bg-card">
+                    <div className="flex items-start justify-between gap-2 mb-1">
+                      <div className="min-w-0">
+                        <div className="font-display font-bold">{m.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {m.activity_name} · {m.goal_type === "streak" ? `${m.goal_target} dias seguidos` : `${m.goal_target} vezes`}
+                        </div>
+                      </div>
+                      {m.bonus_amount_cents > 0 && (
+                        <Badge className="bg-gradient-reward text-accent-foreground border-0 whitespace-nowrap">
+                          +{formatBRL(m.bonus_amount_cents)}
+                        </Badge>
+                      )}
+                    </div>
+                    {m.description && <p className="text-xs text-muted-foreground mb-2">{m.description}</p>}
+                    <div className="space-y-2 mt-3">
+                      {m.participants.map(p => {
+                        const pct = Math.min(100, Math.round((p.progress / Math.max(m.goal_target, 1)) * 100));
+                        const isMe = p.child_id === child.id;
+                        return (
+                          <div key={p.child_id} className={`p-2 rounded-xl ${isMe ? "bg-primary/10 ring-1 ring-primary/30" : "bg-muted/40"}`}>
+                            <div className="flex items-center justify-between gap-2 text-sm">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className="w-7 h-7 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+                                  {p.name[0]?.toUpperCase()}
+                                </div>
+                                <span className={`truncate ${isMe ? "font-semibold" : ""}`}>{p.name}{isMe && " (você)"}</span>
+                                {p.achieved && <Trophy className="w-4 h-4 text-accent shrink-0" />}
+                              </div>
+                              <span className="font-display font-bold whitespace-nowrap">
+                                {p.progress}/{m.goal_target}
+                              </span>
+                            </div>
+                            <div className="mt-1 h-2 rounded-full bg-muted overflow-hidden">
+                              <div
+                                className={`h-full ${p.achieved ? "bg-success" : "bg-gradient-primary"}`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <Tabs defaultValue="atividades" className="w-full">
           <TabsList className="grid grid-cols-3 w-full bg-card/95 rounded-2xl p-1 h-auto">
