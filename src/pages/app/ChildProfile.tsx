@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles } from "lucide-react";
+import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles, Eye } from "lucide-react";
 import { formatBRL } from "@/lib/format";
+import { toast } from "sonner";
 
 type Child = { id: string; name: string; avatar_url: string | null };
 type Mission = {
@@ -130,6 +131,23 @@ const ChildProfile = () => {
               })}
             </div>
           )}
+        </CardContent>
+      </Card>
+
+      <Card className="border-0 shadow-card rounded-2xl bg-primary/5">
+        <CardContent className="p-5 flex items-center justify-between gap-4 flex-wrap">
+          <div>
+            <div className="font-semibold flex items-center gap-2"><Eye className="w-4 h-4 text-primary" /> Visualizar como a criança</div>
+            <p className="text-sm text-muted-foreground">Veja exatamente o painel que {child?.name ?? "ela"} enxerga ao entrar no app.</p>
+          </div>
+          <Button variant="hero" size="sm" onClick={async () => {
+            if (!childId) return;
+            const { data, error } = await supabase.functions.invoke("child-preview-session", { body: { child_id: childId } });
+            if (error || !data?.token) { toast.error(error?.message ?? "Erro ao abrir prévia"); return; }
+            window.open(`/c#t=${encodeURIComponent(data.token)}`, "_blank", "noopener");
+          }}>
+            <Eye className="w-4 h-4" /> Abrir painel da criança
+          </Button>
         </CardContent>
       </Card>
 
