@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles } from "lucide-react";
+import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles, Eye } from "lucide-react";
 import { formatBRL } from "@/lib/format";
+import { toast } from "sonner";
 
 type Child = { id: string; name: string; avatar_url: string | null };
 type Mission = {

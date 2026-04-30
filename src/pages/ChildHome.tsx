@@ -85,6 +85,15 @@ const ChildHome = () => {
   }, [logout]);
 
   useEffect(() => {
+    // Suporte a token de pré-visualização via hash (#t=...) — usado pelo painel dos pais
+    if (typeof window !== "undefined" && window.location.hash.startsWith("#t=")) {
+      const previewToken = decodeURIComponent(window.location.hash.slice(3));
+      if (previewToken) {
+        localStorage.setItem("jk_child_token", previewToken);
+        localStorage.setItem("jk_child_preview", "1");
+        history.replaceState(null, "", window.location.pathname);
+      }
+    }
     const token = localStorage.getItem("jk_child_token");
     if (!token) { nav("/entrar", { replace: true }); return; }
     refresh();
