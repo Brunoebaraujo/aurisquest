@@ -75,6 +75,7 @@ const ChildHome = () => {
     setFamilyChildren(d.family_children ?? []);
     setFamilySubs(d.family_submissions ?? []);
     setRanking(d.ranking ?? []);
+    setMissions(d.missions ?? []);
 
     const totals = d.totals ?? { pending_cents: 0, approved_cents: 0 };
     setPendingCents(totals.pending_cents ?? 0);
