@@ -10,11 +10,11 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 const SAMPLE_ACTIVITIES = [
-  { name: "Escovar os dentes", description: "De manhã e à noite", reward_amount_cents: 50, category: "Higiene", frequency_hint: "diaria" },
-  { name: "Arrumar a cama", description: "Logo ao acordar", reward_amount_cents: 100, category: "Casa", frequency_hint: "diaria" },
-  { name: "Fazer a lição de casa", description: "Sem reclamar 😉", reward_amount_cents: 200, category: "Estudos", frequency_hint: "diaria" },
-  { name: "Guardar os brinquedos", description: "Antes de dormir", reward_amount_cents: 100, category: "Casa", frequency_hint: "diaria" },
-  { name: "Ajudar na cozinha", description: "Lavar louça ou pôr a mesa", reward_amount_cents: 150, category: "Casa", frequency_hint: "semanal" },
+  { name: "Escovar os dentes", description: "De manhã e à noite", reward_auris: 5, category: "Higiene", frequency_hint: "diaria" },
+  { name: "Arrumar a cama", description: "Logo ao acordar", reward_auris: 10, category: "Casa", frequency_hint: "diaria" },
+  { name: "Fazer a lição de casa", description: "Sem reclamar 😉", reward_auris: 20, category: "Estudos", frequency_hint: "diaria" },
+  { name: "Guardar os brinquedos", description: "Antes de dormir", reward_auris: 10, category: "Casa", frequency_hint: "diaria" },
+  { name: "Ajudar na cozinha", description: "Lavar louça ou pôr a mesa", reward_auris: 15, category: "Casa", frequency_hint: "semanal" },
 ];
 
 type Kid = { name: string; age: string };
