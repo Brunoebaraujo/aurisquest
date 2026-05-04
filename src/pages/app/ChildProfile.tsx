@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles, Eye } from "lucide-react";
-import { formatBRL } from "@/lib/format";
+import { formatAuris } from "@/lib/format";
+import { AuriIcon } from "@/components/AuriIcon";
 import { toast } from "sonner";
 
 type Child = { id: string; name: string; avatar_url: string | null };
@@ -18,10 +19,10 @@ type Mission = {
   activity_id: string;
   goal_type: "total" | "streak";
   goal_target: number;
-  bonus_amount_cents: number;
+  bonus_auris: number;
   medal_url: string | null;
 };
-type AwardRow = { mission_id: string; awarded_at: string; bonus_amount_cents: number };
+type AwardRow = { mission_id: string; awarded_at: string; bonus_auris: number };
 
 const ChildProfile = () => {
   const { childId } = useParams();
@@ -40,7 +41,7 @@ const ChildProfile = () => {
         supabase.from("children").select("id, name, avatar_url").eq("id", childId).maybeSingle(),
         supabase.from("missions").select("*").eq("family_id", fid),
         supabase.from("mission_participants").select("mission_id").eq("child_id", childId).eq("family_id", fid),
-        supabase.from("mission_awards").select("mission_id, awarded_at, bonus_amount_cents").eq("child_id", childId).eq("family_id", fid),
+        supabase.from("mission_awards").select("mission_id, awarded_at, bonus_auris").eq("child_id", childId).eq("family_id", fid),
       ]);
       setChild(c.data as Child);
       const myMissionIds = new Set((mp.data ?? []).map((r: any) => r.mission_id));
@@ -123,8 +124,8 @@ const ChildProfile = () => {
                     <div className="text-xs text-muted-foreground">
                       {new Date(a.awarded_at).toLocaleDateString("pt-BR")}
                     </div>
-                    {a.bonus_amount_cents > 0 && (
-                      <Badge className="bg-accent text-accent-foreground">+{formatBRL(a.bonus_amount_cents)}</Badge>
+                    {a.bonus_auris > 0 && (
+                      <Badge className="bg-accent text-accent-foreground">+<AuriIcon size={11} className="inline mx-0.5" />{formatAuris(a.bonus_auris)}</Badge>
                     )}
                   </div>
                 );
@@ -180,8 +181,8 @@ const ChildProfile = () => {
                       {cur} de {m.goal_target} {m.goal_type === "streak" ? "dias seguidos" : ""}
                     </div>
                   </div>
-                  {m.bonus_amount_cents > 0 && (
-                    <Badge variant="outline">+{formatBRL(m.bonus_amount_cents)}</Badge>
+                  {m.bonus_auris > 0 && (
+                    <Badge variant="outline">+<AuriIcon size={11} className="inline mx-0.5" />{formatAuris(m.bonus_auris)}</Badge>
                   )}
                 </div>
                 <Progress value={pct} className="h-2" />
