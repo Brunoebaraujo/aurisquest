@@ -18,6 +18,8 @@ import Missions from "./pages/app/Missions.tsx";
 import ChildProfile from "./pages/app/ChildProfile.tsx";
 import ChildLogin from "./pages/ChildLogin.tsx";
 import ChildHome from "./pages/ChildHome.tsx";
+import InviteAccept from "./pages/InviteAccept.tsx";
+import AdminFamilies from "./pages/app/AdminFamilies.tsx";
 
 const queryClient = new QueryClient();
 
@@ -33,6 +35,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/entrar" element={<ChildLogin />} />
             <Route path="/c" element={<ChildHome />} />
+            <Route path="/convite/:token" element={<InviteAccept />} />
             {/* legado: redireciona para nova tela de login */}
             <Route path="/enviar/:childId" element={<ChildLogin />} />
             <Route path="/app" element={<AppLayout />}>
@@ -44,6 +47,7 @@ const App = () => (
               <Route path="pendencias" element={<Pending />} />
               <Route path="pagamentos" element={<Payments />} />
               <Route path="calendario" element={<CalendarPage />} />
+              <Route path="admin/familias" element={<AdminFamilies />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
