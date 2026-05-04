@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, CalendarDays, Clock, CheckCircle2, XCircle, Wallet, Trash2 } from "lucide-react";
-import { formatBRL } from "@/lib/format";
+import { formatAuris } from "@/lib/format";
+import { AuriIcon } from "@/components/AuriIcon";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
@@ -237,7 +238,7 @@ const CalendarPage = () => {
                   } ${isToday ? "ring-2 ring-primary" : ""}`}
                   title={
                     b
-                      ? `Pendente: ${formatBRL(b.pendingAuris)} • Não pago: ${formatBRL(b.approvedUnpaidAuris)} • Pago: ${formatBRL(b.approvedPaidAuris)}`
+                      ? `Pendente: ${formatAuris(b.pendingAuris) + " ✦"} • Não pago: ${formatAuris(b.approvedUnpaidAuris) + " ✦"} • Pago: ${formatAuris(b.approvedPaidAuris) + " ✦"}`
                       : "Sem atividades"
                   }
                 >
@@ -276,19 +277,19 @@ const CalendarPage = () => {
         <Card className="border-0 shadow-card rounded-2xl bg-warning/10">
           <CardContent className="p-4">
             <div className="text-xs text-warning-foreground/80">Pendente</div>
-            <div className="text-2xl font-display font-bold">{formatBRL(monthBuckets.pendingAuris)}</div>
+            <div className="text-2xl font-display font-bold">{formatAuris(monthBuckets.pendingAuris) + " ✦"}</div>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-card rounded-2xl bg-destructive/10">
           <CardContent className="p-4">
             <div className="text-xs text-destructive">A pagar</div>
-            <div className="text-2xl font-display font-bold">{formatBRL(monthBuckets.approvedUnpaidAuris)}</div>
+            <div className="text-2xl font-display font-bold">{formatAuris(monthBuckets.approvedUnpaidAuris) + " ✦"}</div>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-card rounded-2xl bg-success/10">
           <CardContent className="p-4">
             <div className="text-xs text-success">Pago</div>
-            <div className="text-2xl font-display font-bold">{formatBRL(monthBuckets.approvedPaidAuris)}</div>
+            <div className="text-2xl font-display font-bold">{formatAuris(monthBuckets.approvedPaidAuris) + " ✦"}</div>
           </CardContent>
         </Card>
       </div>
@@ -368,10 +369,10 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
 
         {sorted.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div className="rounded-xl bg-warning/10 p-2"><div className="text-[10px] text-warning-foreground/70">Pendente</div><div className="font-display font-bold">{formatBRL(totals.pending)}</div></div>
-            <div className="rounded-xl bg-destructive/10 p-2"><div className="text-[10px] text-destructive">A pagar</div><div className="font-display font-bold">{formatBRL(totals.unpaid)}</div></div>
-            <div className="rounded-xl bg-success/10 p-2"><div className="text-[10px] text-success">Pago</div><div className="font-display font-bold">{formatBRL(totals.paid)}</div></div>
-            <div className="rounded-xl bg-muted p-2"><div className="text-[10px] text-muted-foreground">Recusado</div><div className="font-display font-bold">{formatBRL(totals.refused)}</div></div>
+            <div className="rounded-xl bg-warning/10 p-2"><div className="text-[10px] text-warning-foreground/70">Pendente</div><div className="font-display font-bold">{formatAuris(totals.pending) + " ✦"}</div></div>
+            <div className="rounded-xl bg-destructive/10 p-2"><div className="text-[10px] text-destructive">A pagar</div><div className="font-display font-bold">{formatAuris(totals.unpaid) + " ✦"}</div></div>
+            <div className="rounded-xl bg-success/10 p-2"><div className="text-[10px] text-success">Pago</div><div className="font-display font-bold">{formatAuris(totals.paid) + " ✦"}</div></div>
+            <div className="rounded-xl bg-muted p-2"><div className="text-[10px] text-muted-foreground">Recusado</div><div className="font-display font-bold">{formatAuris(totals.refused) + " ✦"}</div></div>
           </div>
         )}
 
@@ -403,7 +404,7 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
                       <div className="font-semibold truncate">{activityName(s.activity_id)}</div>
                       <div className="text-xs text-muted-foreground">{childName(s.child_id)} • {new Date(s.completed_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</div>
                     </div>
-                    <div className="font-display font-bold text-primary whitespace-nowrap">{formatBRL(s.reward_auris)}</div>
+                    <div className="font-display font-bold text-primary whitespace-nowrap">{formatAuris(s.reward_auris) + " ✦"}</div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 mt-2">
                     <Badge variant="outline" className="gap-1">
@@ -416,7 +417,7 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
                       <Badge className="bg-success text-success-foreground gap-1"><Wallet className="w-3 h-3" /> Pago</Badge>
                     )}
                     {isApproved && payState === "parcial" && (
-                      <Badge className="bg-warning text-warning-foreground gap-1"><Wallet className="w-3 h-3" /> Pago {formatBRL(partial)} de {formatBRL(s.reward_auris)}</Badge>
+                      <Badge className="bg-warning text-warning-foreground gap-1"><Wallet className="w-3 h-3" /> Pago {formatAuris(partial) + " ✦"} de {formatAuris(s.reward_auris) + " ✦"}</Badge>
                     )}
                     {isApproved && payState === "a pagar" && (
                       <Badge className="bg-destructive text-destructive-foreground gap-1"><Wallet className="w-3 h-3" /> A pagar</Badge>
@@ -436,7 +437,7 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
                     <AlertDialogHeader>
                       <AlertDialogTitle>Remover esta atividade?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Vai apagar permanentemente "{activityName(s.activity_id)}" de {childName(s.child_id)} ({formatBRL(s.reward_auris)}). Esta ação não pode ser desfeita.
+                        Vai apagar permanentemente "{activityName(s.activity_id)}" de {childName(s.child_id)} ({formatAuris(s.reward_auris) + " ✦"}). Esta ação não pode ser desfeita.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
