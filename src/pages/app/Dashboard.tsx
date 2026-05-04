@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Users, ListChecks, ClipboardCheck, Sparkles } from "lucide-react";
-import { formatBRL } from "@/lib/format";
+import { formatAuris, formatBRL, aurisToBRL } from "@/lib/format";
+import { AuriIcon } from "@/components/AuriIcon";
 import { Link } from "react-router-dom";
 
 type Stats = {
@@ -11,33 +12,36 @@ type Stats = {
   activitiesCount: number;
   pending: number;
   approvedThisMonth: number;
-  earnedThisMonthCents: number;
+  earnedThisMonthAuris: number;
 };
 
 const Dashboard = () => {
   const { profile } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
   const [topKids, setTopKids] = useState<{ id: string; name: string; balance: number }[]>([]);
+  const [aurisPerReal, setAurisPerReal] = useState(1);
 
   useEffect(() => {
     const load = async () => {
       if (!profile?.family_id) return;
       const startMonth = new Date(); startMonth.setDate(1); startMonth.setHours(0, 0, 0, 0);
 
-      const [kidsRes, actsRes, pendRes, monthRes, allApproved, paymentsRes] = await Promise.all([
+      const [famRes, kidsRes, actsRes, pendRes, monthRes, allApproved, paymentsRes] = await Promise.all([
+        supabase.from("families").select("auris_per_real").eq("id", profile.family_id).maybeSingle(),
         supabase.from("children").select("id, name").eq("family_id", profile.family_id).eq("active", true),
         supabase.from("activities").select("id", { count: "exact", head: true }).eq("family_id", profile.family_id).eq("active", true),
         supabase.from("submissions").select("id", { count: "exact", head: true }).eq("family_id", profile.family_id).eq("status", "pendente"),
-        supabase.from("submissions").select("reward_amount_cents", { count: "exact" }).eq("family_id", profile.family_id).eq("status", "aprovado").gte("completed_at", startMonth.toISOString()),
-        supabase.from("submissions").select("child_id, reward_amount_cents").eq("family_id", profile.family_id).eq("status", "aprovado"),
-        supabase.from("payments").select("child_id, amount_cents").eq("family_id", profile.family_id),
+        supabase.from("submissions").select("reward_auris", { count: "exact" }).eq("family_id", profile.family_id).eq("status", "aprovado").gte("completed_at", startMonth.toISOString()),
+        supabase.from("submissions").select("child_id, reward_auris").eq("family_id", profile.family_id).eq("status", "aprovado"),
+        supabase.from("payments").select("child_id, auris_redeemed").eq("family_id", profile.family_id),
       ]);
 
-      const earned = (monthRes.data ?? []).reduce((s, r) => s + (r.reward_amount_cents ?? 0), 0);
+      setAurisPerReal(famRes.data?.auris_per_real ?? 1);
+      const earned = (monthRes.data ?? []).reduce((s, r) => s + (r.reward_auris ?? 0), 0);
 
       const balances = new Map<string, number>();
-      (allApproved.data ?? []).forEach(r => balances.set(r.child_id, (balances.get(r.child_id) ?? 0) + r.reward_amount_cents));
-      (paymentsRes.data ?? []).forEach(r => balances.set(r.child_id, (balances.get(r.child_id) ?? 0) - r.amount_cents));
+      (allApproved.data ?? []).forEach(r => balances.set(r.child_id, (balances.get(r.child_id) ?? 0) + (r.reward_auris ?? 0)));
+      (paymentsRes.data ?? []).forEach(r => balances.set(r.child_id, (balances.get(r.child_id) ?? 0) - (r.auris_redeemed ?? 0)));
 
       const top = (kidsRes.data ?? [])
         .map(k => ({ id: k.id, name: k.name, balance: balances.get(k.id) ?? 0 }))
@@ -49,7 +53,7 @@ const Dashboard = () => {
         activitiesCount: actsRes.count ?? 0,
         pending: pendRes.count ?? 0,
         approvedThisMonth: monthRes.count ?? 0,
-        earnedThisMonthCents: earned,
+        earnedThisMonthAuris: earned,
       });
     };
     load();
@@ -59,7 +63,12 @@ const Dashboard = () => {
     { label: "Crianças", value: stats?.childrenCount ?? "—", icon: Users, color: "bg-gradient-primary text-primary-foreground" },
     { label: "Atividades ativas", value: stats?.activitiesCount ?? "—", icon: ListChecks, color: "bg-gradient-warm text-secondary-foreground" },
     { label: "Pendentes", value: stats?.pending ?? "—", icon: ClipboardCheck, color: "bg-warning text-warning-foreground" },
-    { label: "Ganho no mês", value: stats ? formatBRL(stats.earnedThisMonthCents) : "—", icon: Trophy, color: "bg-gradient-reward text-accent-foreground" },
+    {
+      label: "Auris no mês",
+      value: stats ? <span className="inline-flex items-center gap-1"><AuriIcon size={20} />{formatAuris(stats.earnedThisMonthAuris)}</span> : "—",
+      icon: Trophy,
+      color: "bg-gradient-reward text-accent-foreground",
+    },
   ];
 
   return (
@@ -95,7 +104,10 @@ const Dashboard = () => {
             {topKids.map(k => (
               <div key={k.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
                 <span className="font-medium">{k.name}</span>
-                <span className="font-display font-bold text-lg text-primary">{formatBRL(k.balance)}</span>
+                <span className="font-display font-bold text-lg text-primary inline-flex items-center gap-1">
+                  <AuriIcon size={18} /> {formatAuris(k.balance)}
+                  <span className="text-xs text-muted-foreground font-normal ml-1">≈ {formatBRL(aurisToBRL(k.balance, aurisPerReal))}</span>
+                </span>
               </div>
             ))}
           </CardContent>
@@ -112,8 +124,8 @@ const Dashboard = () => {
             <Link to="/app/atividades" className="block p-3 rounded-xl bg-card/15 hover:bg-card/25 transition-smooth">
               ➕ Adicionar nova atividade
             </Link>
-            <Link to="/app/criancas" className="block p-3 rounded-xl bg-card/15 hover:bg-card/25 transition-smooth">
-              👧 Cadastrar criança
+            <Link to="/app/grupos" className="block p-3 rounded-xl bg-card/15 hover:bg-card/25 transition-smooth">
+              👥 Grupos compartilhados
             </Link>
             <Link to="/app/pagamentos" className="block p-3 rounded-xl bg-card/15 hover:bg-card/25 transition-smooth">
               💰 Registrar pagamento

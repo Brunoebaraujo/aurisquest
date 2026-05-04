@@ -11,7 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, Trophy, Target, Flame, Award, Upload } from "lucide-react";
 import { toast } from "sonner";
-import { formatBRL } from "@/lib/format";
+import { formatAuris } from "@/lib/format";
+import { AuriIcon } from "@/components/AuriIcon";
 
 type Activity = { id: string; name: string; active: boolean };
 type Child = { id: string; name: string };
@@ -22,7 +23,7 @@ type Mission = {
   activity_id: string;
   goal_type: "total" | "streak";
   goal_target: number;
-  bonus_amount_cents: number;
+  bonus_auris: number;
   medal_url: string | null;
   active: boolean;
 };
@@ -34,7 +35,7 @@ const emptyForm = {
   activity_id: "",
   goal_type: "total" as "total" | "streak",
   goal_target: "5",
-  bonus_reais: "1,00",
+  bonus_auris: "10",
   childIds: [] as string[],
   medalFile: null as File | null,
 };
@@ -85,7 +86,7 @@ const Missions = () => {
     if (form.childIds.length === 0) { toast.error("Selecione ao menos uma criança"); return; }
     const target = parseInt(form.goal_target, 10);
     if (isNaN(target) || target <= 0) { toast.error("Meta inválida"); return; }
-    const bonusCents = Math.round(parseFloat(form.bonus_reais.replace(",", ".") || "0") * 100);
+    const bonus = Math.max(0, parseInt(form.bonus_auris, 10) || 0);
 
     setBusy(true);
     try {
@@ -105,7 +106,8 @@ const Missions = () => {
         description: form.description.trim() || null,
         goal_type: form.goal_type,
         goal_target: target,
-        bonus_amount_cents: bonusCents,
+        bonus_auris: bonus,
+        bonus_amount_cents: 0,
         medal_url: medalUrl,
         active: true,
       }).select().single();
@@ -153,7 +155,7 @@ const Missions = () => {
           <h2 className="text-2xl font-display font-bold flex items-center gap-2">
             <Trophy className="w-6 h-6 text-accent" /> Missões e Medalhas
           </h2>
-          <p className="text-muted-foreground text-sm">Crie desafios com bônus para as crianças.</p>
+          <p className="text-muted-foreground text-sm">Crie desafios com bônus em Auris para as crianças.</p>
         </div>
         <Button variant="hero" onClick={openNew}><Plus className="w-4 h-4" /> Nova missão</Button>
       </div>
@@ -186,8 +188,8 @@ const Missions = () => {
                         ? <><Target className="w-3 h-3" /> {m.goal_target}× total</>
                         : <><Flame className="w-3 h-3" /> {m.goal_target} dias seguidos</>}
                     </Badge>
-                    {m.bonus_amount_cents > 0 && (
-                      <Badge className="bg-accent text-accent-foreground">+{formatBRL(m.bonus_amount_cents)}</Badge>
+                    {m.bonus_auris > 0 && (
+                      <Badge className="bg-accent text-accent-foreground gap-1">+ <AuriIcon size={12} /> {formatAuris(m.bonus_auris)}</Badge>
                     )}
                   </div>
                   <div>
@@ -252,8 +254,8 @@ const Missions = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label>Bônus em dinheiro (R$)</Label>
-              <Input value={form.bonus_reais} onChange={e => setForm({ ...form, bonus_reais: e.target.value })} placeholder="1,00" />
+              <Label className="flex items-center gap-1">Bônus em <AuriIcon size={14} /> Auris</Label>
+              <Input type="number" min={0} value={form.bonus_auris} onChange={e => setForm({ ...form, bonus_auris: e.target.value })} placeholder="10" />
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-2"><Upload className="w-4 h-4" /> Imagem da medalha</Label>
