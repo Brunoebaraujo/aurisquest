@@ -20,6 +20,9 @@ import ChildLogin from "./pages/ChildLogin.tsx";
 import ChildHome from "./pages/ChildHome.tsx";
 import InviteAccept from "./pages/InviteAccept.tsx";
 import AdminFamilies from "./pages/app/AdminFamilies.tsx";
+import Groups from "./pages/app/Groups.tsx";
+import GroupDetail from "./pages/app/GroupDetail.tsx";
+import GroupInviteAccept from "./pages/GroupInviteAccept.tsx";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +39,7 @@ const App = () => (
             <Route path="/entrar" element={<ChildLogin />} />
             <Route path="/c" element={<ChildHome />} />
             <Route path="/convite/:token" element={<InviteAccept />} />
+            <Route path="/grupo-convite/:token" element={<GroupInviteAccept />} />
             {/* legado: redireciona para nova tela de login */}
             <Route path="/enviar/:childId" element={<ChildLogin />} />
             <Route path="/app" element={<AppLayout />}>
@@ -47,6 +51,8 @@ const App = () => (
               <Route path="pendencias" element={<Pending />} />
               <Route path="pagamentos" element={<Payments />} />
               <Route path="calendario" element={<CalendarPage />} />
+              <Route path="grupos" element={<Groups />} />
+              <Route path="grupos/:groupId" element={<GroupDetail />} />
               <Route path="admin/familias" element={<AdminFamilies />} />
             </Route>
             <Route path="*" element={<NotFound />} />

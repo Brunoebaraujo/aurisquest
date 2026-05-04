@@ -11,20 +11,21 @@ import {
   CalendarDays, ChevronLeft, ChevronRight, Medal, Crown,
 } from "lucide-react";
 import { toast } from "sonner";
-import { formatBRL, formatDateTime } from "@/lib/format";
+import { formatAuris, formatDateTime } from "@/lib/format";
+import { AuriIcon } from "@/components/AuriIcon";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
-type Activity = { id: string; name: string; description: string | null; reward_amount_cents: number; category: string | null };
-type Submission = { id: string; activity_id: string; status: string; reward_amount_cents: number; completed_at: string };
+type Activity = { id: string; name: string; description: string | null; reward_auris: number; category: string | null };
+type Submission = { id: string; activity_id: string; status: string; reward_auris: number; completed_at: string };
 type FamilySubmission = Submission & { child_id: string };
 type FamilyChild = { id: string; name: string; avatar_url: string | null };
 type AwardItem = { id: string; mission_name: string; medal_url: string | null; awarded_at: string };
-type RankItem = { child_id: string; name: string; avatar_url: string | null; approved_count: number; earned_cents: number; pending_count: number; medals_count: number };
+type RankItem = { child_id: string; name: string; avatar_url: string | null; approved_count: number; earned_auris: number; pending_count: number; medals_count: number };
 type MissionParticipant = { child_id: string; name: string; avatar_url: string | null; progress: number; achieved: boolean };
 type MissionItem = {
   id: string; name: string; description: string | null;
   goal_type: "total" | "streak"; goal_target: number;
-  bonus_amount_cents: number; activity_id: string; activity_name: string | null;
+  bonus_auris: number; activity_id: string; activity_name: string | null;
   medal_url: string | null; participants: MissionParticipant[];
 };
 
@@ -42,9 +43,9 @@ const ChildHome = () => {
   const [familySubs, setFamilySubs] = useState<FamilySubmission[]>([]);
   const [ranking, setRanking] = useState<RankItem[]>([]);
   const [missions, setMissions] = useState<MissionItem[]>([]);
-  const [pendingCents, setPendingCents] = useState(0);
-  const [approvedCents, setApprovedCents] = useState(0);
-  const [paidCents, setPaidCents] = useState(0);
+  const [pendingAuris, setPendingAuris] = useState(0);
+  const [approvedAuris, setApprovedAuris] = useState(0);
+  const [paidAuris, setPaidAuris] = useState(0);
   const [selected, setSelected] = useState<Activity | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [comment, setComment] = useState("");
@@ -77,10 +78,10 @@ const ChildHome = () => {
     setRanking(d.ranking ?? []);
     setMissions(d.missions ?? []);
 
-    const totals = d.totals ?? { pending_cents: 0, approved_cents: 0 };
-    setPendingCents(totals.pending_cents ?? 0);
-    setApprovedCents(totals.approved_cents ?? 0);
-    setPaidCents(d.paid_cents ?? 0);
+    const totals = d.totals ?? { pending_auris: 0, approved_auris: 0 };
+    setPendingAuris(totals.pending_auris ?? 0);
+    setApprovedAuris(totals.approved_auris ?? 0);
+    setPaidAuris(d.paid_auris ?? 0);
     setLoading(false);
   }, [logout]);
 
@@ -212,7 +213,7 @@ const ChildHome = () => {
                 <Clock className="w-4 h-4" />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pendente</span>
               </div>
-              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight">{formatBRL(pendingCents)}</div>
+              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(pendingAuris)}</span></div>
             </CardContent>
           </Card>
           <Card className="border-0 shadow-card rounded-2xl bg-gradient-reward text-accent-foreground">
@@ -221,7 +222,7 @@ const ChildHome = () => {
                 <Sparkles className="w-4 h-4" />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">Total Aprovado</span>
               </div>
-              <div className="text-lg sm:text-xl font-display font-bold leading-tight">{formatBRL(approvedCents)}</div>
+              <div className="text-lg sm:text-xl font-display font-bold leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(approvedAuris)}</span></div>
             </CardContent>
           </Card>
           <Card className="border-0 shadow-card rounded-2xl bg-card">
@@ -230,7 +231,7 @@ const ChildHome = () => {
                 <CheckCircle2 className="w-4 h-4" />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pago</span>
               </div>
-              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight">{formatBRL(paidCents)}</div>
+              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(paidAuris)}</span></div>
             </CardContent>
           </Card>
         </div>
@@ -251,9 +252,9 @@ const ChildHome = () => {
                           {m.activity_name} · {m.goal_type === "streak" ? `${m.goal_target} dias seguidos` : `${m.goal_target} vezes`}
                         </div>
                       </div>
-                      {m.bonus_amount_cents > 0 && (
+                      {m.bonus_auris > 0 && (
                         <Badge className="bg-gradient-reward text-accent-foreground border-0 whitespace-nowrap">
-                          +{formatBRL(m.bonus_amount_cents)}
+                          +<AuriIcon size={11} className="inline mx-0.5" />{formatAuris(m.bonus_auris)}
                         </Badge>
                       )}
                     </div>
@@ -311,7 +312,7 @@ const ChildHome = () => {
                       <button key={a.id} onClick={() => setSelected(a)} className="text-left p-4 rounded-2xl border-2 border-border hover:border-primary hover:shadow-soft transition-bounce bg-card">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <span className="font-semibold">{a.name}</span>
-                          <span className="font-display font-bold text-primary whitespace-nowrap">{formatBRL(a.reward_amount_cents)}</span>
+                          <span className="font-display font-bold text-primary whitespace-nowrap"><span className="inline-flex items-center gap-1"><AuriIcon size={12} />{formatAuris(a.reward_auris)}</span></span>
                         </div>
                         {a.description && <p className="text-xs text-muted-foreground">{a.description}</p>}
                       </button>
@@ -329,7 +330,7 @@ const ChildHome = () => {
                     <div className="text-xs text-muted-foreground">Atividade escolhida</div>
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="font-display font-bold text-xl">{selected.name}</h3>
-                      <Badge className="bg-gradient-reward text-accent-foreground border-0">{formatBRL(selected.reward_amount_cents)}</Badge>
+                      <Badge className="bg-gradient-reward text-accent-foreground border-0"><span className="inline-flex items-center gap-1"><AuriIcon size={12} />{formatAuris(selected.reward_auris)}</span></Badge>
                     </div>
                   </div>
 
@@ -402,7 +403,7 @@ const ChildHome = () => {
                         </div>
                       </div>
                       <span className={`font-display font-bold whitespace-nowrap ${h.status === "aprovado" ? "text-success" : h.status === "recusado" ? "text-muted-foreground line-through" : "text-warning"}`}>
-                        {formatBRL(h.reward_amount_cents)}
+                        <span className="inline-flex items-center gap-1"><AuriIcon size={11} />{formatAuris(h.reward_auris)}</span>
                       </span>
                     </div>
                   ))}
@@ -491,7 +492,7 @@ const ChildHome = () => {
                           </div>
                         </div>
                         <span className={`font-display font-bold text-xs whitespace-nowrap ${s.status === "aprovado" ? "text-success" : s.status === "recusado" ? "text-muted-foreground line-through" : "text-warning"}`}>
-                          {formatBRL(s.reward_amount_cents)}
+                          <span className="inline-flex items-center gap-1"><AuriIcon size={11} />{formatAuris(s.reward_auris)}</span>
                         </span>
                       </div>
                     ))}
@@ -534,7 +535,7 @@ const ChildHome = () => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-display font-bold text-success">{formatBRL(r.earned_cents)}</div>
+                          <div className="font-display font-bold text-success"><span className="inline-flex items-center gap-1"><AuriIcon size={12} />{formatAuris(r.earned_auris)}</span></div>
                           <div className="text-[10px] text-muted-foreground">ganho</div>
                         </div>
                       </div>

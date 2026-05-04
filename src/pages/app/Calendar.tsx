@@ -7,7 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, ChevronRight, CalendarDays, Clock, CheckCircle2, XCircle, Wallet, Trash2 } from "lucide-react";
-import { formatBRL } from "@/lib/format";
+import { formatAuris } from "@/lib/format";
+import { AuriIcon } from "@/components/AuriIcon";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
@@ -18,17 +19,17 @@ type Submission = {
   child_id: string;
   activity_id: string;
   status: "pendente" | "aprovado" | "recusado";
-  reward_amount_cents: number;
+  reward_auris: number;
   completed_at: string;
   photo_url: string | null;
   review_note: string | null;
 };
-type Payment = { child_id: string; amount_cents: number; paid_at: string };
+type Payment = { child_id: string; auris_redeemed: number; paid_at: string };
 
 type DayBuckets = {
-  pendingCents: number;
-  approvedUnpaidCents: number;
-  approvedPaidCents: number;
+  pendingAuris: number;
+  approvedUnpaidAuris: number;
+  approvedPaidAuris: number;
   count: number;
 };
 
@@ -70,10 +71,10 @@ const CalendarPage = () => {
       if (!profile?.family_id) return;
       const [subRes, payRes] = await Promise.all([
         supabase.from("submissions")
-          .select("id, child_id, activity_id, status, reward_amount_cents, completed_at, photo_url, review_note")
+          .select("id, child_id, activity_id, status, reward_auris, completed_at, photo_url, review_note")
           .eq("family_id", profile.family_id),
         supabase.from("payments")
-          .select("child_id, amount_cents, paid_at")
+          .select("child_id, auris_redeemed, paid_at")
           .eq("family_id", profile.family_id),
       ]);
       setSubmissions((subRes.data ?? []) as Submission[]);
@@ -96,16 +97,16 @@ const CalendarPage = () => {
 
     const paymentsByChild = new Map<string, number>();
     payments.forEach(p => {
-      paymentsByChild.set(p.child_id, (paymentsByChild.get(p.child_id) ?? 0) + p.amount_cents);
+      paymentsByChild.set(p.child_id, (paymentsByChild.get(p.child_id) ?? 0) + p.auris_redeemed);
     });
 
     byChild.forEach((subs, childId) => {
       subs.sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
       let pool = paymentsByChild.get(childId) ?? 0;
       for (const s of subs) {
-        if (pool >= s.reward_amount_cents) {
+        if (pool >= s.reward_auris) {
           map.set(s.id, true);
-          pool -= s.reward_amount_cents;
+          pool -= s.reward_auris;
         } else if (pool > 0) {
           map.set(s.id, false);
           partialMap.set(s.id, pool);
@@ -134,20 +135,20 @@ const CalendarPage = () => {
       const d = new Date(s.completed_at);
       if (d.getFullYear() !== year || d.getMonth() !== month) return;
       const key = dayKey(d);
-      const b = buckets.get(key) ?? { pendingCents: 0, approvedUnpaidCents: 0, approvedPaidCents: 0, count: 0 };
+      const b = buckets.get(key) ?? { pendingAuris: 0, approvedUnpaidAuris: 0, approvedPaidAuris: 0, count: 0 };
       b.count += 1;
       if (s.status === "pendente") {
-        b.pendingCents += s.reward_amount_cents;
+        b.pendingAuris += s.reward_auris;
       } else if (s.status === "aprovado") {
         const fullyPaid = paidMap.fullyPaid.get(s.id);
         const partial = paidMap.partial.get(s.id) ?? 0;
         if (fullyPaid) {
-          b.approvedPaidCents += s.reward_amount_cents;
+          b.approvedPaidAuris += s.reward_auris;
         } else if (partial > 0) {
-          b.approvedPaidCents += partial;
-          b.approvedUnpaidCents += s.reward_amount_cents - partial;
+          b.approvedPaidAuris += partial;
+          b.approvedUnpaidAuris += s.reward_auris - partial;
         } else {
-          b.approvedUnpaidCents += s.reward_amount_cents;
+          b.approvedUnpaidAuris += s.reward_auris;
         }
       }
       buckets.set(key, b);
@@ -162,11 +163,11 @@ const CalendarPage = () => {
     }
     while (cells.length < totalCells) cells.push({ date: null, key: `e2-${cells.length}` });
 
-    const totals: DayBuckets = { pendingCents: 0, approvedUnpaidCents: 0, approvedPaidCents: 0, count: 0 };
+    const totals: DayBuckets = { pendingAuris: 0, approvedUnpaidAuris: 0, approvedPaidAuris: 0, count: 0 };
     buckets.forEach(b => {
-      totals.pendingCents += b.pendingCents;
-      totals.approvedUnpaidCents += b.approvedUnpaidCents;
-      totals.approvedPaidCents += b.approvedPaidCents;
+      totals.pendingAuris += b.pendingAuris;
+      totals.approvedUnpaidAuris += b.approvedUnpaidAuris;
+      totals.approvedPaidAuris += b.approvedPaidAuris;
       totals.count += b.count;
     });
 
@@ -222,9 +223,9 @@ const CalendarPage = () => {
               }
               const b = cell.bucket;
               const isToday = cell.key === todayKey;
-              const hasPending = !!b && b.pendingCents > 0;
-              const hasUnpaid = !!b && b.approvedUnpaidCents > 0;
-              const hasPaid = !!b && b.approvedPaidCents > 0;
+              const hasPending = !!b && b.pendingAuris > 0;
+              const hasUnpaid = !!b && b.approvedUnpaidAuris > 0;
+              const hasPaid = !!b && b.approvedPaidAuris > 0;
               const isEmpty = !b;
 
               return (
@@ -237,7 +238,7 @@ const CalendarPage = () => {
                   } ${isToday ? "ring-2 ring-primary" : ""}`}
                   title={
                     b
-                      ? `Pendente: ${formatBRL(b.pendingCents)} • Não pago: ${formatBRL(b.approvedUnpaidCents)} • Pago: ${formatBRL(b.approvedPaidCents)}`
+                      ? `Pendente: ${formatAuris(b.pendingAuris) + " ✦"} • Não pago: ${formatAuris(b.approvedUnpaidAuris) + " ✦"} • Pago: ${formatAuris(b.approvedPaidAuris) + " ✦"}`
                       : "Sem atividades"
                   }
                 >
@@ -276,19 +277,19 @@ const CalendarPage = () => {
         <Card className="border-0 shadow-card rounded-2xl bg-warning/10">
           <CardContent className="p-4">
             <div className="text-xs text-warning-foreground/80">Pendente</div>
-            <div className="text-2xl font-display font-bold">{formatBRL(monthBuckets.pendingCents)}</div>
+            <div className="text-2xl font-display font-bold">{formatAuris(monthBuckets.pendingAuris) + " ✦"}</div>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-card rounded-2xl bg-destructive/10">
           <CardContent className="p-4">
             <div className="text-xs text-destructive">A pagar</div>
-            <div className="text-2xl font-display font-bold">{formatBRL(monthBuckets.approvedUnpaidCents)}</div>
+            <div className="text-2xl font-display font-bold">{formatAuris(monthBuckets.approvedUnpaidAuris) + " ✦"}</div>
           </CardContent>
         </Card>
         <Card className="border-0 shadow-card rounded-2xl bg-success/10">
           <CardContent className="p-4">
             <div className="text-xs text-success">Pago</div>
-            <div className="text-2xl font-display font-bold">{formatBRL(monthBuckets.approvedPaidCents)}</div>
+            <div className="text-2xl font-display font-bold">{formatAuris(monthBuckets.approvedPaidAuris) + " ✦"}</div>
           </CardContent>
         </Card>
       </div>
@@ -338,13 +339,13 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
 
   const totals = sorted.reduce(
     (acc, s) => {
-      if (s.status === "pendente") acc.pending += s.reward_amount_cents;
+      if (s.status === "pendente") acc.pending += s.reward_auris;
       else if (s.status === "aprovado") {
         const fully = paidMap.fullyPaid.get(s.id);
         const partial = paidMap.partial.get(s.id) ?? 0;
-        if (fully) acc.paid += s.reward_amount_cents;
-        else { acc.paid += partial; acc.unpaid += s.reward_amount_cents - partial; }
-      } else acc.refused += s.reward_amount_cents;
+        if (fully) acc.paid += s.reward_auris;
+        else { acc.paid += partial; acc.unpaid += s.reward_auris - partial; }
+      } else acc.refused += s.reward_auris;
       return acc;
     },
     { pending: 0, unpaid: 0, paid: 0, refused: 0 }
@@ -368,10 +369,10 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
 
         {sorted.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-            <div className="rounded-xl bg-warning/10 p-2"><div className="text-[10px] text-warning-foreground/70">Pendente</div><div className="font-display font-bold">{formatBRL(totals.pending)}</div></div>
-            <div className="rounded-xl bg-destructive/10 p-2"><div className="text-[10px] text-destructive">A pagar</div><div className="font-display font-bold">{formatBRL(totals.unpaid)}</div></div>
-            <div className="rounded-xl bg-success/10 p-2"><div className="text-[10px] text-success">Pago</div><div className="font-display font-bold">{formatBRL(totals.paid)}</div></div>
-            <div className="rounded-xl bg-muted p-2"><div className="text-[10px] text-muted-foreground">Recusado</div><div className="font-display font-bold">{formatBRL(totals.refused)}</div></div>
+            <div className="rounded-xl bg-warning/10 p-2"><div className="text-[10px] text-warning-foreground/70">Pendente</div><div className="font-display font-bold">{formatAuris(totals.pending) + " ✦"}</div></div>
+            <div className="rounded-xl bg-destructive/10 p-2"><div className="text-[10px] text-destructive">A pagar</div><div className="font-display font-bold">{formatAuris(totals.unpaid) + " ✦"}</div></div>
+            <div className="rounded-xl bg-success/10 p-2"><div className="text-[10px] text-success">Pago</div><div className="font-display font-bold">{formatAuris(totals.paid) + " ✦"}</div></div>
+            <div className="rounded-xl bg-muted p-2"><div className="text-[10px] text-muted-foreground">Recusado</div><div className="font-display font-bold">{formatAuris(totals.refused) + " ✦"}</div></div>
           </div>
         )}
 
@@ -403,7 +404,7 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
                       <div className="font-semibold truncate">{activityName(s.activity_id)}</div>
                       <div className="text-xs text-muted-foreground">{childName(s.child_id)} • {new Date(s.completed_at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}</div>
                     </div>
-                    <div className="font-display font-bold text-primary whitespace-nowrap">{formatBRL(s.reward_amount_cents)}</div>
+                    <div className="font-display font-bold text-primary whitespace-nowrap">{formatAuris(s.reward_auris) + " ✦"}</div>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 mt-2">
                     <Badge variant="outline" className="gap-1">
@@ -416,7 +417,7 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
                       <Badge className="bg-success text-success-foreground gap-1"><Wallet className="w-3 h-3" /> Pago</Badge>
                     )}
                     {isApproved && payState === "parcial" && (
-                      <Badge className="bg-warning text-warning-foreground gap-1"><Wallet className="w-3 h-3" /> Pago {formatBRL(partial)} de {formatBRL(s.reward_amount_cents)}</Badge>
+                      <Badge className="bg-warning text-warning-foreground gap-1"><Wallet className="w-3 h-3" /> Pago {formatAuris(partial) + " ✦"} de {formatAuris(s.reward_auris) + " ✦"}</Badge>
                     )}
                     {isApproved && payState === "a pagar" && (
                       <Badge className="bg-destructive text-destructive-foreground gap-1"><Wallet className="w-3 h-3" /> A pagar</Badge>
@@ -436,7 +437,7 @@ const DayDetailsDialog = ({ open, onOpenChange, date, submissions, children, act
                     <AlertDialogHeader>
                       <AlertDialogTitle>Remover esta atividade?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Vai apagar permanentemente "{activityName(s.activity_id)}" de {childName(s.child_id)} ({formatBRL(s.reward_amount_cents)}). Esta ação não pode ser desfeita.
+                        Vai apagar permanentemente "{activityName(s.activity_id)}" de {childName(s.child_id)} ({formatAuris(s.reward_auris) + " ✦"}). Esta ação não pode ser desfeita.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
