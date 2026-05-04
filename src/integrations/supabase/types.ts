@@ -138,20 +138,76 @@ export type Database = {
           created_by: string
           id: string
           name: string
+          primary_parent_id: string | null
+          status: string
         }
         Insert: {
           created_at?: string
           created_by: string
           id?: string
           name: string
+          primary_parent_id?: string | null
+          status?: string
         }
         Update: {
           created_at?: string
           created_by?: string
           id?: string
           name?: string
+          primary_parent_id?: string | null
+          status?: string
         }
         Relationships: []
+      }
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          contact: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          family_id: string
+          id: string
+          parent_name: string
+          status: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          contact: string
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          family_id: string
+          id?: string
+          parent_name: string
+          status?: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          contact?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          family_id?: string
+          id?: string
+          parent_name?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mission_awards: {
         Row: {
@@ -449,17 +505,58 @@ export type Database = {
           },
         ]
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      accept_invitation: { Args: { _token: string }; Returns: Json }
       compute_streak: {
         Args: { _activity_id: string; _child_id: string }
         Returns: number
       }
+      expire_invitations: { Args: never; Returns: number }
       get_child_dashboard: { Args: { _token: string }; Returns: Json }
+      get_invitation_by_token: {
+        Args: { _token: string }
+        Returns: {
+          expires_at: string
+          family_id: string
+          family_name: string
+          is_valid: boolean
+          parent_name: string
+          status: string
+        }[]
+      }
       get_user_family_id: { Args: { _user_id: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       list_active_children_public: {
         Args: never
         Returns: {
@@ -478,6 +575,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "parent" | "member"
       mission_goal_type: "total" | "streak"
       submission_status: "pendente" | "aprovado" | "recusado"
     }
@@ -607,6 +705,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "parent", "member"],
       mission_goal_type: ["total", "streak"],
       submission_status: ["pendente", "aprovado", "recusado"],
     },
