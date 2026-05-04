@@ -25,6 +25,7 @@ export type Database = {
           id: string
           name: string
           reward_amount_cents: number
+          reward_auris: number
         }
         Insert: {
           active?: boolean
@@ -36,6 +37,7 @@ export type Database = {
           id?: string
           name: string
           reward_amount_cents?: number
+          reward_auris?: number
         }
         Update: {
           active?: boolean
@@ -47,6 +49,7 @@ export type Database = {
           id?: string
           name?: string
           reward_amount_cents?: number
+          reward_auris?: number
         }
         Relationships: [
           {
@@ -134,6 +137,7 @@ export type Database = {
       }
       families: {
         Row: {
+          auris_per_real: number
           created_at: string
           created_by: string
           id: string
@@ -142,6 +146,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          auris_per_real?: number
           created_at?: string
           created_by: string
           id?: string
@@ -150,6 +155,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          auris_per_real?: number
           created_at?: string
           created_by?: string
           id?: string
@@ -213,6 +219,7 @@ export type Database = {
         Row: {
           awarded_at: string
           bonus_amount_cents: number
+          bonus_auris: number
           child_id: string
           family_id: string
           id: string
@@ -221,6 +228,7 @@ export type Database = {
         Insert: {
           awarded_at?: string
           bonus_amount_cents?: number
+          bonus_auris?: number
           child_id: string
           family_id: string
           id?: string
@@ -229,6 +237,7 @@ export type Database = {
         Update: {
           awarded_at?: string
           bonus_amount_cents?: number
+          bonus_auris?: number
           child_id?: string
           family_id?: string
           id?: string
@@ -303,6 +312,7 @@ export type Database = {
           active: boolean
           activity_id: string
           bonus_amount_cents: number
+          bonus_auris: number
           created_at: string
           description: string | null
           family_id: string
@@ -316,6 +326,7 @@ export type Database = {
           active?: boolean
           activity_id: string
           bonus_amount_cents?: number
+          bonus_auris?: number
           created_at?: string
           description?: string | null
           family_id: string
@@ -329,6 +340,7 @@ export type Database = {
           active?: boolean
           activity_id?: string
           bonus_amount_cents?: number
+          bonus_auris?: number
           created_at?: string
           description?: string | null
           family_id?: string
@@ -358,6 +370,7 @@ export type Database = {
       payments: {
         Row: {
           amount_cents: number
+          auris_redeemed: number
           child_id: string
           created_at: string
           created_by: string
@@ -368,6 +381,7 @@ export type Database = {
         }
         Insert: {
           amount_cents: number
+          auris_redeemed?: number
           child_id: string
           created_at?: string
           created_by: string
@@ -378,6 +392,7 @@ export type Database = {
         }
         Update: {
           amount_cents?: number
+          auris_redeemed?: number
           child_id?: string
           created_at?: string
           created_by?: string
@@ -435,6 +450,238 @@ export type Database = {
           },
         ]
       }
+      shared_group_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          created_by: string
+          email: string
+          expires_at: string
+          group_id: string
+          id: string
+          status: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by: string
+          email: string
+          expires_at?: string
+          group_id: string
+          id?: string
+          status?: string
+          token: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string
+          expires_at?: string
+          group_id?: string
+          id?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_group_invitations_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "shared_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_group_members: {
+        Row: {
+          family_id: string
+          group_id: string
+          id: string
+          joined_at: string
+        }
+        Insert: {
+          family_id: string
+          group_id: string
+          id?: string
+          joined_at?: string
+        }
+        Update: {
+          family_id?: string
+          group_id?: string
+          id?: string
+          joined_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "shared_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          owner_family_id: string
+          owner_user_id: string
+          type: Database["public"]["Enums"]["group_type"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          owner_family_id: string
+          owner_user_id: string
+          type?: Database["public"]["Enums"]["group_type"]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          owner_family_id?: string
+          owner_user_id?: string
+          type?: Database["public"]["Enums"]["group_type"]
+        }
+        Relationships: []
+      }
+      shared_mission_awards: {
+        Row: {
+          awarded_at: string
+          bonus_auris: number
+          child_id: string | null
+          family_id: string | null
+          id: string
+          mission_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          bonus_auris?: number
+          child_id?: string | null
+          family_id?: string | null
+          id?: string
+          mission_id: string
+        }
+        Update: {
+          awarded_at?: string
+          bonus_auris?: number
+          child_id?: string | null
+          family_id?: string | null
+          id?: string
+          mission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_mission_awards_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "shared_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_mission_logs: {
+        Row: {
+          approved_by: string
+          child_id: string
+          family_id: string
+          id: string
+          logged_at: string
+          mission_id: string
+        }
+        Insert: {
+          approved_by: string
+          child_id: string
+          family_id: string
+          id?: string
+          logged_at?: string
+          mission_id: string
+        }
+        Update: {
+          approved_by?: string
+          child_id?: string
+          family_id?: string
+          id?: string
+          logged_at?: string
+          mission_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_mission_logs_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "shared_missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_missions: {
+        Row: {
+          active: boolean
+          activity_name: string
+          bonus_auris: number
+          created_at: string
+          created_by: string
+          description: string | null
+          goal_target: number
+          goal_type: Database["public"]["Enums"]["mission_goal_type"]
+          group_id: string
+          id: string
+          medal_url: string | null
+          mode: Database["public"]["Enums"]["shared_mission_mode"]
+          name: string
+        }
+        Insert: {
+          active?: boolean
+          activity_name: string
+          bonus_auris?: number
+          created_at?: string
+          created_by: string
+          description?: string | null
+          goal_target: number
+          goal_type: Database["public"]["Enums"]["mission_goal_type"]
+          group_id: string
+          id?: string
+          medal_url?: string | null
+          mode: Database["public"]["Enums"]["shared_mission_mode"]
+          name: string
+        }
+        Update: {
+          active?: boolean
+          activity_name?: string
+          bonus_auris?: number
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          goal_target?: number
+          goal_type?: Database["public"]["Enums"]["mission_goal_type"]
+          group_id?: string
+          id?: string
+          medal_url?: string | null
+          mode?: Database["public"]["Enums"]["shared_mission_mode"]
+          name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_missions_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "shared_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submissions: {
         Row: {
           activity_id: string
@@ -448,6 +695,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           reward_amount_cents: number
+          reward_auris: number
           status: Database["public"]["Enums"]["submission_status"]
           submitted_at: string
         }
@@ -463,6 +711,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           reward_amount_cents?: number
+          reward_auris?: number
           status?: Database["public"]["Enums"]["submission_status"]
           submitted_at?: string
         }
@@ -478,6 +727,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           reward_amount_cents?: number
+          reward_auris?: number
           status?: Database["public"]["Enums"]["submission_status"]
           submitted_at?: string
         }
@@ -532,6 +782,10 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { _token: string }; Returns: Json }
+      accept_shared_group_invitation: {
+        Args: { _token: string }
+        Returns: Json
+      }
       compute_streak: {
         Args: { _activity_id: string; _child_id: string }
         Returns: number
@@ -549,12 +803,27 @@ export type Database = {
           status: string
         }[]
       }
+      get_shared_group_invitation: {
+        Args: { _token: string }
+        Returns: {
+          email: string
+          expires_at: string
+          group_id: string
+          group_name: string
+          is_valid: boolean
+          status: string
+        }[]
+      }
       get_user_family_id: { Args: { _user_id: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      is_group_member: {
+        Args: { _group_id: string; _uid: string }
         Returns: boolean
       }
       list_active_children_public: {
@@ -576,7 +845,9 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "parent" | "member"
+      group_type: "familia_estendida" | "escola" | "condominio" | "outro"
       mission_goal_type: "total" | "streak"
+      shared_mission_mode: "coletiva" | "individual"
       submission_status: "pendente" | "aprovado" | "recusado"
     }
     CompositeTypes: {
@@ -706,7 +977,9 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "parent", "member"],
+      group_type: ["familia_estendida", "escola", "condominio", "outro"],
       mission_goal_type: ["total", "streak"],
+      shared_mission_mode: ["coletiva", "individual"],
       submission_status: ["pendente", "aprovado", "recusado"],
     },
   },
