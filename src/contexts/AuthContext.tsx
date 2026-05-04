@@ -9,10 +9,14 @@ type Profile = {
   email: string | null;
 };
 
+type AppRole = "admin" | "parent" | "member";
+
 type AuthContextValue = {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
+  roles: AppRole[];
+  isAdmin: boolean;
   loading: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
