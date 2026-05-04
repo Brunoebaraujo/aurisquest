@@ -11,7 +11,8 @@ import {
   CalendarDays, ChevronLeft, ChevronRight, Medal, Crown,
 } from "lucide-react";
 import { toast } from "sonner";
-import { formatBRL, formatDateTime } from "@/lib/format";
+import { formatAuris, formatDateTime } from "@/lib/format";
+import { AuriIcon } from "@/components/AuriIcon";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
 type Activity = { id: string; name: string; description: string | null; reward_auris: number; category: string | null };
@@ -212,7 +213,7 @@ const ChildHome = () => {
                 <Clock className="w-4 h-4" />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pendente</span>
               </div>
-              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight">{formatBRL(pendingAuris)}</div>
+              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(pendingAuris)}</span></div>
             </CardContent>
           </Card>
           <Card className="border-0 shadow-card rounded-2xl bg-gradient-reward text-accent-foreground">
@@ -221,7 +222,7 @@ const ChildHome = () => {
                 <Sparkles className="w-4 h-4" />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">Total Aprovado</span>
               </div>
-              <div className="text-lg sm:text-xl font-display font-bold leading-tight">{formatBRL(approvedAuris)}</div>
+              <div className="text-lg sm:text-xl font-display font-bold leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(approvedAuris)}</span></div>
             </CardContent>
           </Card>
           <Card className="border-0 shadow-card rounded-2xl bg-card">
@@ -230,7 +231,7 @@ const ChildHome = () => {
                 <CheckCircle2 className="w-4 h-4" />
                 <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pago</span>
               </div>
-              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight">{formatBRL(paidAuris)}</div>
+              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(paidAuris)}</span></div>
             </CardContent>
           </Card>
         </div>
@@ -253,7 +254,7 @@ const ChildHome = () => {
                       </div>
                       {m.bonus_auris > 0 && (
                         <Badge className="bg-gradient-reward text-accent-foreground border-0 whitespace-nowrap">
-                          +{formatBRL(m.bonus_auris)}
+                          +<AuriIcon size={11} className="inline mx-0.5" />{formatAuris(m.bonus_auris)}
                         </Badge>
                       )}
                     </div>
@@ -311,7 +312,7 @@ const ChildHome = () => {
                       <button key={a.id} onClick={() => setSelected(a)} className="text-left p-4 rounded-2xl border-2 border-border hover:border-primary hover:shadow-soft transition-bounce bg-card">
                         <div className="flex items-start justify-between gap-2 mb-1">
                           <span className="font-semibold">{a.name}</span>
-                          <span className="font-display font-bold text-primary whitespace-nowrap">{formatBRL(a.reward_auris)}</span>
+                          <span className="font-display font-bold text-primary whitespace-nowrap"><span className="inline-flex items-center gap-1"><AuriIcon size={12} />{formatAuris(a.reward_auris)}</span></span>
                         </div>
                         {a.description && <p className="text-xs text-muted-foreground">{a.description}</p>}
                       </button>
@@ -329,7 +330,7 @@ const ChildHome = () => {
                     <div className="text-xs text-muted-foreground">Atividade escolhida</div>
                     <div className="flex items-center justify-between gap-2">
                       <h3 className="font-display font-bold text-xl">{selected.name}</h3>
-                      <Badge className="bg-gradient-reward text-accent-foreground border-0">{formatBRL(selected.reward_auris)}</Badge>
+                      <Badge className="bg-gradient-reward text-accent-foreground border-0"><span className="inline-flex items-center gap-1"><AuriIcon size={12} />{formatAuris(selected.reward_auris)}</span></Badge>
                     </div>
                   </div>
 
@@ -402,7 +403,7 @@ const ChildHome = () => {
                         </div>
                       </div>
                       <span className={`font-display font-bold whitespace-nowrap ${h.status === "aprovado" ? "text-success" : h.status === "recusado" ? "text-muted-foreground line-through" : "text-warning"}`}>
-                        {formatBRL(h.reward_auris)}
+                        <span className="inline-flex items-center gap-1"><AuriIcon size={11} />{formatAuris(h.reward_auris)}</span>
                       </span>
                     </div>
                   ))}
@@ -491,7 +492,7 @@ const ChildHome = () => {
                           </div>
                         </div>
                         <span className={`font-display font-bold text-xs whitespace-nowrap ${s.status === "aprovado" ? "text-success" : s.status === "recusado" ? "text-muted-foreground line-through" : "text-warning"}`}>
-                          {formatBRL(s.reward_auris)}
+                          <span className="inline-flex items-center gap-1"><AuriIcon size={11} />{formatAuris(s.reward_auris)}</span>
                         </span>
                       </div>
                     ))}
@@ -534,7 +535,7 @@ const ChildHome = () => {
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="font-display font-bold text-success">{formatBRL(r.earned_auris)}</div>
+                          <div className="font-display font-bold text-success"><span className="inline-flex items-center gap-1"><AuriIcon size={12} />{formatAuris(r.earned_auris)}</span></div>
                           <div className="text-[10px] text-muted-foreground">ganho</div>
                         </div>
                       </div>
