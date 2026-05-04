@@ -18,7 +18,7 @@ type Stats = {
 const Dashboard = () => {
   const { profile } = useAuth();
   const [stats, setStats] = useState<Stats | null>(null);
-  const [topKids, setTopKids] = useState<{ id: string; name: string; balance: number }[]>([]);
+  const [topKids, setTopKids] = useState<{ id: string; name: string; balance: number; earned: number }[]>([]);
   const [aurisPerReal, setAurisPerReal] = useState(1);
 
   useEffect(() => {
@@ -39,12 +39,16 @@ const Dashboard = () => {
       setAurisPerReal(famRes.data?.auris_per_real ?? 1);
       const earned = (monthRes.data ?? []).reduce((s, r) => s + (r.reward_auris ?? 0), 0);
 
+      const earnedTotals = new Map<string, number>();
       const balances = new Map<string, number>();
-      (allApproved.data ?? []).forEach(r => balances.set(r.child_id, (balances.get(r.child_id) ?? 0) + (r.reward_auris ?? 0)));
+      (allApproved.data ?? []).forEach(r => {
+        earnedTotals.set(r.child_id, (earnedTotals.get(r.child_id) ?? 0) + (r.reward_auris ?? 0));
+        balances.set(r.child_id, (balances.get(r.child_id) ?? 0) + (r.reward_auris ?? 0));
+      });
       (paymentsRes.data ?? []).forEach(r => balances.set(r.child_id, (balances.get(r.child_id) ?? 0) - (r.auris_redeemed ?? 0)));
 
       const top = (kidsRes.data ?? [])
-        .map(k => ({ id: k.id, name: k.name, balance: balances.get(k.id) ?? 0 }))
+        .map(k => ({ id: k.id, name: k.name, balance: balances.get(k.id) ?? 0, earned: earnedTotals.get(k.id) ?? 0 }))
         .sort((a, b) => b.balance - a.balance);
 
       setTopKids(top);
@@ -60,14 +64,15 @@ const Dashboard = () => {
   }, [profile?.family_id]);
 
   const cards = [
-    { label: "Crianças", value: stats?.childrenCount ?? "—", icon: Users, color: "bg-gradient-primary text-primary-foreground" },
-    { label: "Atividades ativas", value: stats?.activitiesCount ?? "—", icon: ListChecks, color: "bg-gradient-warm text-secondary-foreground" },
-    { label: "Pendentes", value: stats?.pending ?? "—", icon: ClipboardCheck, color: "bg-warning text-warning-foreground" },
+    { label: "Crianças", value: stats?.childrenCount ?? "—", icon: Users, color: "bg-gradient-primary text-primary-foreground", to: "/app/criancas" },
+    { label: "Atividades ativas", value: stats?.activitiesCount ?? "—", icon: ListChecks, color: "bg-gradient-warm text-secondary-foreground", to: "/app/atividades" },
+    { label: "Pendentes", value: stats?.pending ?? "—", icon: ClipboardCheck, color: "bg-warning text-warning-foreground", to: "/app/pendencias" },
     {
       label: "Auris no mês",
       value: stats ? <span className="inline-flex items-center gap-1"><AuriIcon size={20} />{formatAuris(stats.earnedThisMonthAuris)}</span> : "—",
       icon: Trophy,
       color: "bg-gradient-reward text-accent-foreground",
+      to: "/app/auris-mes",
     },
   ];
 
