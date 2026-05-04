@@ -21,6 +21,7 @@ import ChildHome from "./pages/ChildHome.tsx";
 import InviteAccept from "./pages/InviteAccept.tsx";
 import AdminFamilies from "./pages/app/AdminFamilies.tsx";
 import Groups from "./pages/app/Groups.tsx";
+import AurisMonth from "./pages/app/AurisMonth.tsx";
 import GroupDetail from "./pages/app/GroupDetail.tsx";
 import GroupInviteAccept from "./pages/GroupInviteAccept.tsx";
 
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="pendencias" element={<Pending />} />
               <Route path="pagamentos" element={<Payments />} />
               <Route path="calendario" element={<CalendarPage />} />
+              <Route path="auris-mes" element={<AurisMonth />} />
               <Route path="grupos" element={<Groups />} />
               <Route path="grupos/:groupId" element={<GroupDetail />} />
               <Route path="admin/familias" element={<AdminFamilies />} />
