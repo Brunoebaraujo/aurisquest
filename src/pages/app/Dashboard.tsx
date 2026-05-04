@@ -87,15 +87,17 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {cards.map(c => (
-          <Card key={c.label} className="border-0 shadow-card rounded-2xl overflow-hidden">
-            <CardContent className="p-0">
-              <div className={`p-4 ${c.color}`}>
-                <c.icon className="w-6 h-6 mb-2 opacity-90" />
-                <div className="text-2xl font-display font-bold">{c.value}</div>
-                <div className="text-xs opacity-90">{c.label}</div>
-              </div>
-            </CardContent>
-          </Card>
+          <Link key={c.label} to={c.to} className="block focus:outline-none focus:ring-2 focus:ring-ring rounded-2xl">
+            <Card className="border-0 shadow-card rounded-2xl overflow-hidden cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all">
+              <CardContent className="p-0">
+                <div className={`p-4 ${c.color}`}>
+                  <c.icon className="w-6 h-6 mb-2 opacity-90" />
+                  <div className="text-2xl font-display font-bold">{c.value}</div>
+                  <div className="text-xs opacity-90">{c.label}</div>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
         ))}
       </div>
 
@@ -107,12 +109,17 @@ const Dashboard = () => {
           <CardContent className="space-y-3">
             {topKids.length === 0 && <p className="text-sm text-muted-foreground">Cadastre crianças para começar.</p>}
             {topKids.map(k => (
-              <div key={k.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50">
+              <div key={k.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50 gap-3">
                 <span className="font-medium">{k.name}</span>
-                <span className="font-display font-bold text-lg text-primary inline-flex items-center gap-1">
-                  <AuriIcon size={18} /> {formatAuris(k.balance)}
-                  <span className="text-xs text-muted-foreground font-normal ml-1">≈ {formatBRL(aurisToBRL(k.balance, aurisPerReal))}</span>
-                </span>
+                <div className="flex flex-col items-end leading-tight">
+                  <span className="font-display font-bold text-lg text-primary inline-flex items-center gap-1">
+                    <AuriIcon size={18} /> {formatAuris(k.balance)}
+                    <span className="text-xs text-muted-foreground font-normal ml-1">≈ {formatBRL(aurisToBRL(k.balance, aurisPerReal))}</span>
+                  </span>
+                  <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+                    Total ganho: <AuriIcon size={11} /> {formatAuris(k.earned)}
+                  </span>
+                </div>
               </div>
             ))}
           </CardContent>
