@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     // Get activity to validate family + reward
     const { data: activity } = await admin
       .from("activities")
-      .select("id, family_id, reward_amount_cents, active")
+      .select("id, family_id, reward_amount_cents, reward_auris, active")
       .eq("id", activityId)
       .maybeSingle();
 
@@ -51,6 +51,7 @@ Deno.serve(async (req) => {
       photo_url: photoUrl,
       status: "pendente",
       reward_amount_cents: activity.reward_amount_cents,
+      reward_auris: activity.reward_auris ?? 0,
       completed_at: new Date().toISOString(),
       review_note: comment,
     }).select().single();
