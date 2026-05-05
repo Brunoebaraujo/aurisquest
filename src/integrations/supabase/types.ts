@@ -786,6 +786,25 @@ export type Database = {
         Args: { _token: string }
         Returns: Json
       }
+      admin_usage_alerts: { Args: never; Returns: Json }
+      admin_usage_families: {
+        Args: {
+          _family_status?: string
+          _from: string
+          _group_id?: string
+          _to: string
+        }
+        Returns: Json
+      }
+      admin_usage_overview: {
+        Args: {
+          _family_status?: string
+          _from: string
+          _group_id?: string
+          _to: string
+        }
+        Returns: Json
+      }
       compute_streak: {
         Args: { _activity_id: string; _child_id: string }
         Returns: number

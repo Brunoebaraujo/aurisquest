@@ -24,6 +24,8 @@ import Groups from "./pages/app/Groups.tsx";
 import AurisMonth from "./pages/app/AurisMonth.tsx";
 import GroupDetail from "./pages/app/GroupDetail.tsx";
 import GroupInviteAccept from "./pages/GroupInviteAccept.tsx";
+import AdminUsage from "./pages/app/AdminUsage.tsx";
+import AdminAlerts from "./pages/app/AdminAlerts.tsx";
 
 const queryClient = new QueryClient();
 
@@ -56,6 +58,8 @@ const App = () => (
               <Route path="grupos" element={<Groups />} />
               <Route path="grupos/:groupId" element={<GroupDetail />} />
               <Route path="admin/familias" element={<AdminFamilies />} />
+              <Route path="admin/utilizacao" element={<AdminUsage />} />
+              <Route path="admin/alertas" element={<AdminAlerts />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
