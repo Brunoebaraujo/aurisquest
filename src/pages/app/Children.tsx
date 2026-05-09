@@ -16,6 +16,7 @@ type Child = { id: string; name: string; avatar_url: string | null; active: bool
 const Children = () => {
   const { profile } = useAuth();
   const [list, setList] = useState<Child[]>([]);
+  const [familySlug, setFamilySlug] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
