@@ -17,6 +17,8 @@ import CalendarPage from "./pages/app/Calendar.tsx";
 import Missions from "./pages/app/Missions.tsx";
 import ChildProfile from "./pages/app/ChildProfile.tsx";
 import ChildLogin from "./pages/ChildLogin.tsx";
+import ChildLoginFamily from "./pages/ChildLoginFamily.tsx";
+import Responsibles from "./pages/app/Responsibles.tsx";
 import ChildHome from "./pages/ChildHome.tsx";
 import InviteAccept from "./pages/InviteAccept.tsx";
 import AdminFamilies from "./pages/app/AdminFamilies.tsx";
