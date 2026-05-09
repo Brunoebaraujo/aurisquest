@@ -16,6 +16,7 @@ type Child = { id: string; name: string; avatar_url: string | null; active: bool
 const Children = () => {
   const { profile } = useAuth();
   const [list, setList] = useState<Child[]>([]);
+  const [familySlug, setFamilySlug] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
@@ -27,11 +28,13 @@ const Children = () => {
 
   const load = async () => {
     if (!profile?.family_id) return;
-    const { data } = await supabase.from("children")
-      .select("id, name, avatar_url, active, password_set_at")
-      .eq("family_id", profile.family_id)
-      .order("created_at", { ascending: true });
+    const [{ data }, { data: fam }] = await Promise.all([
+      supabase.from("children").select("id, name, avatar_url, active, password_set_at")
+        .eq("family_id", profile.family_id).order("created_at", { ascending: true }),
+      supabase.from("families").select("slug,kid_access_token").eq("id", profile.family_id).maybeSingle(),
+    ]);
     setList((data ?? []) as Child[]);
+    setFamilySlug(fam?.slug ?? fam?.kid_access_token ?? null);
   };
 
   useEffect(() => { load(); }, [profile?.family_id]);
@@ -71,7 +74,7 @@ const Children = () => {
     }
   };
 
-  const loginUrl = `${window.location.origin}/entrar`;
+  const loginUrl = familySlug ? `${window.location.origin}/familia/${familySlug}/entrar` : `${window.location.origin}/entrar`;
 
   return (
     <div className="space-y-6">

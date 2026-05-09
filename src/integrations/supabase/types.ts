@@ -141,8 +141,10 @@ export type Database = {
           created_at: string
           created_by: string
           id: string
+          kid_access_token: string
           name: string
           primary_parent_id: string | null
+          slug: string
           status: string
         }
         Insert: {
@@ -150,8 +152,10 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
+          kid_access_token?: string
           name: string
           primary_parent_id?: string | null
+          slug?: string
           status?: string
         }
         Update: {
@@ -159,8 +163,10 @@ export type Database = {
           created_at?: string
           created_by?: string
           id?: string
+          kid_access_token?: string
           name?: string
           primary_parent_id?: string | null
+          slug?: string
           status?: string
         }
         Relationships: []
@@ -175,6 +181,7 @@ export type Database = {
           expires_at: string
           family_id: string
           id: string
+          kind: string
           parent_name: string
           status: string
           token: string
@@ -188,6 +195,7 @@ export type Database = {
           expires_at?: string
           family_id: string
           id?: string
+          kind?: string
           parent_name: string
           status?: string
           token: string
@@ -201,6 +209,7 @@ export type Database = {
           expires_at?: string
           family_id?: string
           id?: string
+          kind?: string
           parent_name?: string
           status?: string
           token?: string
@@ -781,6 +790,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _slugify: { Args: { _text: string }; Returns: string }
       accept_invitation: { Args: { _token: string }; Returns: Json }
       accept_shared_group_invitation: {
         Args: { _token: string }
@@ -809,8 +819,13 @@ export type Database = {
         Args: { _activity_id: string; _child_id: string }
         Returns: number
       }
+      create_responsible_invitation: {
+        Args: { _contact: string; _name: string }
+        Returns: Json
+      }
       expire_invitations: { Args: never; Returns: number }
       get_child_dashboard: { Args: { _token: string }; Returns: Json }
+      get_family_id_by_token: { Args: { _token: string }; Returns: string }
       get_invitation_by_token: {
         Args: { _token: string }
         Returns: {
@@ -852,6 +867,17 @@ export type Database = {
           has_password: boolean
           id: string
           name: string
+        }[]
+      }
+      list_children_by_family_token: {
+        Args: { _token: string }
+        Returns: {
+          avatar_url: string
+          child_id: string
+          child_name: string
+          family_id: string
+          family_name: string
+          has_password: boolean
         }[]
       }
       validate_child_token: {

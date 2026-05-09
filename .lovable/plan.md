@@ -1,91 +1,105 @@
-## Painel Administrativo de Utilização
+# Isolamento de famílias e convite de responsáveis
 
-Nova área **Admin → Utilização** (`/app/admin/utilizacao`) e **Admin → Alertas** (`/app/admin/alertas`), acessíveis apenas com role `admin`. Toda a leitura é feita por funções `SECURITY DEFINER` que retornam **somente agregados e identificadores** — nunca nomes de criança, fotos, descrições ou notas privadas.
-
----
-
-### 1. Privacidade — regras inegociáveis
-
-A função SQL admin retorna:
-- ✅ Nome da família, nome do grupo, datas, contagens, médias, status.
-- ❌ **Nunca**: nomes/avatares de crianças, `photo_url`, `review_note`, `description` de atividades, conteúdo de submissões, valores R$ por pagamento.
-- Crianças são apresentadas como "Criança 1, Criança 2…" (ordem estável por `id`).
-- Admin não tem ação alguma sobre submissões de outras famílias (somente leitura agregada).
+## Objetivo
+1. Isolar o ambiente de login das crianças por família (cada família com link próprio).
+2. Permitir que um responsável convide outro responsável para a mesma família.
 
 ---
 
-### 2. Backend — funções SQL `SECURITY DEFINER`
+## 1) Login infantil isolado por família
 
-Todas começam com `if not has_role(auth.uid(),'admin') then raise exception 'forbidden'; end if;`.
+### Banco
+- Adicionar à tabela `families`:
+  - `slug` text único (gerado a partir do nome + sufixo curto aleatório)
+  - `kid_access_token` text único (token aleatório seguro, fallback caso o slug colida)
+- Backfill automático para famílias existentes.
+- Trigger `BEFORE INSERT` que gera `slug` e `kid_access_token` quando nulos.
 
-**`admin_usage_overview(_from timestamptz, _to timestamptz, _group_id uuid default null, _family_status text default null)`** → `jsonb`:
-- `globals`: famílias cadastradas/ativas no período, responsáveis, crianças cadastradas/ativas, submissões (total/aprovadas/recusadas/pendentes), taxa de aprovação, tempo médio de aprovação (`avg(reviewed_at - submitted_at)` em horas), missões criadas/em andamento/concluídas, medalhas concedidas, Auris distribuídos no período, média de Auris por criança ativa, famílias e crianças sem atividade em 7d, retenção semanal (% de famílias ativas em 2 semanas consecutivas dentro do período).
-- `series.submissionsPerDay`: `[{day, count}]`
-- `series.activeFamiliesPerWeek`: `[{week, count}]`
-- `series.approvedVsRejected`: `[{day, aprovado, recusado}]`
-- `series.aurisPerMonth`: `[{month, auris}]` (últimos 12 meses, fixo)
-- `funnel`: convidadas, ativadas (status=ativa), com criança, com 1ª submissão, com 1ª aprovação.
+### Função RPC
+- Substituir `list_active_children_public()` (atual: lista crianças de TODAS as famílias) por:
+  - `list_children_by_family_token(_token text)` → retorna apenas crianças ativas da família correspondente ao `slug` ou `kid_access_token`. Retorna também `{ family_id, family_name }`.
+- Manter `list_active_children_public` removida ou trocada por versão segura — ela é o vazamento principal hoje.
 
-**`admin_usage_families(_from, _to, _group_id, _family_status)`** → `jsonb` array:
-Uma linha por família com: `family_id`, `family_name`, `group_name` (1º grupo), `status`, `parents_active` (responsáveis com login nos últimos 30d via `auth.users.last_sign_in_at`), `children_count`, `children_active` (com submissão no período), `submissions_period`, `pending`, `missions_in_progress`, `missions_completed`, `auris_distributed`, `last_activity_at` (max submissão/pagamento/missão), `adherence_score` (0-100, calculado abaixo).
+### Edge function `child-login`
+- Aceitar opcionalmente `family_token` e validar que `child.family_id` corresponde à família do token, evitando login cruzado mesmo se alguém adivinhar `child_id`.
 
-**Score de aderência (0-100):**
+### Frontend
+- Nova rota: `/familia/:familyToken/entrar` → componente `ChildLoginFamily` (reaproveitando a UI atual).
+- Rota antiga `/entrar`: passa a mostrar uma tela explicativa ("peça o link à sua família") em vez de listar todas as crianças.
+- Botão "Copiar link das crianças" em:
+  - `Admin → Famílias` (coluna nova com link `/familia/{slug}/entrar`)
+  - Nova seção em `Children` (tela do responsável) com card "Link de acesso das crianças desta família".
+
+---
+
+## 2) Convite de outro responsável
+
+### Banco
+- Reutilizar `invitations` adicionando coluna `kind text NOT NULL DEFAULT 'family_onboarding'` com valores: `family_onboarding` | `family_responsible`.
+- Atualizar `accept_invitation(_token)`:
+  - Se `kind = 'family_responsible'`, NÃO trocar `primary_parent_id`, apenas vincular `profiles.family_id` e dar role `parent`. Família já está ativa.
+- Nova função `create_responsible_invitation(_name text, _email text)`:
+  - Verifica que o usuário tem `family_id`.
+  - Cria invitation com `family_id` do usuário, `kind='family_responsible'`, token aleatório, expira em 7 dias.
+  - Retorna o token para o frontend montar a URL.
+- RLS de `invitations`: permitir SELECT/INSERT pelo responsável da própria família para `kind='family_responsible'` (admin continua vendo tudo).
+
+### Frontend
+- Nova rota `/app/responsaveis` → tela `Responsibles.tsx`:
+  - Lista profiles com `family_id = minha família` (nome, email, "principal" badge se `families.primary_parent_id`).
+  - Lista invitations pendentes/aceitos da família com `kind='family_responsible'`.
+  - Botão "Convidar responsável" (nome + email) → chama RPC, mostra link copiável `/convite/{token}`.
+- Item "Responsáveis" no `AppSidebar` (visível para usuários com família).
+- `InviteAccept` já existe e chama `accept_invitation` — funcionará automaticamente porque a função aceitará ambos os `kind`.
+
+---
+
+## 3) Segurança e RLS — revisão
+- Tabela `children` já filtra por `family_id = get_user_family_id(auth.uid())` ✅
+- A brecha real é a função `list_active_children_public`. Será **substituída** pela versão tokenizada.
+- `child-login` ganhará validação de família para fechar a porta lateral.
+
+---
+
+## Detalhes técnicos
+
+```sql
+ALTER TABLE families
+  ADD COLUMN slug text UNIQUE,
+  ADD COLUMN kid_access_token text UNIQUE;
+
+-- backfill: slug = lower(unaccent(name)) + '-' + 6 hex; kid_access_token = encode(gen_random_bytes(18),'base64')
 ```
-freq      = min(submissions_period / dias_periodo / max(children_count,1) * 30, 1) * 35
-ativos    = (children_active / max(children_count,1)) * 25
-aprov     = (1 - clamp(avg_approval_hours/72, 0, 1)) * 15        -- ≤72h é bom
-miss      = clamp((missions_in_progress + 2*missions_completed)/3, 0, 1) * 15
-recente   = (1 if last_activity_at >= now()-7d else 0) * 10
-score     = round(freq + ativos + aprov + miss + recente)
+
+```sql
+CREATE FUNCTION list_children_by_family_token(_token text)
+RETURNS TABLE(family_id uuid, family_name text, child_id uuid, name text, avatar_url text, has_password boolean)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path=public AS $$
+  SELECT f.id, f.name, c.id, c.name, c.avatar_url, (c.password_hash IS NOT NULL)
+  FROM families f
+  JOIN children c ON c.family_id = f.id AND c.active
+  WHERE f.slug = _token OR f.kid_access_token = _token
+  ORDER BY c.name;
+$$;
 ```
-Faixas: 80-100 alta, 50-79 média, 0-49 baixa.
 
-**`admin_usage_alerts()`** → `jsonb` com 5 listas (cada item = `{family_id, family_name, value}`):
-- `inactive7d`: famílias com `last_activity < now()-7d` (e `status=ativa`).
-- `pendingHeavy`: famílias com `pending > 10` ou pendência mais antiga > 72h.
-- `noChildren`: criadas há 3+ dias sem nenhuma criança.
-- `noSubmissions`: com criança há 7+ dias e zero submissão.
-- `staleMissions`: missões ativas criadas há 14+ dias com 0 submissões aprovadas vinculadas.
+```sql
+ALTER TABLE invitations ADD COLUMN kind text NOT NULL DEFAULT 'family_onboarding';
+-- nova policy: responsável da família vê/cria invites kind='family_responsible' da sua família
+```
 
----
+### Arquivos a criar/editar
+- `supabase/migrations/<novo>.sql` — colunas, backfill, trigger, novas funções, RLS.
+- `src/integrations/supabase/types.ts` — auto.
+- `src/pages/ChildLoginFamily.tsx` — nova (reaproveita UI de `ChildLogin`).
+- `src/pages/ChildLogin.tsx` — convertida em tela informativa.
+- `src/pages/app/Responsibles.tsx` — nova.
+- `src/pages/app/Children.tsx` — adicionar card com link das crianças.
+- `src/pages/app/AdminFamilies.tsx` — coluna "Link das crianças" + botão copiar.
+- `src/components/AppSidebar.tsx` — item "Responsáveis".
+- `src/App.tsx` — novas rotas.
+- `supabase/functions/child-login/index.ts` — validação de família.
 
-### 3. Frontend
-
-**`src/pages/app/AdminUsage.tsx`**
-- Filtros no topo: período (Select: 7d, 30d, mês atual, mês anterior, personalizado com `Calendar` do shadcn em Popover, `pointer-events-auto`), grupo (Select), status (Select), família (Combobox opcional para "drill" em uma família).
-- 6 cards: Famílias ativas, Crianças ativas, Submissões no período, Missões em andamento, Taxa de aprovação, Tempo médio de aprovação.
-- Gráficos em grid 2 colunas usando **Recharts** (já incluído pelo shadcn `chart.tsx`):
-  1. `LineChart` — submissões por dia
-  2. `BarChart` — famílias ativas por semana
-  3. `BarChart` empilhado — aprovadas vs recusadas
-  4. `LineChart` — Auris/mês
-  5. Funil — `BarChart` horizontal com 5 etapas (recharts não tem funil nativo; barras decrescentes resolvem)
-- Tabela "Famílias" com todas as colunas listadas + badge de score colorido (verde/amarelo/vermelho). Ordenação clicável; busca por nome de família.
-- Loader/skeleton enquanto carrega.
-
-**`src/pages/app/AdminAlerts.tsx`**
-- 5 cards-tabelas, cada um listando até 50 famílias do alerta, com link "Ver detalhes" que abre o painel `AdminUsage` filtrado naquela família.
-
-**`src/components/AppSidebar.tsx`** — no grupo Admin, adicionar:
-- "Utilização" (`/app/admin/utilizacao`, ícone `BarChart3`)
-- "Alertas" (`/app/admin/alertas`, ícone `AlertTriangle`)
-
-**`src/App.tsx`** — registrar as duas rotas.
-
----
-
-### 4. Arquivos
-
-- **Novo:** `supabase/migrations/<ts>_admin_usage.sql` — cria `admin_usage_overview`, `admin_usage_families`, `admin_usage_alerts`.
-- **Novo:** `src/pages/app/AdminUsage.tsx`
-- **Novo:** `src/pages/app/AdminAlerts.tsx`
-- **Editar:** `src/App.tsx`
-- **Editar:** `src/components/AppSidebar.tsx`
-
----
-
-### 5. Notas
-
-- Responsivo: cards em grid `grid-cols-2 md:grid-cols-3 lg:grid-cols-6`; gráficos `grid-cols-1 lg:grid-cols-2`; tabela com scroll horizontal em mobile.
-- "Responsáveis ativos" usa `auth.users.last_sign_in_at` — acessível dentro de `SECURITY DEFINER` via `auth.users`.
-- Nenhum dado de criança/foto/comentário trafega para o cliente admin.
+### Compatibilidade
+- A rota antiga `/entrar` continua existindo (sem listar crianças). Links antigos `/enviar/:childId` continuam redirecionando.
+- Famílias existentes recebem slug/token via backfill antes do trigger entrar.

@@ -17,6 +17,8 @@ import CalendarPage from "./pages/app/Calendar.tsx";
 import Missions from "./pages/app/Missions.tsx";
 import ChildProfile from "./pages/app/ChildProfile.tsx";
 import ChildLogin from "./pages/ChildLogin.tsx";
+import ChildLoginFamily from "./pages/ChildLoginFamily.tsx";
+import Responsibles from "./pages/app/Responsibles.tsx";
 import ChildHome from "./pages/ChildHome.tsx";
 import InviteAccept from "./pages/InviteAccept.tsx";
 import AdminFamilies from "./pages/app/AdminFamilies.tsx";
@@ -40,6 +42,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/entrar" element={<ChildLogin />} />
+            <Route path="/familia/:familyToken/entrar" element={<ChildLoginFamily />} />
             <Route path="/c" element={<ChildHome />} />
             <Route path="/convite/:token" element={<InviteAccept />} />
             <Route path="/grupo-convite/:token" element={<GroupInviteAccept />} />
@@ -57,6 +60,7 @@ const App = () => (
               <Route path="auris-mes" element={<AurisMonth />} />
               <Route path="grupos" element={<Groups />} />
               <Route path="grupos/:groupId" element={<GroupDetail />} />
+              <Route path="responsaveis" element={<Responsibles />} />
               <Route path="admin/familias" element={<AdminFamilies />} />
               <Route path="admin/utilizacao" element={<AdminUsage />} />
               <Route path="admin/alertas" element={<AdminAlerts />} />
