@@ -1,52 +1,50 @@
-## Objetivo
+## O que precisa ser ajustado
 
-1. Corrigir o erro `function gen_random_bytes(integer) does not exist` ao convidar responsável.
-2. Enviar o convite **por email** automaticamente, mantendo o **link copiável** como redundância.
+O código do app **não** depende do nome antigo do subdomínio — todos os links de convite, redirects de email e login social usam `window.location.origin`, então se adaptam sozinhos ao novo `aurisquest.lovable.app`.
 
-## Causa do erro
+O que **precisa de configuração** está no backend (Lovable Cloud → Auth):
 
-A função `public.create_responsible_invitation` chama `gen_random_bytes(24)` sem schema. A extensão `pgcrypto` está instalada em `extensions`, e o `search_path` da função é só `public` — daí o "does not exist". A coluna `families.kid_access_token` já usa corretamente `extensions.gen_random_bytes(...)`.
+### 1. Atualizar Site URL e Redirect URLs (Auth)
 
-## Plano
+A Site URL atual provavelmente é o subdomínio antigo (`jornada-kids.lovable.app`). Isso afeta:
+- Link no email de confirmação de cadastro
+- Link no email de recuperação de senha
+- Callback do login com Google (se ativado)
 
-### 1. Migração SQL
+Vou atualizar via `configure_auth` para:
+- **Site URL:** `https://aurisquest.lovable.app`
+- **Redirect allowlist:** incluir
+  - `https://aurisquest.lovable.app/**`
+  - `https://id-preview--1dc5c107-a8a8-4d5e-995e-56ab718eb7b6.lovable.app/**` (preview do editor)
+  - `http://localhost:*/**` (dev local)
+  - Quando `aurisquest.com` estiver pronto amanhã, eu acrescento `https://aurisquest.com/**` e `https://www.aurisquest.com/**`.
 
-Recriar `public.create_responsible_invitation` com:
-- `extensions.gen_random_bytes(24)` qualificado, e
-- `SET search_path = public, extensions`.
+### 2. Google OAuth (se estiver ativo)
 
-Nenhuma outra mudança de schema/RLS.
+Se você tem login com Google ativado, no console do Google Cloud o **Authorized redirect URI** precisa incluir o callback do Supabase — esse não muda com a troca de subdomínio (continua sendo `https://rydwbkvkokwqpcpfwvcy.supabase.co/auth/v1/callback`), então **nada a fazer aqui**.
 
-### 2. Configurar infraestrutura de email
+### 3. Domínio de email (`aurisquest.com`) — amanhã
 
-Como o projeto ainda não tem domínio de email configurado, vou pedir o setup do domínio (diálogo "Set up email domain"). Após verificado, rodo `setup_email_infra` para criar fila/cron de envio.
+Quando o domínio estiver disponível:
+- Adicionar via "Set up email domain" (gera registros DNS: SPF, DKIM, DMARC)
+- Você adiciona os registros em **Project Settings → Domains → ⋯ Configure → Manage DNS records** (já que comprou pela Lovable)
+- Após verificado, eu rodo `setup_email_infra` e crio a edge function `send-responsible-invite` que envia o convite por email automaticamente (mantendo o link copiável como fallback).
 
-### 3. Edge function `send-responsible-invite`
+### 4. Conectar `aurisquest.com` ao app — amanhã
 
-Nova function (verify_jwt = true) que:
-- Recebe `{ name, contact }`
-- Chama `create_responsible_invitation` via `supabase-js` com o JWT do usuário (respeitando RLS/auth)
-- Recebe `{ id, token }`
-- Enfileira email via `pgmq` com:
-  - assunto: "Você foi convidado para a família {nome} no Jornada Kids"
-  - corpo HTML com nome do convidado, nome de quem convidou, link `https://<app>/convite/{token}`, validade 7 dias
-- Retorna `{ token, email_queued: true|false }`
+No mesmo painel **Project Settings → Domains**, conectar `aurisquest.com` e `www.aurisquest.com` ao projeto e definir um como Primary. SSL é provisionado automaticamente.
 
-Se o domínio de email ainda não estiver pronto, a função retorna `email_queued: false` (silenciosamente) — o link copiável continua funcionando como fallback.
+### 5. Nada a mudar no código
 
-### 4. Frontend `src/pages/app/Responsibles.tsx`
+Confirmei com busca: não há referência a `jornada-kids` em nenhum arquivo (`src/`, `supabase/`, `index.html`). Os títulos e meta tags já foram trocados para "Auris Quest" na rodada anterior.
 
-- Trocar a chamada direta `supabase.rpc("create_responsible_invitation", ...)` por `supabase.functions.invoke("send-responsible-invite", { body: { name, contact } })`.
-- Toast: "Convite criado! Email enviado para {contact}." quando `email_queued`; senão "Convite criado — copie e envie o link manualmente."
-- Manter o bloco com link copiável (já existe).
-- Manter botão "Copiar link" em cada convite pendente da listagem.
+## Resumo do que faço agora
 
-### 5. Verificação
+1. Atualizar Site URL + Redirect allowlist no Auth para `aurisquest.lovable.app` (+ preview + localhost).
 
-1. Convidar responsável → toast de sucesso, sem erro de `gen_random_bytes`.
-2. Convite aparece na listagem com link copiável.
-3. Email chega ao destinatário (após DNS verificado); enquanto isso, o link copiado funciona normalmente.
+## O que fica para amanhã
 
-## Pergunta antes de começar
-
-Você quer configurar agora um **domínio próprio para envio de email** (precisa adicionar registros DNS) ou prefere que eu **só corrija o bug** e mantenha o convite por link copiável até decidir o domínio?
+- Adicionar domínio de email `aurisquest.com` + DNS
+- Conectar `aurisquest.com` como custom domain do app
+- Acrescentar `aurisquest.com` na Redirect allowlist
+- Implementar envio de convite por email
