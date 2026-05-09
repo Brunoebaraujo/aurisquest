@@ -152,10 +152,10 @@ export type Database = {
           created_at?: string
           created_by: string
           id?: string
-          kid_access_token: string
+          kid_access_token?: string
           name: string
           primary_parent_id?: string | null
-          slug: string
+          slug?: string
           status?: string
         }
         Update: {
