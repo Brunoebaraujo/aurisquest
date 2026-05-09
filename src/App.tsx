@@ -60,6 +60,7 @@ const App = () => (
               <Route path="auris-mes" element={<AurisMonth />} />
               <Route path="grupos" element={<Groups />} />
               <Route path="grupos/:groupId" element={<GroupDetail />} />
+              <Route path="responsaveis" element={<Responsibles />} />
               <Route path="admin/familias" element={<AdminFamilies />} />
               <Route path="admin/utilizacao" element={<AdminUsage />} />
               <Route path="admin/alertas" element={<AdminAlerts />} />
