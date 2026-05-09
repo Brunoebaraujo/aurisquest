@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Wallet, LogOut, Trophy, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Wallet, LogOut, Trophy, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter,
