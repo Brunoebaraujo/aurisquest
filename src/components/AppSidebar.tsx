@@ -16,6 +16,7 @@ const items = [
   { title: "Calendário", url: "/app/calendario", icon: CalendarDays },
   { title: "Pagamentos", url: "/app/pagamentos", icon: Wallet },
   { title: "Grupos", url: "/app/grupos", icon: UsersRound },
+  { title: "Responsáveis", url: "/app/responsaveis", icon: UserPlus },
 ];
 
 export const AppSidebar = () => {
