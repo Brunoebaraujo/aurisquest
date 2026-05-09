@@ -176,17 +176,27 @@ const AdminFamilies = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-muted-foreground">
-                  <tr><th className="py-2">Família</th><th>Responsável</th><th>Status</th><th>Criada em</th></tr>
+                  <tr><th className="py-2">Família</th><th>Responsável</th><th>Status</th><th>Criada em</th><th>Link das crianças</th></tr>
                 </thead>
                 <tbody>
                   {families.map(f => {
                     const p = f.primary_parent_id ? parents[f.primary_parent_id] : null;
+                    const kidUrl = f.slug || f.kid_access_token
+                      ? `${window.location.origin}/familia/${f.slug || f.kid_access_token}/entrar`
+                      : null;
                     return (
                       <tr key={f.id} className="border-t">
                         <td className="py-2 font-medium">{f.name}</td>
                         <td>{p ? (p.full_name || p.email || "—") : <span className="text-muted-foreground">—</span>}</td>
                         <td>{statusBadge(f.status)}</td>
                         <td className="text-muted-foreground">{fmtDate(f.created_at)}</td>
+                        <td>
+                          {kidUrl ? (
+                            <Button size="sm" variant="outline" onClick={() => copyLink(kidUrl)}>
+                              <Copy className="w-3 h-3 mr-1" />Copiar
+                            </Button>
+                          ) : <span className="text-muted-foreground">—</span>}
+                        </td>
                       </tr>
                     );
                   })}
