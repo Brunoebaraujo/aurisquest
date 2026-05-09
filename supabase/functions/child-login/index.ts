@@ -13,6 +13,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const childId = String(body.child_id ?? "");
     const password = String(body.password ?? "");
+    const familyToken = body.family_token ? String(body.family_token) : null;
     if (!childId || !password) return json({ error: "invalid_input" }, 400);
 
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
@@ -25,6 +26,13 @@ Deno.serve(async (req) => {
 
     if (!child || !child.active || !child.password_hash) {
       return json({ error: "invalid_credentials" }, 401);
+    }
+
+    if (familyToken) {
+      const { data: famId } = await admin.rpc("get_family_id_by_token", { _token: familyToken });
+      if (!famId || famId !== child.family_id) {
+        return json({ error: "invalid_family" }, 403);
+      }
     }
 
     const ok = await bcrypt.compare(password, child.password_hash);
