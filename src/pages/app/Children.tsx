@@ -74,7 +74,7 @@ const Children = () => {
     }
   };
 
-  const loginUrl = `${window.location.origin}/entrar`;
+  const loginUrl = familySlug ? `${window.location.origin}/familia/${familySlug}/entrar` : `${window.location.origin}/entrar`;
 
   return (
     <div className="space-y-6">
