@@ -42,6 +42,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/entrar" element={<ChildLogin />} />
+            <Route path="/familia/:familyToken/entrar" element={<ChildLoginFamily />} />
             <Route path="/c" element={<ChildHome />} />
             <Route path="/convite/:token" element={<InviteAccept />} />
             <Route path="/grupo-convite/:token" element={<GroupInviteAccept />} />
