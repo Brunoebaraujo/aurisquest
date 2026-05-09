@@ -16,7 +16,7 @@ const ChildLogin = () => {
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-card/95 shadow-glow mb-3">
           <Trophy className="w-8 h-8 text-accent" />
         </div>
-        <h1 className="text-3xl font-display font-bold drop-shadow text-primary-foreground mb-4">Jornada Kids</h1>
+        <h1 className="text-3xl font-display font-bold drop-shadow text-primary-foreground mb-4">Auris Quest</h1>
         <Card className="border-0 shadow-card rounded-3xl text-left">
           <CardContent className="p-5 space-y-3">
             <div className="flex items-center gap-2 font-semibold">

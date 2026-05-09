@@ -79,7 +79,7 @@ const ChildLoginFamily = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-card/95 shadow-glow mb-3">
             <Trophy className="w-8 h-8 text-accent" />
           </div>
-          <h1 className="text-3xl font-display font-bold drop-shadow">Jornada Kids</h1>
+          <h1 className="text-3xl font-display font-bold drop-shadow">Auris Quest</h1>
           {familyName && <p className="text-primary-foreground/90 text-sm">Família {familyName}</p>}
           <p className="text-primary-foreground/90 text-sm flex items-center justify-center gap-1">
             <Sparkles className="w-4 h-4" /> Quem está aqui agora?

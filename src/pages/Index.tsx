@@ -24,7 +24,7 @@ const Index = () => {
             <div className="w-10 h-10 rounded-xl bg-card/95 flex items-center justify-center shadow-glow">
               <Trophy className="w-5 h-5 text-accent" />
             </div>
-            <span className="font-display font-bold text-xl">Jornada Kids</span>
+            <span className="font-display font-bold text-xl">Auris Quest</span>
           </div>
           <Button asChild variant="reward" size="sm"><Link to="/auth">Entrar</Link></Button>
         </header>

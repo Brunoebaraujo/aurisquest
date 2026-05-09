@@ -37,7 +37,7 @@ export const AppSidebar = () => {
           </div>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="font-display font-bold text-sidebar-foreground">Jornada Kids</span>
+              <span className="font-display font-bold text-sidebar-foreground">Auris Quest</span>
               <span className="text-xs text-muted-foreground truncate max-w-[140px]">{profile?.email}</span>
             </div>
           )}

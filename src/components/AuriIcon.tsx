@@ -6,7 +6,7 @@ export const AuriIcon = ({ size = 16, className }: Props) => (
   <img
     src={auriPng}
     alt="Auri"
-    title="Auri — moeda da Jornada"
+    title="Auri — moeda do Auris Quest"
     width={size}
     height={size}
     className={`inline-block align-text-bottom select-none ${className ?? ""}`}
