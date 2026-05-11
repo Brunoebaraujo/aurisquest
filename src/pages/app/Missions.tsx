@@ -13,6 +13,8 @@ import { Plus, Trash2, Trophy, Target, Flame, Award, Upload } from "lucide-react
 import { toast } from "sonner";
 import { formatAuris } from "@/lib/format";
 import { AuriIcon } from "@/components/AuriIcon";
+import { MissionTierSelector } from "@/components/MissionTierSelector";
+import { MISSION_TIERS, missionAurisFor, missionTierFromAuris, type MissionTier } from "@/lib/tiers";
 
 type Activity = { id: string; name: string; active: boolean };
 type Child = { id: string; name: string };
