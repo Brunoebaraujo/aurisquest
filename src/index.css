@@ -132,4 +132,50 @@
   .shadow-reward { box-shadow: var(--shadow-reward); }
   .transition-bounce { transition: var(--transition-bounce); }
   .transition-smooth { transition: var(--transition-smooth); }
+
+  /* === Modo Criança (cartoon/sticker) === */
+  .kid-theme {
+    --kid-shadow: 6px 6px 0 hsl(220 30% 18% / 0.12);
+  }
+  .kid-card {
+    @apply rounded-3xl border-4 border-card bg-card;
+    box-shadow: var(--kid-shadow);
+  }
+  .kid-sticker {
+    box-shadow: 4px 4px 0 hsl(220 30% 18% / 0.15);
+  }
+  /* Sutil padrão de estrelas no fundo */
+  .kid-bg {
+    background-image:
+      radial-gradient(circle at 20% 30%, hsl(0 0% 100% / 0.18) 2px, transparent 3px),
+      radial-gradient(circle at 70% 70%, hsl(0 0% 100% / 0.12) 1.5px, transparent 2.5px),
+      radial-gradient(circle at 90% 20%, hsl(0 0% 100% / 0.15) 2px, transparent 3px),
+      var(--gradient-hero);
+    background-size: 220px 220px, 180px 180px, 260px 260px, 100% 100%;
+  }
 }
+
+/* Animações cartoon para área infantil */
+@keyframes bounce-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+@keyframes pop-in {
+  0% { transform: scale(0.6); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-4deg); }
+  75% { transform: rotate(4deg); }
+}
+@keyframes auri-rise {
+  0% { transform: translateY(20px) scale(0.8); opacity: 0; }
+  30% { opacity: 1; }
+  100% { transform: translateY(-60px) scale(1.1); opacity: 0; }
+}
+.animate-bounce-soft { animation: bounce-soft 1.6s ease-in-out infinite; }
+.animate-pop-in { animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.animate-wiggle { animation: wiggle 0.6s ease-in-out; }
+.animate-auri-rise { animation: auri-rise 1.2s ease-out forwards; }
