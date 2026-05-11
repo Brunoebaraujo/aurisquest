@@ -22,10 +22,13 @@ export type Database = {
           description: string | null
           family_id: string
           frequency_hint: string | null
+          icon_key: string | null
+          icon_url: string | null
           id: string
           name: string
           reward_amount_cents: number
           reward_auris: number
+          tier: Database["public"]["Enums"]["activity_tier"]
         }
         Insert: {
           active?: boolean
@@ -34,10 +37,13 @@ export type Database = {
           description?: string | null
           family_id: string
           frequency_hint?: string | null
+          icon_key?: string | null
+          icon_url?: string | null
           id?: string
           name: string
           reward_amount_cents?: number
           reward_auris?: number
+          tier?: Database["public"]["Enums"]["activity_tier"]
         }
         Update: {
           active?: boolean
@@ -46,10 +52,13 @@ export type Database = {
           description?: string | null
           family_id?: string
           frequency_hint?: string | null
+          icon_key?: string | null
+          icon_url?: string | null
           id?: string
           name?: string
           reward_amount_cents?: number
           reward_auris?: number
+          tier?: Database["public"]["Enums"]["activity_tier"]
         }
         Relationships: [
           {
@@ -889,6 +898,7 @@ export type Database = {
       }
     }
     Enums: {
+      activity_tier: "rotina" | "responsabilidade" | "desafio"
       app_role: "admin" | "parent" | "member"
       group_type: "familia_estendida" | "escola" | "condominio" | "outro"
       mission_goal_type: "total" | "streak"
@@ -1021,6 +1031,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      activity_tier: ["rotina", "responsabilidade", "desafio"],
       app_role: ["admin", "parent", "member"],
       group_type: ["familia_estendida", "escola", "condominio", "outro"],
       mission_goal_type: ["total", "streak"],
