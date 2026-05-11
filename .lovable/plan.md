@@ -1,50 +1,121 @@
-## O que precisa ser ajustado
 
-O código do app **não** depende do nome antigo do subdomínio — todos os links de convite, redirects de email e login social usam `window.location.origin`, então se adaptam sozinhos ao novo `aurisquest.lovable.app`.
+# Refatoração visual e econômica — Auris Quest
 
-O que **precisa de configuração** está no backend (Lovable Cloud → Auth):
+## 1. Sistema visual: dois modos
 
-### 1. Atualizar Site URL e Redirect URLs (Auth)
+**Modo Responsável (`/app/*`)** — manter clean, layout atual de dashboard. Pequenos ajustes:
+- Reduzir uso de `bg-gradient-hero` em telas internas (atualmente o painel adulto já é clean — só padronizar)
+- Tipografia: títulos com Fredoka (já está), corpo com Nunito.
 
-A Site URL atual provavelmente é o subdomínio antigo (`jornada-kids.lovable.app`). Isso afeta:
-- Link no email de confirmação de cadastro
-- Link no email de recuperação de senha
-- Callback do login com Google (se ativado)
+**Modo Criança (`/c`, `/entrar`, `/familia/:t/entrar`, `/grupo`)** — visual mais cartoon/desenhado:
+- Novo token de tema infantil em `index.css`: classe `.kid-theme` aplicada no root das páginas infantis, com:
+  - Cores mais saturadas (turquesa + coral + amarelo dourado já existem, vamos intensificar)
+  - Bordas mais grossas (`border-4`), cantos mais arredondados (`rounded-3xl`)
+  - Sombras "stickers" (`shadow-[6px_6px_0_rgba(0,0,0,0.1)]`)
+  - Background com padrão sutil (estrelas/nuvens via SVG repeat)
+- Animações leves (framer-motion já não está; usar Tailwind keyframes existentes + novas: `bounce-soft`, `pop-in`, `wiggle`)
+- Botões grandes (`size="xl"`), ícones grandes (32–48px)
 
-Vou atualizar via `configure_auth` para:
-- **Site URL:** `https://aurisquest.lovable.app`
-- **Redirect allowlist:** incluir
-  - `https://aurisquest.lovable.app/**`
-  - `https://id-preview--1dc5c107-a8a8-4d5e-995e-56ab718eb7b6.lovable.app/**` (preview do editor)
-  - `http://localhost:*/**` (dev local)
-  - Quando `aurisquest.com` estiver pronto amanhã, eu acrescento `https://aurisquest.com/**` e `https://www.aurisquest.com/**`.
+## 2. Auri (moeda) — padronização
 
-### 2. Google OAuth (se estiver ativo)
+**Problema atual:** `AuriIcon` carrega `auri.png` (raster), tamanhos inconsistentes pelo app, sem glow.
 
-Se você tem login com Google ativado, no console do Google Cloud o **Authorized redirect URI** precisa incluir o callback do Supabase — esse não muda com a troca de subdomínio (continua sendo `https://rydwbkvkokwqpcpfwvcy.supabase.co/auth/v1/callback`), então **nada a fazer aqui**.
+**Solução:**
+- Gerar `src/assets/auri.svg` (SVG cartoon — moeda dourada com "A" estilizado, brilho, sombra interna)
+- Reescrever `AuriIcon.tsx` para:
+  - Aceitar `size: "xs" | "sm" | "md" | "lg" | "xl" | number` (12/16/20/28/40 px)
+  - Variantes: `glow` (sombra dourada), `flat`, `coin-stack` (3 moedas empilhadas)
+  - Suporte a `animate` (rotação suave / pulse no ganho)
+- Substituir todas as ocorrências `<AuriIcon size={N}>` para usar tamanhos semânticos
+- Remover `auri.png` após migração
 
-### 3. Domínio de email (`aurisquest.com`) — amanhã
+## 3. Economia: tiers globais fixos
 
-Quando o domínio estiver disponível:
-- Adicionar via "Set up email domain" (gera registros DNS: SPF, DKIM, DMARC)
-- Você adiciona os registros em **Project Settings → Domains → ⋯ Configure → Manage DNS records** (já que comprou pela Lovable)
-- Após verificado, eu rodo `setup_email_infra` e crio a edge function `send-responsible-invite` que envia o convite por email automaticamente (mantendo o link copiável como fallback).
+**Constante única** em `src/lib/tiers.ts`:
+```
+ROTINA = 1, RESPONSABILIDADE = 3, DESAFIO = 5
+```
 
-### 4. Conectar `aurisquest.com` ao app — amanhã
+**Migration DB:**
+- Adicionar coluna `activities.tier text NOT NULL DEFAULT 'rotina'` (enum `activity_tier`: `rotina|responsabilidade|desafio`)
+- Adicionar coluna `activities.icon_key text` (referência ao ícone da biblioteca) e `activities.icon_url text` (upload personalizado)
+- **Auto-mapear existentes** baseado em `reward_auris`:
+  - `1` → `rotina` (fixa em 1)
+  - `2`–`3` → `responsabilidade` (fixa em 3)
+  - `≥4` → `desafio` (fixa em 5)
+- Recalcular `reward_auris` para o valor canônico do tier
+- Trigger `BEFORE INSERT/UPDATE`: `reward_auris` é sempre derivado de `tier`, ignorando input arbitrário (fonte única da verdade)
 
-No mesmo painel **Project Settings → Domains**, conectar `aurisquest.com` e `www.aurisquest.com` ao projeto e definir um como Primary. SSL é provisionado automaticamente.
+**Frontend:**
+- Form de atividade: remover input numérico de Auris; substituir por seletor visual de 3 cards (Rotina/Responsabilidade/Desafio) com ícone, cor e valor visíveis
+- Listagens de atividades mostram tier como badge colorido
 
-### 5. Nada a mudar no código
+**Missões em grupo:** mantêm `bonus_auris` próprio (tiers separados — Bronze 5 / Prata 10 / Ouro 20), conforme escolhido. Aplicar mesma ideia de seletor visual no form de missão.
 
-Confirmei com busca: não há referência a `jornada-kids` em nenhum arquivo (`src/`, `supabase/`, `index.html`). Os títulos e meta tags já foram trocados para "Auris Quest" na rodada anterior.
+## 4. Biblioteca oficial de ícones cartoon (atividades)
 
-## Resumo do que faço agora
+Gerar **set IA** em `src/assets/activity-icons/` (PNG transparente cartoon, 256×256). Conjunto inicial (~20):
+- escovar-dentes, tomar-banho, arrumar-cama, lição-de-casa, leitura, brincar, ajudar-cozinha, organizar-quarto, regar-plantas, alimentar-pet, passear-pet, exercício, instrumento-musical, idioma, meditação, ajudar-irmão, lavar-louça, tirar-lixo, levantar-cedo, dormir-cedo
 
-1. Atualizar Site URL + Redirect allowlist no Auth para `aurisquest.lovable.app` (+ preview + localhost).
+**Cadastro `iconLibrary`** em `src/lib/iconLibrary.ts`: array de `{ key, label, src, category }`.
 
-## O que fica para amanhã
+**No form de atividade:**
+- Grid visual para escolher ícone (com busca por nome)
+- Tab "Personalizado" → upload para bucket `activity-icons` (criar bucket público) salvo em `icon_url`
+- Preview do ícone em todos os cards de atividade
 
-- Adicionar domínio de email `aurisquest.com` + DNS
-- Conectar `aurisquest.com` como custom domain do app
-- Acrescentar `aurisquest.com` na Redirect allowlist
-- Implementar envio de convite por email
+## 5. Telas infantis — progresso visual
+
+`ChildHome` ganha:
+- **Card de atividade** com imagem grande (96px), nome, badge do tier com Auri, descrição
+- **Streak** por atividade: chama de fogo + número de dias seguidos (já existe `compute_streak` no DB; expor por atividade no `get_child_dashboard`)
+- **Barra de progresso** mais grossa e colorida nas missões
+- **Badges** ganhas: galeria horizontal scrollável com brilho
+- **Animação de ganho de Auris**: ao submeter, mostra +N Auris caindo (CSS keyframe)
+
+## 6. Consistência visual
+
+- Todos componentes que mostram Auris usam `<AuriIcon variant="glow">`
+- Cores de tier: Rotina = `--primary` (turquesa), Responsabilidade = `--secondary` (coral), Desafio = `--accent` (dourado)
+- Badges, cards de atividade, missões e quests compartilham mesma estética cartoon (bordas grossas, sombras stickers) só na área infantil
+
+---
+
+## Detalhes técnicos
+
+### Migrations SQL
+1. `CREATE TYPE activity_tier AS ENUM ('rotina','responsabilidade','desafio');`
+2. `ALTER TABLE activities ADD COLUMN tier activity_tier NOT NULL DEFAULT 'rotina', ADD COLUMN icon_key text, ADD COLUMN icon_url text;`
+3. UPDATE para mapear `reward_auris` → `tier` e normalizar `reward_auris`
+4. Função + trigger `enforce_activity_tier_reward()` que sobrescreve `reward_auris` conforme `tier`
+5. Atualizar `get_child_dashboard` para retornar `tier`, `icon_key`, `icon_url`, e `streak` por atividade
+6. Bucket `activity-icons` (público) com policies de upload por família
+
+### Arquivos a criar
+- `src/assets/auri.svg`
+- `src/assets/activity-icons/*.png` (20 ícones via imagegen)
+- `src/lib/tiers.ts`
+- `src/lib/iconLibrary.ts`
+- `src/components/TierBadge.tsx`
+- `src/components/TierSelector.tsx`
+- `src/components/ActivityIconPicker.tsx`
+- `src/components/ActivityIcon.tsx` (renderiza icon_key da lib OU icon_url custom)
+
+### Arquivos a editar
+- `src/components/AuriIcon.tsx` — variantes + SVG
+- `src/index.css` — tokens kid-theme + keyframes
+- `tailwind.config.ts` — animações novas
+- `src/pages/app/Activities.tsx` — TierSelector + IconPicker, remover input Auris
+- `src/pages/app/Missions.tsx` — TierSelector próprio (Bronze/Prata/Ouro)
+- `src/pages/ChildHome.tsx` — cards com ícone, streak, animação ganho
+- `src/pages/ChildLogin.tsx`, `ChildLoginFamily.tsx` — aplicar kid-theme reforçado
+- Substituir `<AuriIcon size={N}>` em todo o projeto para variantes semânticas
+
+### Fora de escopo (não mexer)
+- Rotas, autenticação, RLS de outras tabelas
+- Lógica de pagamentos
+- Dashboard administrativo (`/app/admin/*`)
+
+### Riscos
+- Atividades existentes terão `reward_auris` recalculado (ex: 2 → 3, 7 → 5). Submissões antigas mantêm seu valor histórico (já gravado em `submissions.reward_auris`).
+- Geração de 20 ícones IA leva alguns minutos.
