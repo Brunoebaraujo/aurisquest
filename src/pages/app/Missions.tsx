@@ -37,7 +37,7 @@ const emptyForm = {
   activity_id: "",
   goal_type: "total" as "total" | "streak",
   goal_target: "5",
-  bonus_auris: "10",
+  bonus_tier: "bronze" as MissionTier,
   childIds: [] as string[],
   medalFile: null as File | null,
 };
