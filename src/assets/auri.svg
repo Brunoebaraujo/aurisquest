@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <radialGradient id="auriFace" cx="35%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#FFE680"/>
+      <stop offset="55%" stop-color="#F4B400"/>
+      <stop offset="100%" stop-color="#B97600"/>
+    </radialGradient>
+    <linearGradient id="auriRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD24A"/>
+      <stop offset="100%" stop-color="#A66400"/>
+    </linearGradient>
+    <radialGradient id="auriShine" cx="30%" cy="25%" r="25%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- rim -->
+  <circle cx="32" cy="32" r="30" fill="url(#auriRim)"/>
+  <!-- face -->
+  <circle cx="32" cy="32" r="25" fill="url(#auriFace)"/>
+  <!-- inner ring -->
+  <circle cx="32" cy="32" r="25" fill="none" stroke="#7a4a00" stroke-opacity="0.25" stroke-width="1.2"/>
+  <!-- letter A -->
+  <g fill="#5a3500">
+    <path d="M32 14 L20 48 H26 L28.4 41 H35.6 L38 48 H44 L32 14 Z M30 35 L32 27 L34 35 Z"/>
+  </g>
+  <!-- shine -->
+  <ellipse cx="22" cy="20" rx="11" ry="7" fill="url(#auriShine)"/>
+</svg>

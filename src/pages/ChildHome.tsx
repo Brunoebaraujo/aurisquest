@@ -13,9 +13,12 @@ import {
 import { toast } from "sonner";
 import { formatAuris, formatDateTime } from "@/lib/format";
 import { AuriIcon } from "@/components/AuriIcon";
+import { ActivityIcon } from "@/components/ActivityIcon";
+import { TierBadge } from "@/components/TierBadge";
+import { type ActivityTier, tierFromAuris } from "@/lib/tiers";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
-type Activity = { id: string; name: string; description: string | null; reward_auris: number; category: string | null };
+type Activity = { id: string; name: string; description: string | null; reward_auris: number; category: string | null; tier?: ActivityTier; icon_key?: string | null; icon_url?: string | null; streak?: number };
 type Submission = { id: string; activity_id: string; status: string; reward_auris: number; completed_at: string };
 type FamilySubmission = Submission & { child_id: string };
 type FamilyChild = { id: string; name: string; avatar_url: string | null };
@@ -189,7 +192,7 @@ const ChildHome = () => {
     <span className="w-5 text-center text-xs font-bold text-muted-foreground">{i+1}</span>;
 
   return (
-    <div className="min-h-screen bg-gradient-hero pb-10">
+    <div className="min-h-screen kid-theme kid-bg pb-10">
       <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
         <div className="flex items-center justify-between text-primary-foreground">
           <div className="flex items-center gap-3">
@@ -309,12 +312,20 @@ const ChildHome = () => {
                   <h2 className="font-display font-bold text-xl mb-4">Escolha uma atividade</h2>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {activities.map(a => (
-                      <button key={a.id} onClick={() => setSelected(a)} className="text-left p-4 rounded-2xl border-2 border-border hover:border-primary hover:shadow-soft transition-bounce bg-card">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <span className="font-semibold">{a.name}</span>
-                          <span className="font-display font-bold text-primary whitespace-nowrap"><span className="inline-flex items-center gap-1"><AuriIcon size={12} />{formatAuris(a.reward_auris)}</span></span>
+                      <button key={a.id} onClick={() => setSelected(a)} className="text-left p-4 rounded-2xl border-4 border-border hover:border-primary kid-sticker transition-bounce bg-card animate-pop-in">
+                        <div className="flex items-start gap-3 mb-2">
+                          <ActivityIcon iconKey={a.icon_key} iconUrl={a.icon_url} size={56} />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-display font-bold text-base leading-tight mb-1">{a.name}</div>
+                            <TierBadge tier={(a.tier ?? tierFromAuris(a.reward_auris)) as ActivityTier} size="sm" />
+                          </div>
                         </div>
                         {a.description && <p className="text-xs text-muted-foreground">{a.description}</p>}
+                        {(a.streak ?? 0) > 0 && (
+                          <div className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-orange-600 bg-orange-100 rounded-full px-2 py-0.5">
+                            🔥 {a.streak} dia{(a.streak ?? 0) > 1 ? "s" : ""} seguidos
+                          </div>
+                        )}
                       </button>
                     ))}
                     {activities.length === 0 && <p className="text-sm text-muted-foreground col-span-full">Nenhuma atividade disponível.</p>}

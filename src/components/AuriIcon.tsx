@@ -1,17 +1,55 @@
-import auriPng from "@/assets/auri.png";
+import auriSvg from "@/assets/auri.svg";
 
-type Props = { size?: number; className?: string };
+type SizeToken = "xs" | "sm" | "md" | "lg" | "xl" | "2xl";
+const SIZE_MAP: Record<SizeToken, number> = { xs: 12, sm: 16, md: 20, lg: 28, xl: 40, "2xl": 56 };
 
-export const AuriIcon = ({ size = 16, className }: Props) => (
-  <img
-    src={auriPng}
-    alt="Auri"
-    title="Auri — moeda do Auris Quest"
-    width={size}
-    height={size}
-    className={`inline-block align-text-bottom select-none ${className ?? ""}`}
-    draggable={false}
-  />
-);
+type Props = {
+  size?: SizeToken | number;
+  variant?: "flat" | "glow" | "stack";
+  animate?: boolean;
+  className?: string;
+};
+
+const resolveSize = (s: Props["size"]) =>
+  typeof s === "number" ? s : SIZE_MAP[s ?? "sm"];
+
+export const AuriIcon = ({ size = "sm", variant = "flat", animate = false, className }: Props) => {
+  const px = resolveSize(size);
+  const glow = variant === "glow"
+    ? { filter: `drop-shadow(0 0 ${Math.max(2, px / 6)}px hsl(42 95% 60% / 0.65))` }
+    : undefined;
+
+  if (variant === "stack") {
+    const offset = Math.max(1, Math.round(px * 0.12));
+    return (
+      <span
+        className={`relative inline-block align-text-bottom ${animate ? "animate-pulse" : ""} ${className ?? ""}`}
+        style={{ width: px + offset * 2, height: px + offset * 2 }}
+        aria-label="Auris"
+        title="Auris — moeda do Auris Quest"
+      >
+        <img src={auriSvg} alt="" width={px} height={px} draggable={false}
+          className="absolute" style={{ left: 0, top: offset * 2, ...glow }} />
+        <img src={auriSvg} alt="" width={px} height={px} draggable={false}
+          className="absolute" style={{ left: offset, top: offset, ...glow }} />
+        <img src={auriSvg} alt="Auri" width={px} height={px} draggable={false}
+          className="absolute" style={{ left: offset * 2, top: 0, ...glow }} />
+      </span>
+    );
+  }
+
+  return (
+    <img
+      src={auriSvg}
+      alt="Auri"
+      title="Auri — moeda do Auris Quest"
+      width={px}
+      height={px}
+      draggable={false}
+      className={`inline-block align-text-bottom select-none ${animate ? "animate-bounce-soft" : ""} ${className ?? ""}`}
+      style={glow}
+    />
+  );
+};
 
 export default AuriIcon;

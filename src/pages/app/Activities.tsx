@@ -11,23 +11,42 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { formatAuris } from "@/lib/format";
-import { AuriIcon } from "@/components/AuriIcon";
+import { TIERS, type ActivityTier, tierFromAuris } from "@/lib/tiers";
+import { TierSelector } from "@/components/TierSelector";
+import { TierBadge } from "@/components/TierBadge";
+import { ActivityIconPicker } from "@/components/ActivityIconPicker";
+import { ActivityIcon } from "@/components/ActivityIcon";
 
 type Activity = {
   id: string; name: string; description: string | null;
-  reward_auris: number; category: string | null;
-  frequency_hint: string | null; active: boolean;
+  reward_auris: number; tier: ActivityTier;
+  icon_key: string | null; icon_url: string | null;
+  category: string | null; frequency_hint: string | null; active: boolean;
 };
 
-const empty = { name: "", description: "", reward_auris: "1", category: "", frequency_hint: "diaria", active: true };
+type FormState = {
+  name: string;
+  description: string;
+  tier: ActivityTier;
+  icon_key: string | null;
+  icon_url: string | null;
+  category: string;
+  frequency_hint: string;
+  active: boolean;
+};
+
+const empty: FormState = {
+  name: "", description: "", tier: "rotina",
+  icon_key: null, icon_url: null,
+  category: "", frequency_hint: "diaria", active: true,
+};
 
 const Activities = () => {
   const { profile } = useAuth();
   const [list, setList] = useState<Activity[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Activity | null>(null);
-  const [form, setForm] = useState(empty);
+  const [form, setForm] = useState<FormState>(empty);
 
   const load = async () => {
     if (!profile?.family_id) return;
@@ -41,7 +60,8 @@ const Activities = () => {
     setEditing(a);
     setForm({
       name: a.name, description: a.description ?? "",
-      reward_auris: String(a.reward_auris ?? 0),
+      tier: (a.tier ?? tierFromAuris(a.reward_auris)) as ActivityTier,
+      icon_key: a.icon_key, icon_url: a.icon_url,
       category: a.category ?? "", frequency_hint: a.frequency_hint ?? "diaria", active: a.active,
     });
     setOpen(true);
@@ -50,17 +70,17 @@ const Activities = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile?.family_id) return;
-    const auris = parseInt(form.reward_auris, 10);
-    if (isNaN(auris) || auris < 0) { toast.error("Valor inválido"); return; }
     const payload = {
       family_id: profile.family_id,
       name: form.name.trim(),
       description: form.description.trim() || null,
-      reward_auris: auris,
-      reward_amount_cents: 0,
+      tier: form.tier,
+      icon_key: form.icon_key,
+      icon_url: form.icon_url,
       category: form.category.trim() || null,
       frequency_hint: form.frequency_hint || null,
       active: form.active,
+      // reward_auris e reward_amount_cents são definidos pelo trigger no banco
     };
     const { error } = editing
       ? await supabase.from("activities").update(payload).eq("id", editing.id)
@@ -80,7 +100,7 @@ const Activities = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-display font-bold">Atividades</h2>
-          <p className="text-muted-foreground text-sm">Tarefas com recompensa em Auris.</p>
+          <p className="text-muted-foreground text-sm">Tarefas com recompensa em Auris por tier.</p>
         </div>
         <Button variant="hero" onClick={openNew}><Plus className="w-4 h-4" /> Nova atividade</Button>
       </div>
@@ -89,11 +109,12 @@ const Activities = () => {
         {list.map(a => (
           <Card key={a.id} className={`border-0 shadow-card rounded-2xl ${!a.active ? "opacity-60" : ""}`}>
             <CardContent className="p-5">
-              <div className="flex items-start justify-between gap-2 mb-2">
-                <h3 className="font-semibold text-lg leading-tight">{a.name}</h3>
-                <span className="font-display font-bold text-primary text-lg whitespace-nowrap inline-flex items-center gap-1">
-                  <AuriIcon size={18} />{formatAuris(a.reward_auris)}
-                </span>
+              <div className="flex items-start gap-3 mb-2">
+                <ActivityIcon iconKey={a.icon_key} iconUrl={a.icon_url} size={48} framed />
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg leading-tight">{a.name}</h3>
+                  <TierBadge tier={(a.tier ?? tierFromAuris(a.reward_auris)) as ActivityTier} size="sm" />
+                </div>
               </div>
               {a.description && <p className="text-sm text-muted-foreground mb-3">{a.description}</p>}
               <div className="flex flex-wrap gap-1 mb-3">
@@ -112,9 +133,9 @@ const Activities = () => {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{editing ? "Editar atividade" : "Nova atividade"}</DialogTitle></DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-3">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label>Nome</Label>
               <Input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required maxLength={80} />
@@ -123,11 +144,18 @@ const Activities = () => {
               <Label>Descrição (opcional)</Label>
               <Textarea value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} maxLength={300} rows={2} />
             </div>
+            <div className="space-y-2">
+              <Label>Tier de recompensa</Label>
+              <TierSelector value={form.tier} onChange={t => setForm({ ...form, tier: t })} />
+              <p className="text-[11px] text-muted-foreground">Vale {TIERS[form.tier].auris} Auris — valor padronizado para todas as famílias.</p>
+            </div>
+            <ActivityIconPicker
+              familyId={profile!.family_id!}
+              iconKey={form.icon_key}
+              iconUrl={form.icon_url}
+              onChange={(v) => setForm({ ...form, ...v })}
+            />
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label className="flex items-center gap-1">Recompensa <AuriIcon size={14} /> Auris</Label>
-                <Input type="number" min={0} value={form.reward_auris} onChange={e => setForm({ ...form, reward_auris: e.target.value })} />
-              </div>
               <div className="space-y-2">
                 <Label>Frequência</Label>
                 <select className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={form.frequency_hint} onChange={e => setForm({ ...form, frequency_hint: e.target.value })}>
@@ -136,10 +164,10 @@ const Activities = () => {
                   <option value="ocasional">Ocasional</option>
                 </select>
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Categoria (opcional)</Label>
-              <Input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} placeholder="Ex: Higiene" maxLength={40} />
+              <div className="space-y-2">
+                <Label>Categoria</Label>
+                <Input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} placeholder="Ex: Higiene" maxLength={40} />
+              </div>
             </div>
             <div className="flex items-center justify-between rounded-xl bg-muted px-3 py-2">
               <Label>Ativa</Label>

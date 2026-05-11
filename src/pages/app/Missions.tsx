@@ -13,6 +13,8 @@ import { Plus, Trash2, Trophy, Target, Flame, Award, Upload } from "lucide-react
 import { toast } from "sonner";
 import { formatAuris } from "@/lib/format";
 import { AuriIcon } from "@/components/AuriIcon";
+import { MissionTierSelector } from "@/components/MissionTierSelector";
+import { MISSION_TIERS, missionAurisFor, missionTierFromAuris, type MissionTier } from "@/lib/tiers";
 
 type Activity = { id: string; name: string; active: boolean };
 type Child = { id: string; name: string };
@@ -35,7 +37,7 @@ const emptyForm = {
   activity_id: "",
   goal_type: "total" as "total" | "streak",
   goal_target: "5",
-  bonus_auris: "10",
+  bonus_tier: "bronze" as MissionTier,
   childIds: [] as string[],
   medalFile: null as File | null,
 };
@@ -86,7 +88,7 @@ const Missions = () => {
     if (form.childIds.length === 0) { toast.error("Selecione ao menos uma criança"); return; }
     const target = parseInt(form.goal_target, 10);
     if (isNaN(target) || target <= 0) { toast.error("Meta inválida"); return; }
-    const bonus = Math.max(0, parseInt(form.bonus_auris, 10) || 0);
+    const bonus = missionAurisFor(form.bonus_tier);
 
     setBusy(true);
     try {
@@ -254,8 +256,9 @@ const Missions = () => {
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="flex items-center gap-1">Bônus em <AuriIcon size={14} /> Auris</Label>
-              <Input type="number" min={0} value={form.bonus_auris} onChange={e => setForm({ ...form, bonus_auris: e.target.value })} placeholder="10" />
+              <Label>Bônus da missão</Label>
+              <MissionTierSelector value={form.bonus_tier} onChange={(t) => setForm({ ...form, bonus_tier: t })} />
+              <p className="text-[11px] text-muted-foreground">Bônus padronizado: Bronze 5 · Prata 10 · Ouro 20 Auris.</p>
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-2"><Upload className="w-4 h-4" /> Imagem da medalha</Label>
