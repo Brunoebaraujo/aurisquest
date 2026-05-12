@@ -231,6 +231,45 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="border-0 shadow-card rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-accent" />
+            Auris aprovados acumulados por criança
+            <span className="text-xs font-normal text-muted-foreground ml-2">
+              ({granularity === "week" ? "escala semanal" : "escala mensal"})
+            </span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {kidsForChart.length === 0 || chartData.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Sem dados suficientes ainda.</p>
+          ) : (
+            <ChartContainer config={chartConfig} className="h-[300px] w-full">
+              <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
+                <XAxis dataKey="bucket" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} allowDecimals={false} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <ChartLegend content={<ChartLegendContent />} />
+                {kidsForChart.map((k) => (
+                  <Line
+                    key={k.id}
+                    type="monotone"
+                    dataKey={k.id}
+                    name={k.name}
+                    stroke={`var(--color-${k.id})`}
+                    strokeWidth={2}
+                    dot={false}
+                    connectNulls
+                  />
+                ))}
+              </LineChart>
+            </ChartContainer>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
