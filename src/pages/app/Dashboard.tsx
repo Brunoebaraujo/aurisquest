@@ -43,6 +43,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState<Stats | null>(null);
   const [topKids, setTopKids] = useState<{ id: string; name: string; balance: number; earned: number }[]>([]);
   const [aurisPerReal, setAurisPerReal] = useState(1);
+  const [kids, setKids] = useState<KidRow[]>([]);
+  const [approvedRows, setApprovedRows] = useState<ApprovedRow[]>([]);
 
   useEffect(() => {
     const load = async () => {
@@ -51,11 +53,11 @@ const Dashboard = () => {
 
       const [famRes, kidsRes, actsRes, pendRes, monthRes, allApproved, paymentsRes] = await Promise.all([
         supabase.from("families").select("auris_per_real").eq("id", profile.family_id).maybeSingle(),
-        supabase.from("children").select("id, name").eq("family_id", profile.family_id).eq("active", true),
+        supabase.from("children").select("id, name, created_at").eq("family_id", profile.family_id).eq("active", true),
         supabase.from("activities").select("id", { count: "exact", head: true }).eq("family_id", profile.family_id).eq("active", true),
         supabase.from("submissions").select("id", { count: "exact", head: true }).eq("family_id", profile.family_id).eq("status", "pendente"),
         supabase.from("submissions").select("reward_auris", { count: "exact" }).eq("family_id", profile.family_id).eq("status", "aprovado").gte("completed_at", startMonth.toISOString()),
-        supabase.from("submissions").select("child_id, reward_auris").eq("family_id", profile.family_id).eq("status", "aprovado"),
+        supabase.from("submissions").select("child_id, reward_auris, completed_at").eq("family_id", profile.family_id).eq("status", "aprovado"),
         supabase.from("payments").select("child_id, auris_redeemed").eq("family_id", profile.family_id),
       ]);
 
@@ -75,6 +77,8 @@ const Dashboard = () => {
         .sort((a, b) => b.balance - a.balance);
 
       setTopKids(top);
+      setKids((kidsRes.data ?? []) as KidRow[]);
+      setApprovedRows((allApproved.data ?? []) as ApprovedRow[]);
       setStats({
         childrenCount: kidsRes.data?.length ?? 0,
         activitiesCount: actsRes.count ?? 0,
@@ -85,6 +89,65 @@ const Dashboard = () => {
     };
     load();
   }, [profile?.family_id]);
+
+  const { chartData, chartConfig, granularity, kidsForChart } = useMemo(() => {
+    const empty = { chartData: [] as any[], chartConfig: {} as ChartConfig, granularity: "week" as "week" | "month", kidsForChart: [] as KidRow[] };
+    if (kids.length === 0) return empty;
+
+    const oldest = kids.reduce<Date | null>((acc, k) => {
+      const d = new Date(k.created_at);
+      return !acc || d < acc ? d : acc;
+    }, null);
+    if (!oldest) return empty;
+
+    const now = new Date();
+    const ageWeeks = (now.getTime() - oldest.getTime()) / (1000 * 60 * 60 * 24 * 7);
+    const gran: "week" | "month" = ageWeeks > 52 ? "month" : "week";
+
+    const buckets: Date[] = [];
+    const cursor = gran === "week" ? startOfWeek(oldest) : startOfMonth(oldest);
+    const end = gran === "week" ? startOfWeek(now) : startOfMonth(now);
+    while (cursor <= end) {
+      buckets.push(new Date(cursor));
+      if (gran === "week") cursor.setDate(cursor.getDate() + 7);
+      else cursor.setMonth(cursor.getMonth() + 1);
+    }
+
+    const sums = new Map<string, Map<number, number>>();
+    kids.forEach(k => sums.set(k.id, new Map()));
+    approvedRows.forEach(r => {
+      if (!sums.has(r.child_id)) return;
+      const d = new Date(r.completed_at);
+      const b = gran === "week" ? startOfWeek(d) : startOfMonth(d);
+      const m = sums.get(r.child_id)!;
+      m.set(b.getTime(), (m.get(b.getTime()) ?? 0) + (r.reward_auris ?? 0));
+    });
+
+    const cumulative = new Map<string, number>();
+    kids.forEach(k => cumulative.set(k.id, 0));
+    const data = buckets.map(b => {
+      const row: Record<string, any> = { bucket: fmtBucket(b, gran) };
+      kids.forEach(k => {
+        const created = new Date(k.created_at);
+        const createdBucket = gran === "week" ? startOfWeek(created) : startOfMonth(created);
+        if (b < createdBucket) {
+          row[k.id] = null;
+        } else {
+          const inc = sums.get(k.id)!.get(b.getTime()) ?? 0;
+          cumulative.set(k.id, (cumulative.get(k.id) ?? 0) + inc);
+          row[k.id] = cumulative.get(k.id);
+        }
+      });
+      return row;
+    });
+
+    const config: ChartConfig = {};
+    kids.forEach((k, i) => {
+      config[k.id] = { label: k.name, color: PALETTE[i % PALETTE.length] };
+    });
+
+    return { chartData: data, chartConfig: config, granularity: gran, kidsForChart: kids };
+  }, [kids, approvedRows]);
 
   const cards = [
     { label: "Crianças", value: stats?.childrenCount ?? "—", icon: Users, color: "bg-gradient-primary text-primary-foreground", to: "/app/criancas" },
