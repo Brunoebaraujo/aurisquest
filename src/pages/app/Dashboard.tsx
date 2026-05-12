@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,6 +6,29 @@ import { Trophy, Users, ListChecks, ClipboardCheck, Sparkles } from "lucide-reac
 import { formatAuris, formatBRL, aurisToBRL } from "@/lib/format";
 import { AuriIcon } from "@/components/AuriIcon";
 import { Link } from "react-router-dom";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
+
+type ApprovedRow = { child_id: string; reward_auris: number; completed_at: string };
+type KidRow = { id: string; name: string; created_at: string };
+
+const PALETTE = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--secondary))", "hsl(var(--warning))", "hsl(var(--destructive))", "hsl(var(--muted-foreground))"];
+
+function startOfWeek(d: Date) {
+  const x = new Date(d); x.setHours(0, 0, 0, 0);
+  const day = x.getDay(); // 0 Sun
+  x.setDate(x.getDate() - day);
+  return x;
+}
+function startOfMonth(d: Date) {
+  return new Date(d.getFullYear(), d.getMonth(), 1);
+}
+function fmtBucket(d: Date, granularity: "week" | "month") {
+  if (granularity === "month") {
+    return d.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
+  }
+  return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+}
 
 type Stats = {
   childrenCount: number;
