@@ -10,6 +10,8 @@ import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles, Eye } from "lucide-r
 import { formatAuris } from "@/lib/format";
 import { AuriIcon } from "@/components/AuriIcon";
 import { toast } from "sonner";
+import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
+import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
 
 type Child = { id: string; name: string; avatar_url: string | null };
 type Mission = {
@@ -81,6 +83,7 @@ const ChildProfile = () => {
 
   const wonMissions = missions.filter(m => awards.some(a => a.mission_id === m.id));
   const inProgress = missions.filter(m => !awards.some(a => a.mission_id === m.id));
+  const cosmeticsMap = useFamilyCosmetics(childId ? [childId] : []);
 
   return (
     <div className="space-y-6">
@@ -89,9 +92,11 @@ const ChildProfile = () => {
       </Button>
 
       <div className="flex items-center gap-4">
-        <div className="w-20 h-20 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-display font-bold shadow-soft">
-          {child?.name?.[0]?.toUpperCase() ?? "?"}
-        </div>
+        <EquippedAvatar
+          equipment={(childId && cosmeticsMap[childId]?.equipment) || { avatar: null }}
+          size={96}
+          fallbackName={child?.name}
+        />
         <div>
           <h2 className="text-3xl font-display font-bold">{child?.name ?? "..."}</h2>
           <p className="text-muted-foreground">{wonMissions.length} {wonMissions.length === 1 ? "medalha conquistada" : "medalhas conquistadas"}</p>
