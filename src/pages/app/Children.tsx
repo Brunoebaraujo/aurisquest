@@ -140,6 +140,9 @@ const Children = () => {
               </div>
 
               <div className="flex flex-col gap-2">
+                <Button variant="outline" size="sm" onClick={() => setWardrobeChild(c)}>
+                  <Shirt className="w-4 h-4" /> Editar visual
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => { setPwdChild(c); setPwd(""); }}>
                   <KeyRound className="w-4 h-4" /> {c.password_set_at ? "Trocar senha" : "Definir senha"}
                 </Button>
@@ -170,6 +173,13 @@ const Children = () => {
           </form>
         </DialogContent>
       </Dialog>
+      <ParentWardrobeDialog
+        open={!!wardrobeChild}
+        onOpenChange={(o) => !o && setWardrobeChild(null)}
+        childId={wardrobeChild?.id ?? null}
+        childName={wardrobeChild?.name}
+        onChanged={() => setCosmeticsKey(k => k + 1)}
+      />
     </div>
   );
 };
