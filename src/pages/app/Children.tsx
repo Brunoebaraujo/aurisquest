@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, User as UserIcon, Award, KeyRound, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, Award, KeyRound, CheckCircle2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
+import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
 
 type Child = { id: string; name: string; avatar_url: string | null; active: boolean; password_set_at: string | null };
 
@@ -38,6 +40,7 @@ const Children = () => {
   };
 
   useEffect(() => { load(); }, [profile?.family_id]);
+  const cosmeticsMap = useFamilyCosmetics(list.map(c => c.id));
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -116,9 +119,11 @@ const Children = () => {
           <Card key={c.id} className="border-0 shadow-card rounded-2xl">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground">
-                  <UserIcon className="w-6 h-6" />
-                </div>
+                <EquippedAvatar
+                  equipment={cosmeticsMap[c.id]?.equipment ?? { avatar: null }}
+                  size={56}
+                  fallbackName={c.name}
+                />
                 <div className="flex-1">
                   <div className="font-semibold">{c.name}</div>
                   <div className="text-xs text-muted-foreground">{c.active ? "Ativa" : "Inativa"}</div>
