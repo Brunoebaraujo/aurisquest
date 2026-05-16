@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Trophy, Camera, Sparkles, CheckCircle2, Clock, XCircle, LogOut, Award,
-  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown,
+  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown, Shirt,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatAuris, formatDateTime } from "@/lib/format";
@@ -16,6 +16,10 @@ import { AuriIcon } from "@/components/AuriIcon";
 import { ActivityIcon } from "@/components/ActivityIcon";
 import { TierBadge } from "@/components/TierBadge";
 import { type ActivityTier, tierFromAuris } from "@/lib/tiers";
+import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
+import { LevelBadge, type LevelInfo } from "@/components/cosmetics/LevelBadge";
+import { WardrobeDialog } from "@/components/cosmetics/WardrobeDialog";
+import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
 type Activity = { id: string; name: string; description: string | null; reward_auris: number; category: string | null; tier?: ActivityTier; icon_key?: string | null; icon_url?: string | null; streak?: number };
@@ -54,8 +58,9 @@ const ChildHome = () => {
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [cosmetics, setCosmetics] = useState<import("@/lib/cosmetics").DashboardCosmetics | null>(null);
-  const [levelInfo, setLevelInfo] = useState<import("@/components/cosmetics/LevelBadge").LevelInfo | null>(null);
+  const [cosmetics, setCosmetics] = useState<DashboardCosmetics | null>(null);
+  const [levelInfo, setLevelInfo] = useState<LevelInfo | null>(null);
+  const [rankingLevels, setRankingLevels] = useState<Record<string, number>>({});
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
 
   // Calendar state
@@ -88,6 +93,18 @@ const ChildHome = () => {
     setPendingAuris(totals.pending_auris ?? 0);
     setApprovedAuris(totals.approved_auris ?? 0);
     setPaidAuris(d.paid_auris ?? 0);
+
+    setCosmetics({
+      equipment: d.equipment ?? null,
+      unlocked_avatars: d.unlocked_avatars ?? [],
+      unlocked_items: d.unlocked_items ?? [],
+      avatars_catalog: d.avatars_catalog ?? [],
+      items_catalog: d.items_catalog ?? [],
+    });
+    setLevelInfo(d.level_info ?? null);
+    const lvls: Record<string, number> = {};
+    (d.ranking ?? []).forEach((r: any) => { if (r.child_id && typeof r.level === "number") lvls[r.child_id] = r.level; });
+    setRankingLevels(lvls);
     setLoading(false);
   }, [logout]);
 
