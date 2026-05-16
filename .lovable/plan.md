@@ -1,26 +1,32 @@
 ## Objetivo
-Substituir as imagens dos 6 avatares humanos comuns existentes pelas 6 novas ilustrações enviadas, mantendo IDs, nomes, raridade e todos os desbloqueios já feitos pelas crianças.
+Adicionar as 8 novas artes ao catálogo de itens cosméticos, todas como **comum/starter** (desbloqueadas automaticamente para todas as crianças).
 
-## Mapeamento proposto (mantém os nomes atuais)
+## Itens
 
-| Avatar atual | Nova imagem |
-|---|---|
-| Lia (menina_clara) | Menina_Branca_Castanho.png |
-| Theo (menino_claro) | Menino_Branco_Castanho.png |
-| Maitê (menina_parda) | Menina_Loira.png |
-| Davi (menino_pardo) | Menino_Loiro.png |
-| Aisha (menina_negra) | Menina_Negra.png |
-| Kayo (menino_negro) | Menino_Negro.png |
+### Novos (5 inserts)
+| Nome | Categoria | Imagem |
+|---|---|---|
+| Elmo Azul | elmo | Elmo.png |
+| Armadura Azul | armadura | Armadura_Azul.png |
+| Armadura Rosa | armadura | Armadura_Rosa.png |
+| Armadura Roxa | armadura | Armadura_Roxa.png |
+| Armadura Verde | armadura | Armadura_Verde.png |
 
-Observação: as novas artes de Maitê/Davi têm aparência loira (não parda). O nome é mantido conforme escolha, mas se preferir, posso renomeá-los depois.
+### Atualizações de itens existentes (3 updates "in-place")
+Em vez de DELETE (que quebraria FKs em `child_equipment` e `child_unlocked_items` de quem já equipou/desbloqueou), faço UPDATE in-place mantendo os IDs — efeito visual é o mesmo do "substituir tudo":
+
+| ID atual | Antes | Depois |
+|---|---|---|
+| `d0a98428…` Espada (épico / medalhas≥6) | imagem antiga | nova arte, **rarity=comum, unlock=starter** |
+| `f0de9298…` Cajado (raro / auris≥300) | imagem antiga | nova arte, **rarity=comum, unlock=starter** |
+| `bda4bd83…` Tiara Floral (raro / auris≥200) | imagem antiga | renomeado **"Tiara Rosa"**, nova arte, **rarity=comum, unlock=starter** |
 
 ## Passos técnicos
-1. Copiar as 6 imagens de `user-uploads://` para arquivos locais temporários.
-2. Fazer upload ao bucket público `avatars-catalog` com novos nomes (`humano_v2_*.png`) para invalidar cache do CDN.
-3. Atualizar `avatars.image_url` das 6 linhas existentes (UPDATE pelo id), preservando todo o resto.
-4. Verificar via SELECT que os 6 URLs apontam para as novas imagens.
+1. Copiar as 8 imagens de `user-uploads://` para `/tmp/`.
+2. Fazer upload ao bucket público `cosmetics` em paths novos (`elmo/elmo_azul.png`, `armadura/armadura_azul.png` …, e `arma/espada_v2.png`, `arma/cajado_v2.png`, `elmo/tiara_rosa.png` para invalidar cache).
+3. `UPDATE cosmetic_items` para os 3 existentes (nome quando aplicável, image_url, rarity='comum', unlock_rule_type='starter', unlock_threshold=0).
+4. `INSERT INTO cosmetic_items` para os 5 novos (rarity='comum', unlock_rule_type='starter', sort_order coerente por categoria).
+5. Para que todas as crianças já existentes recebam os novos starters (a função `evaluate_cosmetic_unlocks` só roda em novas submissões aprovadas), executar um backfill: para cada criança ativa, inserir em `child_unlocked_items` os novos itens starter (ON CONFLICT DO NOTHING).
 
-Nenhuma alteração em schema, RLS, código frontend ou edge functions é necessária — `EquippedAvatar`, `ChildShowcase` e `WardrobeDialog` já consomem `image_url` da tabela.
-
-## Avatares não tocados
-Os 4 humanos raros (Mei, Kenji, Iara, Tainá) e os 10 fantásticos permanecem inalterados.
+## Não precisa mexer
+- Nenhum schema, RLS, trigger, edge function ou código frontend muda. `WardrobeDialog`, `ParentWardrobeDialog`, `ChildShowcase` e `useFamilyCosmetics` já leem do catálogo dinamicamente.
