@@ -70,6 +70,144 @@ export type Database = {
           },
         ]
       }
+      avatars: {
+        Row: {
+          active: boolean
+          category: Database["public"]["Enums"]["avatar_category"]
+          created_at: string
+          id: string
+          image_url: string
+          name: string
+          rarity: Database["public"]["Enums"]["cosmetic_rarity"]
+          sort_order: number
+          unlock_rule_type: Database["public"]["Enums"]["unlock_rule_type"]
+          unlock_threshold: number
+        }
+        Insert: {
+          active?: boolean
+          category: Database["public"]["Enums"]["avatar_category"]
+          created_at?: string
+          id?: string
+          image_url: string
+          name: string
+          rarity?: Database["public"]["Enums"]["cosmetic_rarity"]
+          sort_order?: number
+          unlock_rule_type?: Database["public"]["Enums"]["unlock_rule_type"]
+          unlock_threshold?: number
+        }
+        Update: {
+          active?: boolean
+          category?: Database["public"]["Enums"]["avatar_category"]
+          created_at?: string
+          id?: string
+          image_url?: string
+          name?: string
+          rarity?: Database["public"]["Enums"]["cosmetic_rarity"]
+          sort_order?: number
+          unlock_rule_type?: Database["public"]["Enums"]["unlock_rule_type"]
+          unlock_threshold?: number
+        }
+        Relationships: []
+      }
+      child_equipment: {
+        Row: {
+          armor_item_id: string | null
+          aura_item_id: string | null
+          avatar_id: string | null
+          child_id: string
+          favorite_badge_id: string | null
+          frame_item_id: string | null
+          helmet_item_id: string | null
+          last_seen_unlocks_at: string
+          pet_item_id: string | null
+          updated_at: string
+          weapon_item_id: string | null
+        }
+        Insert: {
+          armor_item_id?: string | null
+          aura_item_id?: string | null
+          avatar_id?: string | null
+          child_id: string
+          favorite_badge_id?: string | null
+          frame_item_id?: string | null
+          helmet_item_id?: string | null
+          last_seen_unlocks_at?: string
+          pet_item_id?: string | null
+          updated_at?: string
+          weapon_item_id?: string | null
+        }
+        Update: {
+          armor_item_id?: string | null
+          aura_item_id?: string | null
+          avatar_id?: string | null
+          child_id?: string
+          favorite_badge_id?: string | null
+          frame_item_id?: string | null
+          helmet_item_id?: string | null
+          last_seen_unlocks_at?: string
+          pet_item_id?: string | null
+          updated_at?: string
+          weapon_item_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_equipment_armor_item_id_fkey"
+            columns: ["armor_item_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_equipment_aura_item_id_fkey"
+            columns: ["aura_item_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_equipment_avatar_id_fkey"
+            columns: ["avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_equipment_favorite_badge_id_fkey"
+            columns: ["favorite_badge_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_equipment_frame_item_id_fkey"
+            columns: ["frame_item_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_equipment_helmet_item_id_fkey"
+            columns: ["helmet_item_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_equipment_pet_item_id_fkey"
+            columns: ["pet_item_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "child_equipment_weapon_item_id_fkey"
+            columns: ["weapon_item_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       child_sessions: {
         Row: {
           child_id: string
@@ -99,6 +237,70 @@ export type Database = {
           token_hash?: string
         }
         Relationships: []
+      }
+      child_unlocked_avatars: {
+        Row: {
+          avatar_id: string
+          child_id: string
+          id: string
+          source: string | null
+          unlocked_at: string
+        }
+        Insert: {
+          avatar_id: string
+          child_id: string
+          id?: string
+          source?: string | null
+          unlocked_at?: string
+        }
+        Update: {
+          avatar_id?: string
+          child_id?: string
+          id?: string
+          source?: string | null
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_unlocked_avatars_avatar_id_fkey"
+            columns: ["avatar_id"]
+            isOneToOne: false
+            referencedRelation: "avatars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      child_unlocked_items: {
+        Row: {
+          child_id: string
+          id: string
+          item_id: string
+          source: string | null
+          unlocked_at: string
+        }
+        Insert: {
+          child_id: string
+          id?: string
+          item_id: string
+          source?: string | null
+          unlocked_at?: string
+        }
+        Update: {
+          child_id?: string
+          id?: string
+          item_id?: string
+          source?: string | null
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_unlocked_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       children: {
         Row: {
@@ -143,6 +345,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      cosmetic_items: {
+        Row: {
+          active: boolean
+          category: Database["public"]["Enums"]["cosmetic_category"]
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string
+          name: string
+          rarity: Database["public"]["Enums"]["cosmetic_rarity"]
+          sort_order: number
+          unlock_rule_type: Database["public"]["Enums"]["unlock_rule_type"]
+          unlock_threshold: number
+        }
+        Insert: {
+          active?: boolean
+          category: Database["public"]["Enums"]["cosmetic_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url: string
+          name: string
+          rarity?: Database["public"]["Enums"]["cosmetic_rarity"]
+          sort_order?: number
+          unlock_rule_type?: Database["public"]["Enums"]["unlock_rule_type"]
+          unlock_threshold?: number
+        }
+        Update: {
+          active?: boolean
+          category?: Database["public"]["Enums"]["cosmetic_category"]
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string
+          name?: string
+          rarity?: Database["public"]["Enums"]["cosmetic_rarity"]
+          sort_order?: number
+          unlock_rule_type?: Database["public"]["Enums"]["unlock_rule_type"]
+          unlock_threshold?: number
+        }
+        Relationships: []
       }
       families: {
         Row: {
@@ -824,6 +1068,7 @@ export type Database = {
         }
         Returns: Json
       }
+      compute_child_level: { Args: { _child_id: string }; Returns: Json }
       compute_streak: {
         Args: { _activity_id: string; _child_id: string }
         Returns: number
@@ -831,6 +1076,10 @@ export type Database = {
       create_responsible_invitation: {
         Args: { _contact: string; _name: string }
         Returns: Json
+      }
+      evaluate_cosmetic_unlocks: {
+        Args: { _child_id: string }
+        Returns: undefined
       }
       expire_invitations: { Args: never; Returns: number }
       get_child_dashboard: { Args: { _token: string }; Returns: Json }
@@ -900,10 +1149,26 @@ export type Database = {
     Enums: {
       activity_tier: "rotina" | "responsabilidade" | "desafio"
       app_role: "admin" | "parent" | "member"
+      avatar_category: "humano" | "fantastico"
+      cosmetic_category:
+        | "elmo"
+        | "armadura"
+        | "arma"
+        | "pet"
+        | "aura"
+        | "moldura"
+        | "badge"
+      cosmetic_rarity: "comum" | "raro" | "epico" | "lendario"
       group_type: "familia_estendida" | "escola" | "condominio" | "outro"
       mission_goal_type: "total" | "streak"
       shared_mission_mode: "coletiva" | "individual"
       submission_status: "pendente" | "aprovado" | "recusado"
+      unlock_rule_type:
+        | "starter"
+        | "auris_total"
+        | "medalhas"
+        | "streak"
+        | "manual"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1033,10 +1298,28 @@ export const Constants = {
     Enums: {
       activity_tier: ["rotina", "responsabilidade", "desafio"],
       app_role: ["admin", "parent", "member"],
+      avatar_category: ["humano", "fantastico"],
+      cosmetic_category: [
+        "elmo",
+        "armadura",
+        "arma",
+        "pet",
+        "aura",
+        "moldura",
+        "badge",
+      ],
+      cosmetic_rarity: ["comum", "raro", "epico", "lendario"],
       group_type: ["familia_estendida", "escola", "condominio", "outro"],
       mission_goal_type: ["total", "streak"],
       shared_mission_mode: ["coletiva", "individual"],
       submission_status: ["pendente", "aprovado", "recusado"],
+      unlock_rule_type: [
+        "starter",
+        "auris_total",
+        "medalhas",
+        "streak",
+        "manual",
+      ],
     },
   },
 } as const
