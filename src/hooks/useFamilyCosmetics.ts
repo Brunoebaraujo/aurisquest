@@ -56,7 +56,7 @@ export function useFamilyCosmetics(childIds: string[], refreshKey: number = 0) {
       setMap(out);
     })();
     return () => { cancelled = true; };
-  }, [childIds.join(",")]);
+  }, [childIds.join(","), refreshKey]);
 
   return map;
 }
