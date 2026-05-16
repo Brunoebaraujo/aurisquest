@@ -610,6 +610,16 @@ const ChildHome = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {cosmetics && (
+        <WardrobeDialog
+          open={wardrobeOpen}
+          onOpenChange={setWardrobeOpen}
+          data={cosmetics}
+          token={typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null}
+          onChanged={refresh}
+        />
+      )}
     </div>
   );
 };
