@@ -8,6 +8,8 @@ import { AuriIcon } from "@/components/AuriIcon";
 import { Link } from "react-router-dom";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
+import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
+import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
 
 type ApprovedRow = { child_id: string; reward_auris: number; completed_at: string };
 type KidRow = { id: string; name: string; created_at: string };
@@ -89,6 +91,8 @@ const Dashboard = () => {
     };
     load();
   }, [profile?.family_id]);
+
+  const cosmeticsMap = useFamilyCosmetics(topKids.map(k => k.id));
 
   const { chartData, chartConfig, granularity, kidsForChart } = useMemo(() => {
     const empty = { chartData: [] as any[], chartConfig: {} as ChartConfig, granularity: "week" as "week" | "month", kidsForChart: [] as KidRow[] };
@@ -196,7 +200,14 @@ const Dashboard = () => {
             {topKids.length === 0 && <p className="text-sm text-muted-foreground">Cadastre crianças para começar.</p>}
             {topKids.map(k => (
               <div key={k.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50 gap-3">
-                <span className="font-medium">{k.name}</span>
+                <div className="flex items-center gap-3 min-w-0">
+                  <EquippedAvatar
+                    equipment={cosmeticsMap[k.id]?.equipment ?? { avatar: null }}
+                    size={44}
+                    fallbackName={k.name}
+                  />
+                  <span className="font-medium truncate">{k.name}</span>
+                </div>
                 <div className="flex flex-col items-end leading-tight">
                   <span className="font-display font-bold text-lg text-primary inline-flex items-center gap-1">
                     <AuriIcon size={18} /> {formatAuris(k.balance)}
