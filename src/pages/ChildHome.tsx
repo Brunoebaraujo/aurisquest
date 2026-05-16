@@ -583,8 +583,13 @@ const ChildHome = () => {
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="font-display font-bold truncate">
-                            {r.name}{isMe && <span className="text-xs text-primary ml-1">(eu)</span>}
+                          <div className="font-display font-bold truncate flex items-center gap-1.5">
+                            <span className="truncate">{r.name}{isMe && <span className="text-xs text-primary ml-1">(eu)</span>}</span>
+                            {rankingLevels[r.child_id] != null && (
+                              <span className="inline-flex items-center gap-0.5 rounded-full bg-gradient-primary text-primary-foreground px-1.5 py-0.5 text-[10px] font-bold shrink-0">
+                                <Sparkles className="w-2.5 h-2.5" />Lv {rankingLevels[r.child_id]}
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] text-muted-foreground flex items-center gap-2 flex-wrap">
                             <span>✅ {r.approved_count} aprovadas</span>
