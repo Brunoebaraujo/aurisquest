@@ -6,12 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles, Eye } from "lucide-react";
+import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles, Eye, Shirt } from "lucide-react";
 import { formatAuris } from "@/lib/format";
 import { AuriIcon } from "@/components/AuriIcon";
 import { toast } from "sonner";
-import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
+import { ChildShowcase } from "@/components/cosmetics/ChildShowcase";
+import { ParentWardrobeDialog } from "@/components/cosmetics/ParentWardrobeDialog";
 
 type Child = { id: string; name: string; avatar_url: string | null };
 type Mission = {
