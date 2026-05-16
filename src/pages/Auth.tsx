@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -23,8 +24,27 @@ const Auth = () => {
   const [signupName, setSignupName] = useState("");
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPwd, setSignupPwd] = useState("");
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotBusy, setForgotBusy] = useState(false);
 
   if (!loading && user) return <Navigate to="/app" replace />;
+
+  const handleForgot = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try { emailSchema.parse(forgotEmail); } catch (err: any) {
+      toast.error(err.errors?.[0]?.message ?? "E-mail inválido"); return;
+    }
+    setForgotBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setForgotBusy(false);
+    if (error) { toast.error("Erro: " + error.message); return; }
+    toast.success("Enviamos um link de recuperação para o seu e-mail.");
+    setForgotOpen(false);
+    setForgotEmail("");
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +126,9 @@ const Auth = () => {
                   <Button type="submit" variant="hero" size="lg" className="w-full" disabled={busy}>
                     {busy ? "Entrando..." : "Entrar"}
                   </Button>
+                  <button type="button" onClick={() => { setForgotEmail(loginEmail); setForgotOpen(true); }} className="block w-full text-center text-sm text-primary hover:underline mt-2">
+                    Esqueci minha senha
+                  </button>
                 </form>
               </TabsContent>
 
@@ -136,6 +159,24 @@ const Auth = () => {
           Para responsáveis. Crianças entram em uma tela separada (em breve).
         </p>
       </div>
+
+      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Esqueci minha senha</DialogTitle>
+            <DialogDescription>Enviaremos um link de recuperação para o seu e-mail.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleForgot} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="forgot-email">E-mail</Label>
+              <Input id="forgot-email" type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="seu@email.com" required autoFocus />
+            </div>
+            <Button type="submit" variant="hero" className="w-full" disabled={forgotBusy}>
+              {forgotBusy ? "Enviando..." : "Enviar link de recuperação"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
