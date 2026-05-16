@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Trophy, Camera, Sparkles, CheckCircle2, Clock, XCircle, LogOut, Award,
-  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown,
+  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown, Shirt,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatAuris, formatDateTime } from "@/lib/format";
@@ -16,6 +16,10 @@ import { AuriIcon } from "@/components/AuriIcon";
 import { ActivityIcon } from "@/components/ActivityIcon";
 import { TierBadge } from "@/components/TierBadge";
 import { type ActivityTier, tierFromAuris } from "@/lib/tiers";
+import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
+import { LevelBadge, type LevelInfo } from "@/components/cosmetics/LevelBadge";
+import { WardrobeDialog } from "@/components/cosmetics/WardrobeDialog";
+import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
 type Activity = { id: string; name: string; description: string | null; reward_auris: number; category: string | null; tier?: ActivityTier; icon_key?: string | null; icon_url?: string | null; streak?: number };
@@ -54,8 +58,9 @@ const ChildHome = () => {
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [cosmetics, setCosmetics] = useState<import("@/lib/cosmetics").DashboardCosmetics | null>(null);
-  const [levelInfo, setLevelInfo] = useState<import("@/components/cosmetics/LevelBadge").LevelInfo | null>(null);
+  const [cosmetics, setCosmetics] = useState<DashboardCosmetics | null>(null);
+  const [levelInfo, setLevelInfo] = useState<LevelInfo | null>(null);
+  const [rankingLevels, setRankingLevels] = useState<Record<string, number>>({});
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
 
   // Calendar state
@@ -88,6 +93,18 @@ const ChildHome = () => {
     setPendingAuris(totals.pending_auris ?? 0);
     setApprovedAuris(totals.approved_auris ?? 0);
     setPaidAuris(d.paid_auris ?? 0);
+
+    setCosmetics({
+      equipment: d.equipment ?? null,
+      unlocked_avatars: d.unlocked_avatars ?? [],
+      unlocked_items: d.unlocked_items ?? [],
+      avatars_catalog: d.avatars_catalog ?? [],
+      items_catalog: d.items_catalog ?? [],
+    });
+    setLevelInfo(d.level_info ?? null);
+    const lvls: Record<string, number> = {};
+    (d.ranking ?? []).forEach((r: any) => { if (r.child_id && typeof r.level === "number") lvls[r.child_id] = r.level; });
+    setRankingLevels(lvls);
     setLoading(false);
   }, [logout]);
 
@@ -197,20 +214,47 @@ const ChildHome = () => {
   return (
     <div className="min-h-screen kid-theme kid-bg pb-10">
       <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
-        <div className="flex items-center justify-between text-primary-foreground">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-card/95 shadow-glow flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-accent" />
+        <div className="flex items-center justify-between text-primary-foreground gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="rounded-2xl bg-card/95 shadow-glow p-1">
+              {cosmetics ? (
+                <EquippedAvatar equipment={buildEquipment(cosmetics)} size={56} fallbackName={child.name} />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-gradient-warm flex items-center justify-center font-display font-bold text-secondary-foreground">
+                  {child.name[0]?.toUpperCase()}
+                </div>
+              )}
             </div>
-            <div>
-              <h1 className="text-2xl font-display font-bold drop-shadow">Oi, {child.name}!</h1>
-              <p className="text-xs flex items-center gap-1 opacity-90"><Sparkles className="w-3 h-3" /> Bora ganhar uma recompensa?</p>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-display font-bold drop-shadow truncate">Oi, {child.name}!</h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                {levelInfo && <LevelBadge info={levelInfo} compact />}
+                <p className="text-xs flex items-center gap-1 opacity-90"><Sparkles className="w-3 h-3" /> Bora brilhar!</p>
+              </div>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout} className="text-primary-foreground hover:bg-white/10">
-            <LogOut className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => setWardrobeOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Guarda-roupa">
+              <Shirt className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={logout} className="text-primary-foreground hover:bg-white/10">
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
+
+        {levelInfo && (
+          <Card className="border-0 shadow-card rounded-2xl">
+            <CardContent className="p-4">
+              <LevelBadge info={levelInfo} />
+              <div className="mt-2 text-[11px] text-muted-foreground flex flex-wrap gap-3">
+                <span><AuriIcon size={10} className="inline mr-0.5" />{levelInfo.auris ?? 0} Auris</span>
+                <span>🏅 {levelInfo.medals ?? 0} medalhas</span>
+                <span>🔥 {levelInfo.best_streak ?? 0} dias seguidos</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <Card className="border-0 shadow-card rounded-2xl bg-card">
@@ -539,8 +583,13 @@ const ChildHome = () => {
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <div className="font-display font-bold truncate">
-                            {r.name}{isMe && <span className="text-xs text-primary ml-1">(eu)</span>}
+                          <div className="font-display font-bold truncate flex items-center gap-1.5">
+                            <span className="truncate">{r.name}{isMe && <span className="text-xs text-primary ml-1">(eu)</span>}</span>
+                            {rankingLevels[r.child_id] != null && (
+                              <span className="inline-flex items-center gap-0.5 rounded-full bg-gradient-primary text-primary-foreground px-1.5 py-0.5 text-[10px] font-bold shrink-0">
+                                <Sparkles className="w-2.5 h-2.5" />Lv {rankingLevels[r.child_id]}
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] text-muted-foreground flex items-center gap-2 flex-wrap">
                             <span>✅ {r.approved_count} aprovadas</span>
@@ -561,6 +610,16 @@ const ChildHome = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {cosmetics && (
+        <WardrobeDialog
+          open={wardrobeOpen}
+          onOpenChange={setWardrobeOpen}
+          data={cosmetics}
+          token={typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null}
+          onChanged={refresh}
+        />
+      )}
     </div>
   );
 };
