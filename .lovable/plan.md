@@ -1,54 +1,26 @@
-## Problema 1 — Avatares e itens não aparecem visualmente
+## Objetivo
+Substituir as imagens dos 6 avatares humanos comuns existentes pelas 6 novas ilustrações enviadas, mantendo IDs, nomes, raridade e todos os desbloqueios já feitos pelas crianças.
 
-As crianças têm itens desbloqueados no banco, mas **nenhuma tem nada equipado**, então o componente `EquippedAvatar` mostra apenas a inicial do nome (fallback). Os ícones de elmo, armadura, arma, pet e aura só aparecem quando há algo no slot.
+## Mapeamento proposto (mantém os nomes atuais)
 
-### Solução: auto-equipar starters
+| Avatar atual | Nova imagem |
+|---|---|
+| Lia (menina_clara) | Menina_Branca_Castanho.png |
+| Theo (menino_claro) | Menino_Branco_Castanho.png |
+| Maitê (menina_parda) | Menina_Loira.png |
+| Davi (menino_pardo) | Menino_Loiro.png |
+| Aisha (menina_negra) | Menina_Negra.png |
+| Kayo (menino_negro) | Menino_Negro.png |
 
-**Migração SQL** (`evaluate_cosmetic_unlocks`) — depois de inserir desbloqueios, se a criança ainda não tem nada no slot, equipar automaticamente:
+Observação: as novas artes de Maitê/Davi têm aparência loira (não parda). O nome é mantido conforme escolha, mas se preferir, posso renomeá-los depois.
 
-- `avatar_id` ← primeiro avatar `starter` (categoria humano) por `sort_order` se for `NULL`
-- `helmet_item_id`, `armor_item_id`, `weapon_item_id`, `pet_item_id`, `aura_item_id` ← primeiro item `starter` da respectiva categoria por `sort_order` se for `NULL`
+## Passos técnicos
+1. Copiar as 6 imagens de `user-uploads://` para arquivos locais temporários.
+2. Fazer upload ao bucket público `avatars-catalog` com novos nomes (`humano_v2_*.png`) para invalidar cache do CDN.
+3. Atualizar `avatars.image_url` das 6 linhas existentes (UPDATE pelo id), preservando todo o resto.
+4. Verificar via SELECT que os 6 URLs apontam para as novas imagens.
 
-A regra `if NULL` garante que **nunca sobrescreve** uma escolha que a criança/responsável já fez no Guarda-roupa.
+Nenhuma alteração em schema, RLS, código frontend ou edge functions é necessária — `EquippedAvatar`, `ChildShowcase` e `WardrobeDialog` já consomem `image_url` da tabela.
 
-**Backfill imediato**: rodar `SELECT evaluate_cosmetic_unlocks(id) FROM children;` ao final da migração para que Maya, Gael e Theo apareçam equipados já no próximo refresh.
-
-Resultado esperado em `/app/criancas` e `/app`: cada card de criança passa a mostrar o avatar starter com elmo, armadura, arma, pet e aura visíveis. A criança continua livre para trocar tudo pelo Guarda-roupa.
-
----
-
-## Problema 2 — Recuperação de senha
-
-Hoje a tela `/entrar` (`src/pages/Auth.tsx`) só tem Entrar/Cadastrar — sem link de "Esqueci minha senha". Se você sair, não há caminho de volta.
-
-### Solução: adicionar fluxo padrão de reset
-
-1. **Em `src/pages/Auth.tsx`**: adicionar link "Esqueci minha senha" abaixo do botão Entrar, abrindo um diálogo que pede e-mail e chama `supabase.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/reset-password' })`.
-
-2. **Nova página `src/pages/ResetPassword.tsx`** (rota pública `/reset-password`):
-   - Detecta `type=recovery` no hash da URL.
-   - Mostra dois campos (nova senha + confirmar).
-   - Chama `supabase.auth.updateUser({ password })`.
-   - Redireciona para `/app` após sucesso.
-
-3. **Em `src/App.tsx`**: registrar a rota `/reset-password` antes das rotas protegidas.
-
-### Para você agora (sem precisar sair)
-
-Você **já está logado** como `brunoebaraujo@gmail.com`. Assim que a alteração subir, você pode:
-- Ir em `/entrar` → "Esqueci minha senha" → enviar reset para o próprio e-mail
-- **Ou** simplesmente trocar a senha enquanto está logado via console (eu posso adicionar um botão "Trocar minha senha" no header do `/app` se preferir — diga e incluo no plano).
-
----
-
-## Arquivos afetados
-
-**Banco**
-- nova migração: atualizar função `evaluate_cosmetic_unlocks` + backfill
-
-**Frontend**
-- `src/pages/Auth.tsx` — link + diálogo de reset
-- `src/pages/ResetPassword.tsx` — nova página
-- `src/App.tsx` — registrar rota
-
-Nenhuma alteração nas tabelas, RLS ou edge functions.
+## Avatares não tocados
+Os 4 humanos raros (Mei, Kenji, Iara, Tainá) e os 10 fantásticos permanecem inalterados.
