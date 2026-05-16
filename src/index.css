@@ -188,3 +188,20 @@
 .animate-pop-in { animation: pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .animate-wiggle { animation: wiggle 0.6s ease-in-out; }
 .animate-auri-rise { animation: auri-rise 1.2s ease-out forwards; }
+
+/* Raridades */
+@keyframes rarity-shimmer {
+  0%,100% { filter: brightness(1); }
+  50% { filter: brightness(1.15); }
+}
+@keyframes unlock-burst {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.rarity-comum { --r: var(--rarity-comum); --g: none; }
+.rarity-raro { --r: var(--rarity-raro); --g: var(--glow-raro); }
+.rarity-epico { --r: var(--rarity-epico); --g: var(--glow-epico); animation: rarity-shimmer 2.6s ease-in-out infinite; }
+.rarity-lendario { --r: var(--rarity-lendario); --g: var(--glow-lendario); animation: rarity-shimmer 2s ease-in-out infinite; }
+.rarity-frame { border: 3px solid hsl(var(--r)); box-shadow: var(--g, 0 0 0 transparent); }
+.animate-unlock-burst { animation: unlock-burst 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
