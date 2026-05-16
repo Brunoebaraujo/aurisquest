@@ -34,6 +34,8 @@ const ChildProfile = () => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [awards, setAwards] = useState<AwardRow[]>([]);
   const [progress, setProgress] = useState<Record<string, number>>({});
+  const [level, setLevel] = useState<number>(1);
+  const [wardrobeOpen, setWardrobeOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -78,6 +80,9 @@ const ChildProfile = () => {
         }
       }
       setProgress(prog);
+
+      const { data: lv } = await supabase.rpc("compute_child_level", { _child_id: childId });
+      if (lv && typeof lv === "object" && "level" in (lv as any)) setLevel((lv as any).level ?? 1);
     };
     load();
   }, [childId, profile?.family_id]);
@@ -92,17 +97,28 @@ const ChildProfile = () => {
         <Link to="/app/criancas"><ArrowLeft className="w-4 h-4" /> Voltar</Link>
       </Button>
 
-      <div className="flex items-center gap-4">
-        <EquippedAvatar
-          equipment={(childId && cosmeticsMap[childId]?.equipment) || { avatar: null }}
-          size={96}
-          fallbackName={child?.name}
-        />
-        <div>
-          <h2 className="text-3xl font-display font-bold">{child?.name ?? "..."}</h2>
-          <p className="text-muted-foreground">{wonMissions.length} {wonMissions.length === 1 ? "medalha conquistada" : "medalhas conquistadas"}</p>
-        </div>
+      <ChildShowcase
+        name={child?.name ?? "..."}
+        level={level}
+        equipment={(childId && cosmeticsMap[childId]?.equipment) || { avatar: null }}
+      />
+
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <p className="text-muted-foreground">
+          {wonMissions.length} {wonMissions.length === 1 ? "medalha conquistada" : "medalhas conquistadas"}
+        </p>
+        <Button variant="hero" size="sm" onClick={() => setWardrobeOpen(true)}>
+          <Shirt className="w-4 h-4" /> Editar visual
+        </Button>
       </div>
+
+      <ParentWardrobeDialog
+        open={wardrobeOpen}
+        onOpenChange={setWardrobeOpen}
+        childId={childId ?? null}
+        childName={child?.name}
+        onChanged={() => { /* useFamilyCosmetics re-fetches on next render via dep */ }}
+      />
 
       <Card className="border-0 shadow-card rounded-2xl">
         <CardHeader>
