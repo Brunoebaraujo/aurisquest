@@ -214,20 +214,47 @@ const ChildHome = () => {
   return (
     <div className="min-h-screen kid-theme kid-bg pb-10">
       <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
-        <div className="flex items-center justify-between text-primary-foreground">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-card/95 shadow-glow flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-accent" />
+        <div className="flex items-center justify-between text-primary-foreground gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="rounded-2xl bg-card/95 shadow-glow p-1">
+              {cosmetics ? (
+                <EquippedAvatar equipment={buildEquipment(cosmetics)} size={56} fallbackName={child.name} />
+              ) : (
+                <div className="w-14 h-14 rounded-full bg-gradient-warm flex items-center justify-center font-display font-bold text-secondary-foreground">
+                  {child.name[0]?.toUpperCase()}
+                </div>
+              )}
             </div>
-            <div>
-              <h1 className="text-2xl font-display font-bold drop-shadow">Oi, {child.name}!</h1>
-              <p className="text-xs flex items-center gap-1 opacity-90"><Sparkles className="w-3 h-3" /> Bora ganhar uma recompensa?</p>
+            <div className="min-w-0">
+              <h1 className="text-2xl font-display font-bold drop-shadow truncate">Oi, {child.name}!</h1>
+              <div className="flex items-center gap-2 mt-0.5">
+                {levelInfo && <LevelBadge info={levelInfo} compact />}
+                <p className="text-xs flex items-center gap-1 opacity-90"><Sparkles className="w-3 h-3" /> Bora brilhar!</p>
+              </div>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={logout} className="text-primary-foreground hover:bg-white/10">
-            <LogOut className="w-4 h-4" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => setWardrobeOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Guarda-roupa">
+              <Shirt className="w-4 h-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={logout} className="text-primary-foreground hover:bg-white/10">
+              <LogOut className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
+
+        {levelInfo && (
+          <Card className="border-0 shadow-card rounded-2xl">
+            <CardContent className="p-4">
+              <LevelBadge info={levelInfo} />
+              <div className="mt-2 text-[11px] text-muted-foreground flex flex-wrap gap-3">
+                <span><AuriIcon size={10} className="inline mr-0.5" />{levelInfo.auris ?? 0} Auris</span>
+                <span>🏅 {levelInfo.medals ?? 0} medalhas</span>
+                <span>🔥 {levelInfo.best_streak ?? 0} dias seguidos</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-3 gap-3">
           <Card className="border-0 shadow-card rounded-2xl bg-card">
