@@ -54,6 +54,9 @@ const ChildHome = () => {
   const [comment, setComment] = useState("");
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [cosmetics, setCosmetics] = useState<import("@/lib/cosmetics").DashboardCosmetics | null>(null);
+  const [levelInfo, setLevelInfo] = useState<import("@/components/cosmetics/LevelBadge").LevelInfo | null>(null);
+  const [wardrobeOpen, setWardrobeOpen] = useState(false);
 
   // Calendar state
   const [cursor, setCursor] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
