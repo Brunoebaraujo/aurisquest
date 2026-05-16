@@ -159,6 +159,24 @@ const Auth = () => {
           Para responsáveis. Crianças entram em uma tela separada (em breve).
         </p>
       </div>
+
+      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Esqueci minha senha</DialogTitle>
+            <DialogDescription>Enviaremos um link de recuperação para o seu e-mail.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleForgot} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="forgot-email">E-mail</Label>
+              <Input id="forgot-email" type="email" value={forgotEmail} onChange={e => setForgotEmail(e.target.value)} placeholder="seu@email.com" required autoFocus />
+            </div>
+            <Button type="submit" variant="hero" className="w-full" disabled={forgotBusy}>
+              {forgotBusy ? "Enviando..." : "Enviar link de recuperação"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
