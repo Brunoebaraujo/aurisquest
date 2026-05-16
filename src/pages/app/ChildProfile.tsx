@@ -6,12 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles, Eye } from "lucide-react";
+import { ArrowLeft, Award, Trophy, Target, Flame, Sparkles, Eye, Shirt } from "lucide-react";
 import { formatAuris } from "@/lib/format";
 import { AuriIcon } from "@/components/AuriIcon";
 import { toast } from "sonner";
-import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
+import { ChildShowcase } from "@/components/cosmetics/ChildShowcase";
+import { ParentWardrobeDialog } from "@/components/cosmetics/ParentWardrobeDialog";
 
 type Child = { id: string; name: string; avatar_url: string | null };
 type Mission = {
@@ -33,6 +34,8 @@ const ChildProfile = () => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [awards, setAwards] = useState<AwardRow[]>([]);
   const [progress, setProgress] = useState<Record<string, number>>({});
+  const [level, setLevel] = useState<number>(1);
+  const [wardrobeOpen, setWardrobeOpen] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -77,13 +80,17 @@ const ChildProfile = () => {
         }
       }
       setProgress(prog);
+
+      const { data: lv } = await supabase.rpc("compute_child_level", { _child_id: childId });
+      if (lv && typeof lv === "object" && "level" in (lv as any)) setLevel((lv as any).level ?? 1);
     };
     load();
   }, [childId, profile?.family_id]);
 
   const wonMissions = missions.filter(m => awards.some(a => a.mission_id === m.id));
   const inProgress = missions.filter(m => !awards.some(a => a.mission_id === m.id));
-  const cosmeticsMap = useFamilyCosmetics(childId ? [childId] : []);
+  const [cosmeticsKey, setCosmeticsKey] = useState(0);
+  const cosmeticsMap = useFamilyCosmetics(childId ? [childId] : [], cosmeticsKey);
 
   return (
     <div className="space-y-6">
@@ -91,17 +98,28 @@ const ChildProfile = () => {
         <Link to="/app/criancas"><ArrowLeft className="w-4 h-4" /> Voltar</Link>
       </Button>
 
-      <div className="flex items-center gap-4">
-        <EquippedAvatar
-          equipment={(childId && cosmeticsMap[childId]?.equipment) || { avatar: null }}
-          size={96}
-          fallbackName={child?.name}
-        />
-        <div>
-          <h2 className="text-3xl font-display font-bold">{child?.name ?? "..."}</h2>
-          <p className="text-muted-foreground">{wonMissions.length} {wonMissions.length === 1 ? "medalha conquistada" : "medalhas conquistadas"}</p>
-        </div>
+      <ChildShowcase
+        name={child?.name ?? "..."}
+        level={level}
+        equipment={(childId && cosmeticsMap[childId]?.equipment) || { avatar: null }}
+      />
+
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <p className="text-muted-foreground">
+          {wonMissions.length} {wonMissions.length === 1 ? "medalha conquistada" : "medalhas conquistadas"}
+        </p>
+        <Button variant="hero" size="sm" onClick={() => setWardrobeOpen(true)}>
+          <Shirt className="w-4 h-4" /> Editar visual
+        </Button>
       </div>
+
+      <ParentWardrobeDialog
+        open={wardrobeOpen}
+        onOpenChange={setWardrobeOpen}
+        childId={childId ?? null}
+        childName={child?.name}
+        onChanged={() => setCosmeticsKey(k => k + 1)}
+      />
 
       <Card className="border-0 shadow-card rounded-2xl">
         <CardHeader>

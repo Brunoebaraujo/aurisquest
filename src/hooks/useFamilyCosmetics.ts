@@ -18,7 +18,7 @@ type EquipRow = {
 
 export type FamilyCosmeticsMap = Record<string, { equipment: Equipment; level?: number }>;
 
-export function useFamilyCosmetics(childIds: string[]) {
+export function useFamilyCosmetics(childIds: string[], refreshKey: number = 0) {
   const [map, setMap] = useState<FamilyCosmeticsMap>({});
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export function useFamilyCosmetics(childIds: string[]) {
       setMap(out);
     })();
     return () => { cancelled = true; };
-  }, [childIds.join(",")]);
+  }, [childIds.join(","), refreshKey]);
 
   return map;
 }

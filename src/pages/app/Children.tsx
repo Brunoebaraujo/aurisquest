@@ -7,11 +7,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Award, KeyRound, CheckCircle2, AlertCircle } from "lucide-react";
+import { Plus, Award, KeyRound, CheckCircle2, AlertCircle, Shirt } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
+import { ParentWardrobeDialog } from "@/components/cosmetics/ParentWardrobeDialog";
 
 type Child = { id: string; name: string; avatar_url: string | null; active: boolean; password_set_at: string | null };
 
@@ -27,6 +28,8 @@ const Children = () => {
   const [pwdChild, setPwdChild] = useState<Child | null>(null);
   const [pwd, setPwd] = useState("");
   const [pwdBusy, setPwdBusy] = useState(false);
+  const [wardrobeChild, setWardrobeChild] = useState<Child | null>(null);
+  const [cosmeticsKey, setCosmeticsKey] = useState(0);
 
   const load = async () => {
     if (!profile?.family_id) return;
@@ -40,7 +43,7 @@ const Children = () => {
   };
 
   useEffect(() => { load(); }, [profile?.family_id]);
-  const cosmeticsMap = useFamilyCosmetics(list.map(c => c.id));
+  const cosmeticsMap = useFamilyCosmetics(list.map(c => c.id), cosmeticsKey);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,6 +140,9 @@ const Children = () => {
               </div>
 
               <div className="flex flex-col gap-2">
+                <Button variant="outline" size="sm" onClick={() => setWardrobeChild(c)}>
+                  <Shirt className="w-4 h-4" /> Editar visual
+                </Button>
                 <Button variant="outline" size="sm" onClick={() => { setPwdChild(c); setPwd(""); }}>
                   <KeyRound className="w-4 h-4" /> {c.password_set_at ? "Trocar senha" : "Definir senha"}
                 </Button>
@@ -167,6 +173,13 @@ const Children = () => {
           </form>
         </DialogContent>
       </Dialog>
+      <ParentWardrobeDialog
+        open={!!wardrobeChild}
+        onOpenChange={(o) => !o && setWardrobeChild(null)}
+        childId={wardrobeChild?.id ?? null}
+        childName={wardrobeChild?.name}
+        onChanged={() => setCosmeticsKey(k => k + 1)}
+      />
     </div>
   );
 };
