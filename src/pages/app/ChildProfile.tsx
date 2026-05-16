@@ -89,7 +89,8 @@ const ChildProfile = () => {
 
   const wonMissions = missions.filter(m => awards.some(a => a.mission_id === m.id));
   const inProgress = missions.filter(m => !awards.some(a => a.mission_id === m.id));
-  const cosmeticsMap = useFamilyCosmetics(childId ? [childId] : []);
+  const [cosmeticsKey, setCosmeticsKey] = useState(0);
+  const cosmeticsMap = useFamilyCosmetics(childId ? [childId] : [], cosmeticsKey);
 
   return (
     <div className="space-y-6">
@@ -117,7 +118,7 @@ const ChildProfile = () => {
         onOpenChange={setWardrobeOpen}
         childId={childId ?? null}
         childName={child?.name}
-        onChanged={() => { /* useFamilyCosmetics re-fetches on next render via dep */ }}
+        onChanged={() => setCosmeticsKey(k => k + 1)}
       />
 
       <Card className="border-0 shadow-card rounded-2xl">
