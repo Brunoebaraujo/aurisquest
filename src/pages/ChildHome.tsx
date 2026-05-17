@@ -64,6 +64,7 @@ const ChildHome = () => {
   const [levelInfo, setLevelInfo] = useState<LevelInfo | null>(null);
   const [rankingLevels, setRankingLevels] = useState<Record<string, number>>({});
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
+  const [inventoryOpen, setInventoryOpen] = useState(false);
   const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
 
   // Calendar state
