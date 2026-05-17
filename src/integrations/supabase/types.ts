@@ -75,11 +75,17 @@ export type Database = {
           active: boolean
           category: Database["public"]["Enums"]["avatar_category"]
           created_at: string
+          description: string | null
+          ends_at: string | null
           id: string
           image_url: string
           name: string
           rarity: Database["public"]["Enums"]["cosmetic_rarity"]
+          scope_id: string | null
+          scope_type: string
           sort_order: number
+          starts_at: string | null
+          unlock_condition_value: Json
           unlock_rule_type: Database["public"]["Enums"]["unlock_rule_type"]
           unlock_threshold: number
         }
@@ -87,11 +93,17 @@ export type Database = {
           active?: boolean
           category: Database["public"]["Enums"]["avatar_category"]
           created_at?: string
+          description?: string | null
+          ends_at?: string | null
           id?: string
           image_url: string
           name: string
           rarity?: Database["public"]["Enums"]["cosmetic_rarity"]
+          scope_id?: string | null
+          scope_type?: string
           sort_order?: number
+          starts_at?: string | null
+          unlock_condition_value?: Json
           unlock_rule_type?: Database["public"]["Enums"]["unlock_rule_type"]
           unlock_threshold?: number
         }
@@ -99,11 +111,17 @@ export type Database = {
           active?: boolean
           category?: Database["public"]["Enums"]["avatar_category"]
           created_at?: string
+          description?: string | null
+          ends_at?: string | null
           id?: string
           image_url?: string
           name?: string
           rarity?: Database["public"]["Enums"]["cosmetic_rarity"]
+          scope_id?: string | null
+          scope_type?: string
           sort_order?: number
+          starts_at?: string | null
+          unlock_condition_value?: Json
           unlock_rule_type?: Database["public"]["Enums"]["unlock_rule_type"]
           unlock_threshold?: number
         }
@@ -352,11 +370,16 @@ export type Database = {
           category: Database["public"]["Enums"]["cosmetic_category"]
           created_at: string
           description: string | null
+          ends_at: string | null
           id: string
           image_url: string
           name: string
           rarity: Database["public"]["Enums"]["cosmetic_rarity"]
+          scope_id: string | null
+          scope_type: string
           sort_order: number
+          starts_at: string | null
+          unlock_condition_value: Json
           unlock_rule_type: Database["public"]["Enums"]["unlock_rule_type"]
           unlock_threshold: number
         }
@@ -365,11 +388,16 @@ export type Database = {
           category: Database["public"]["Enums"]["cosmetic_category"]
           created_at?: string
           description?: string | null
+          ends_at?: string | null
           id?: string
           image_url: string
           name: string
           rarity?: Database["public"]["Enums"]["cosmetic_rarity"]
+          scope_id?: string | null
+          scope_type?: string
           sort_order?: number
+          starts_at?: string | null
+          unlock_condition_value?: Json
           unlock_rule_type?: Database["public"]["Enums"]["unlock_rule_type"]
           unlock_threshold?: number
         }
@@ -378,11 +406,16 @@ export type Database = {
           category?: Database["public"]["Enums"]["cosmetic_category"]
           created_at?: string
           description?: string | null
+          ends_at?: string | null
           id?: string
           image_url?: string
           name?: string
           rarity?: Database["public"]["Enums"]["cosmetic_rarity"]
+          scope_id?: string | null
+          scope_type?: string
           sort_order?: number
+          starts_at?: string | null
+          unlock_condition_value?: Json
           unlock_rule_type?: Database["public"]["Enums"]["unlock_rule_type"]
           unlock_threshold?: number
         }
@@ -1169,6 +1202,10 @@ export type Database = {
         | "medalhas"
         | "streak"
         | "manual"
+        | "aprovacoes"
+        | "atividade"
+        | "categoria"
+        | "missao_grupo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1319,6 +1356,10 @@ export const Constants = {
         "medalhas",
         "streak",
         "manual",
+        "aprovacoes",
+        "atividade",
+        "categoria",
+        "missao_grupo",
       ],
     },
   },

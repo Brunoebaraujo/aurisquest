@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Wallet, LogOut, Trophy, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Wallet, LogOut, Trophy, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus, Gift } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter,
@@ -89,6 +89,14 @@ export const AppSidebar = () => {
                     <NavLink to="/app/admin/alertas">
                       <AlertTriangle className="h-4 w-4" />
                       {!collapsed && <span>Alertas</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/app/admin/recompensas")}>
+                    <NavLink to="/app/admin/recompensas">
+                      <Gift className="h-4 w-4" />
+                      {!collapsed && <span>Recompensas</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
