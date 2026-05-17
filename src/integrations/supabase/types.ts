@@ -1116,6 +1116,7 @@ export type Database = {
       }
       expire_invitations: { Args: never; Returns: number }
       get_child_dashboard: { Args: { _token: string }; Returns: Json }
+      get_child_new_unlocks: { Args: { _token: string }; Returns: Json }
       get_family_id_by_token: { Args: { _token: string }; Returns: string }
       get_invitation_by_token: {
         Args: { _token: string }
@@ -1171,6 +1172,7 @@ export type Database = {
           has_password: boolean
         }[]
       }
+      mark_child_unlocks_seen: { Args: { _token: string }; Returns: boolean }
       validate_child_token: {
         Args: { _token: string }
         Returns: {

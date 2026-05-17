@@ -19,6 +19,7 @@ import { type ActivityTier, tierFromAuris } from "@/lib/tiers";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 import { LevelBadge, type LevelInfo } from "@/components/cosmetics/LevelBadge";
 import { WardrobeDialog } from "@/components/cosmetics/WardrobeDialog";
+import { RewardRevealModal, type RevealReward } from "@/components/cosmetics/RewardRevealModal";
 import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
@@ -62,6 +63,7 @@ const ChildHome = () => {
   const [levelInfo, setLevelInfo] = useState<LevelInfo | null>(null);
   const [rankingLevels, setRankingLevels] = useState<Record<string, number>>({});
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
+  const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
 
   // Calendar state
   const [cursor, setCursor] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
@@ -106,6 +108,13 @@ const ChildHome = () => {
     (d.ranking ?? []).forEach((r: any) => { if (r.child_id && typeof r.level === "number") lvls[r.child_id] = r.level; });
     setRankingLevels(lvls);
     setLoading(false);
+
+    // Buscar recompensas recém-desbloqueadas para mostrar animação
+    try {
+      const { data: nu } = await supabase.rpc("get_child_new_unlocks", { _token: token });
+      const list = ((nu as any)?.rewards ?? []) as RevealReward[];
+      if (list.length > 0) setNewRewards(list);
+    } catch { /* silencioso */ }
   }, [logout]);
 
   useEffect(() => {
@@ -620,6 +629,17 @@ const ChildHome = () => {
           onChanged={refresh}
         />
       )}
+
+      <RewardRevealModal
+        rewards={newRewards}
+        onClose={async () => {
+          setNewRewards([]);
+          const token = localStorage.getItem("jk_child_token");
+          if (token) {
+            try { await supabase.rpc("mark_child_unlocks_seen", { _token: token }); } catch {}
+          }
+        }}
+      />
     </div>
   );
 };
