@@ -626,13 +626,20 @@ const ChildHome = () => {
       </div>
 
       {cosmetics && (
-        <WardrobeDialog
-          open={wardrobeOpen}
-          onOpenChange={setWardrobeOpen}
-          data={cosmetics}
-          token={typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null}
-          onChanged={refresh}
-        />
+        <>
+          <WardrobeDialog
+            open={wardrobeOpen}
+            onOpenChange={setWardrobeOpen}
+            data={cosmetics}
+            token={typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null}
+            onChanged={refresh}
+          />
+          <ChildInventoryDialog
+            open={inventoryOpen}
+            onOpenChange={setInventoryOpen}
+            data={cosmetics}
+          />
+        </>
       )}
 
       <RewardRevealModal
