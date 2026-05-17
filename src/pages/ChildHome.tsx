@@ -63,6 +63,7 @@ const ChildHome = () => {
   const [levelInfo, setLevelInfo] = useState<LevelInfo | null>(null);
   const [rankingLevels, setRankingLevels] = useState<Record<string, number>>({});
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
+  const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
 
   // Calendar state
   const [cursor, setCursor] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
