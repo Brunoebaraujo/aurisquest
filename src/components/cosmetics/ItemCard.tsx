@@ -18,6 +18,10 @@ function unlockHint(t: string, n: number) {
   if (t === "auris_total") return `${n} Auris totais`;
   if (t === "medalhas") return `${n} medalhas`;
   if (t === "streak") return `${n} dias seguidos`;
+  if (t === "aprovacoes") return `${n} aprovações`;
+  if (t === "atividade") return `${n}× uma atividade`;
+  if (t === "categoria") return `${n}× por categoria`;
+  if (t === "missao_grupo") return "Missão de grupo";
   return "Manual";
 }
 
