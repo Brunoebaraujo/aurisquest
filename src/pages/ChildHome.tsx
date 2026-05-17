@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Trophy, Camera, Sparkles, CheckCircle2, Clock, XCircle, LogOut, Award,
-  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown, Shirt,
+  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown, Shirt, Package,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatAuris, formatDateTime } from "@/lib/format";
