@@ -108,6 +108,13 @@ const ChildHome = () => {
     (d.ranking ?? []).forEach((r: any) => { if (r.child_id && typeof r.level === "number") lvls[r.child_id] = r.level; });
     setRankingLevels(lvls);
     setLoading(false);
+
+    // Buscar recompensas recém-desbloqueadas para mostrar animação
+    try {
+      const { data: nu } = await supabase.rpc("get_child_new_unlocks", { _token: token });
+      const list = ((nu as any)?.rewards ?? []) as RevealReward[];
+      if (list.length > 0) setNewRewards(list);
+    } catch { /* silencioso */ }
   }, [logout]);
 
   useEffect(() => {
