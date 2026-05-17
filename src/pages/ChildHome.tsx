@@ -629,6 +629,17 @@ const ChildHome = () => {
           onChanged={refresh}
         />
       )}
+
+      <RewardRevealModal
+        rewards={newRewards}
+        onClose={async () => {
+          setNewRewards([]);
+          const token = localStorage.getItem("jk_child_token");
+          if (token) {
+            try { await supabase.rpc("mark_child_unlocks_seen", { _token: token }); } catch {}
+          }
+        }}
+      />
     </div>
   );
 };
