@@ -245,6 +245,9 @@ const ChildHome = () => {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => setInventoryOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Inventário">
+              <Package className="w-4 h-4" />
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => setWardrobeOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Guarda-roupa">
               <Shirt className="w-4 h-4" />
             </Button>
