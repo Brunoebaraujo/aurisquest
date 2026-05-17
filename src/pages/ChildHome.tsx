@@ -19,6 +19,7 @@ import { type ActivityTier, tierFromAuris } from "@/lib/tiers";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 import { LevelBadge, type LevelInfo } from "@/components/cosmetics/LevelBadge";
 import { WardrobeDialog } from "@/components/cosmetics/WardrobeDialog";
+import { RewardRevealModal, type RevealReward } from "@/components/cosmetics/RewardRevealModal";
 import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
