@@ -29,6 +29,7 @@ import GroupDetail from "./pages/app/GroupDetail.tsx";
 import GroupInviteAccept from "./pages/GroupInviteAccept.tsx";
 import AdminUsage from "./pages/app/AdminUsage.tsx";
 import AdminAlerts from "./pages/app/AdminAlerts.tsx";
+import AdminRewards from "./pages/app/AdminRewards.tsx";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +67,7 @@ const App = () => (
               <Route path="admin/familias" element={<AdminFamilies />} />
               <Route path="admin/utilizacao" element={<AdminUsage />} />
               <Route path="admin/alertas" element={<AdminAlerts />} />
+              <Route path="admin/recompensas" element={<AdminRewards />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
