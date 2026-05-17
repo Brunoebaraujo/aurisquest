@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Trophy, Camera, Sparkles, CheckCircle2, Clock, XCircle, LogOut, Award,
-  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown, Shirt,
+  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown, Shirt, Package,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatAuris, formatDateTime } from "@/lib/format";
@@ -20,6 +20,7 @@ import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 import { LevelBadge, type LevelInfo } from "@/components/cosmetics/LevelBadge";
 import { WardrobeDialog } from "@/components/cosmetics/WardrobeDialog";
 import { RewardRevealModal, type RevealReward } from "@/components/cosmetics/RewardRevealModal";
+import { ChildInventoryDialog } from "@/components/cosmetics/ChildInventoryDialog";
 import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
@@ -63,6 +64,7 @@ const ChildHome = () => {
   const [levelInfo, setLevelInfo] = useState<LevelInfo | null>(null);
   const [rankingLevels, setRankingLevels] = useState<Record<string, number>>({});
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
+  const [inventoryOpen, setInventoryOpen] = useState(false);
   const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
 
   // Calendar state
@@ -243,6 +245,9 @@ const ChildHome = () => {
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <Button variant="ghost" size="sm" onClick={() => setInventoryOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Inventário">
+              <Package className="w-4 h-4" />
+            </Button>
             <Button variant="ghost" size="sm" onClick={() => setWardrobeOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Guarda-roupa">
               <Shirt className="w-4 h-4" />
             </Button>
@@ -621,13 +626,20 @@ const ChildHome = () => {
       </div>
 
       {cosmetics && (
-        <WardrobeDialog
-          open={wardrobeOpen}
-          onOpenChange={setWardrobeOpen}
-          data={cosmetics}
-          token={typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null}
-          onChanged={refresh}
-        />
+        <>
+          <WardrobeDialog
+            open={wardrobeOpen}
+            onOpenChange={setWardrobeOpen}
+            data={cosmetics}
+            token={typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null}
+            onChanged={refresh}
+          />
+          <ChildInventoryDialog
+            open={inventoryOpen}
+            onOpenChange={setInventoryOpen}
+            data={cosmetics}
+          />
+        </>
       )}
 
       <RewardRevealModal
