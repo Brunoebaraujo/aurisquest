@@ -21,7 +21,7 @@ type ScopeType = "global" | "group" | "family" | "child";
 type UnlockRule =
   | "starter" | "manual" | "auris_total" | "medalhas" | "streak"
   | "aprovacoes" | "atividade" | "categoria" | "missao_grupo";
-type RewardKind = "avatar" | "elmo" | "armadura" | "arma" | "pet" | "aura" | "moldura" | "badge";
+type RewardKind = "avatar" | "elmo" | "armadura" | "arma" | "pet" | "aura" | "moldura" | "badge" | "chest" | "especial";
 
 type RewardRow = {
   kind: "avatar" | "item";       // origin table
@@ -30,6 +30,18 @@ type RewardRow = {
   description: string | null;
   category: RewardKind;          // for avatar: "avatar"
   image_url: string;
+  rarity: Rarity;
+  active: boolean;
+  sort_order: number;
+  unlock_rule_type: UnlockRule;
+  unlock_threshold: number;
+  unlock_condition_value: Record<string, unknown> | null;
+  scope_type: ScopeType;
+  scope_id: string | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  chest_reveals_item_id: string | null;
+};
   rarity: Rarity;
   active: boolean;
   sort_order: number;
