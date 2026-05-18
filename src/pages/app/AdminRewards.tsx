@@ -247,11 +247,12 @@ const AdminRewards = () => {
 
 // ---------- Form Dialog ----------
 function RewardFormDialog({
-  open, onOpenChange, editing, onSaved,
+  open, onOpenChange, editing, allRows, onSaved,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editing: RewardRow | null;
+  allRows: RewardRow[];
   onSaved: () => void;
 }) {
   const isEdit = !!editing;
