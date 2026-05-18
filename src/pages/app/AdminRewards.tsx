@@ -344,9 +344,10 @@ function RewardFormDialog({
     };
 
     let error: any = null;
+    const chestField = kind === "chest" ? { chest_reveals_item_id: chestRevealsItemId || null } : { chest_reveals_item_id: null };
     if (isEdit && editing) {
       const table = editing.kind === "avatar" ? "avatars" : "cosmetic_items";
-      const updatePayload = editing.kind === "avatar" ? payload : { ...payload, category: kind };
+      const updatePayload = editing.kind === "avatar" ? payload : { ...payload, category: kind, ...chestField };
       const res = await supabase.from(table).update(updatePayload).eq("id", editing.id);
       error = res.error;
     } else {
@@ -354,7 +355,7 @@ function RewardFormDialog({
         const res = await supabase.from("avatars").insert({ ...payload, category: "humano" });
         error = res.error;
       } else {
-        const res = await supabase.from("cosmetic_items").insert({ ...payload, category: kind });
+        const res = await supabase.from("cosmetic_items").insert({ ...payload, category: kind, ...chestField });
         error = res.error;
       }
     }
