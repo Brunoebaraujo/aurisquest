@@ -368,6 +368,7 @@ export type Database = {
         Row: {
           active: boolean
           category: Database["public"]["Enums"]["cosmetic_category"]
+          chest_reveals_item_id: string | null
           created_at: string
           description: string | null
           ends_at: string | null
@@ -386,6 +387,7 @@ export type Database = {
         Insert: {
           active?: boolean
           category: Database["public"]["Enums"]["cosmetic_category"]
+          chest_reveals_item_id?: string | null
           created_at?: string
           description?: string | null
           ends_at?: string | null
@@ -404,6 +406,7 @@ export type Database = {
         Update: {
           active?: boolean
           category?: Database["public"]["Enums"]["cosmetic_category"]
+          chest_reveals_item_id?: string | null
           created_at?: string
           description?: string | null
           ends_at?: string | null
@@ -419,7 +422,15 @@ export type Database = {
           unlock_rule_type?: Database["public"]["Enums"]["unlock_rule_type"]
           unlock_threshold?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cosmetic_items_chest_reveals_item_id_fkey"
+            columns: ["chest_reveals_item_id"]
+            isOneToOne: false
+            referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       families: {
         Row: {
@@ -1193,6 +1204,8 @@ export type Database = {
         | "aura"
         | "moldura"
         | "badge"
+        | "chest"
+        | "especial"
       cosmetic_rarity: "comum" | "raro" | "epico" | "lendario"
       group_type: "familia_estendida" | "escola" | "condominio" | "outro"
       mission_goal_type: "total" | "streak"
@@ -1346,6 +1359,8 @@ export const Constants = {
         "aura",
         "moldura",
         "badge",
+        "chest",
+        "especial",
       ],
       cosmetic_rarity: ["comum", "raro", "epico", "lendario"],
       group_type: ["familia_estendida", "escola", "condominio", "outro"],
