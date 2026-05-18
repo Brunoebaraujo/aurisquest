@@ -21,7 +21,7 @@ type ScopeType = "global" | "group" | "family" | "child";
 type UnlockRule =
   | "starter" | "manual" | "auris_total" | "medalhas" | "streak"
   | "aprovacoes" | "atividade" | "categoria" | "missao_grupo";
-type RewardKind = "avatar" | "elmo" | "armadura" | "arma" | "pet" | "aura" | "moldura" | "badge";
+type RewardKind = "avatar" | "elmo" | "armadura" | "arma" | "pet" | "aura" | "moldura" | "badge" | "chest" | "especial";
 
 type RewardRow = {
   kind: "avatar" | "item";       // origin table
@@ -40,6 +40,7 @@ type RewardRow = {
   scope_id: string | null;
   starts_at: string | null;
   ends_at: string | null;
+  chest_reveals_item_id: string | null;
 };
 
 const RARITIES: Rarity[] = ["comum", "raro", "epico", "lendario"];
@@ -60,6 +61,8 @@ const KINDS: { value: RewardKind; label: string }[] = [
   { value: "aura", label: "Aura" },
   { value: "moldura", label: "Moldura" },
   { value: "badge", label: "Badge" },
+  { value: "chest", label: "Baú" },
+  { value: "especial", label: "Especial / Evento" },
 ];
 
 const RULES: { value: UnlockRule; label: string; help: string }[] = [
@@ -108,6 +111,7 @@ const AdminRewards = () => {
         unlock_condition_value: a.unlock_condition_value ?? null,
         scope_type: a.scope_type ?? "global", scope_id: a.scope_id ?? null,
         starts_at: a.starts_at, ends_at: a.ends_at,
+        chest_reveals_item_id: null,
       })),
       ...((its ?? []) as any[]).map(i => ({
         kind: "item" as const, id: i.id, name: i.name, description: i.description ?? null,
@@ -116,6 +120,7 @@ const AdminRewards = () => {
         unlock_condition_value: i.unlock_condition_value ?? null,
         scope_type: i.scope_type ?? "global", scope_id: i.scope_id ?? null,
         starts_at: i.starts_at, ends_at: i.ends_at,
+        chest_reveals_item_id: i.chest_reveals_item_id ?? null,
       })),
     ];
     setRows(list);
@@ -201,11 +206,16 @@ const AdminRewards = () => {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {filtered.map(r => (
-                <div key={`${r.kind}-${r.id}`} className={`group rounded-2xl border bg-card overflow-hidden shadow-soft transition hover:shadow-card ${!r.active ? "opacity-60" : ""}`}>
+                <div key={`${r.kind}-${r.id}`} className={`group rounded-2xl border bg-card overflow-hidden shadow-soft transition hover:shadow-card ${!r.active ? "opacity-60" : ""} ${r.category === "especial" ? "ring-2 ring-amber-400/60" : ""} ${r.category === "chest" ? "ring-2 ring-violet-400/60" : ""}`}>
                   <div className="aspect-square bg-gradient-to-br from-muted/50 to-background flex items-center justify-center p-2 relative">
                     <img src={r.image_url} alt={r.name} className="w-full h-full object-contain" />
                     <Badge variant="outline" className={`absolute top-2 left-2 text-[10px] ${RARITY_COLOR[r.rarity]}`}>{RARITY_LABEL[r.rarity]}</Badge>
-                    {!r.active && <Badge variant="outline" className="absolute top-2 right-2 text-[10px] bg-background/80">inativo</Badge>}
+                    <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                      {!r.active && <Badge variant="outline" className="text-[10px] bg-background/80">inativo</Badge>}
+                      {r.category === "chest" && <Badge variant="outline" className="text-[10px] bg-violet-500/15 text-violet-700 border-violet-500/30">Baú</Badge>}
+                      {r.category === "especial" && <Badge variant="outline" className="text-[10px] bg-amber-500/15 text-amber-700 border-amber-500/30">Sazonal</Badge>}
+                      {r.category !== "especial" && (r.starts_at || r.ends_at) && <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-700 border-amber-500/20">temporada</Badge>}
+                    </div>
                   </div>
                   <div className="p-3 space-y-2">
                     <div>
@@ -233,6 +243,7 @@ const AdminRewards = () => {
         open={open}
         onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}
         editing={editing}
+        allRows={rows}
         onSaved={() => { setOpen(false); setEditing(null); load(); }}
       />
     </div>
@@ -241,11 +252,12 @@ const AdminRewards = () => {
 
 // ---------- Form Dialog ----------
 function RewardFormDialog({
-  open, onOpenChange, editing, onSaved,
+  open, onOpenChange, editing, allRows, onSaved,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   editing: RewardRow | null;
+  allRows: RewardRow[];
   onSaved: () => void;
 }) {
   const isEdit = !!editing;
@@ -262,6 +274,7 @@ function RewardFormDialog({
   const [startsAt, setStartsAt] = useState<string>("");
   const [endsAt, setEndsAt] = useState<string>("");
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [chestRevealsItemId, setChestRevealsItemId] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -281,10 +294,12 @@ function RewardFormDialog({
       setStartsAt(editing.starts_at ? editing.starts_at.slice(0, 16) : "");
       setEndsAt(editing.ends_at ? editing.ends_at.slice(0, 16) : "");
       setImageUrl(editing.image_url);
+      setChestRevealsItemId(editing.chest_reveals_item_id ?? "");
     } else {
       setName(""); setDescription(""); setKind("pet"); setRarity("comum");
       setActive(true); setRule("manual"); setThreshold(0); setConditionValueText("");
       setScopeType("global"); setScopeId(""); setStartsAt(""); setEndsAt(""); setImageUrl("");
+      setChestRevealsItemId("");
     }
   }, [editing, open]);
 
@@ -310,6 +325,7 @@ function RewardFormDialog({
     if (!name.trim()) { toast.error("Nome obrigatório"); return; }
     if (!imageUrl) { toast.error("Imagem obrigatória"); return; }
     if (scopeType !== "global" && !scopeId.trim()) { toast.error("Informe o ID do escopo"); return; }
+    if (kind === "chest" && !chestRevealsItemId) { toast.error("Escolha o item revelado pelo baú"); return; }
 
     let conditionValue: any = {};
     if (conditionValueText.trim()) {
@@ -334,9 +350,10 @@ function RewardFormDialog({
     };
 
     let error: any = null;
+    const chestField = kind === "chest" ? { chest_reveals_item_id: chestRevealsItemId || null } : { chest_reveals_item_id: null };
     if (isEdit && editing) {
       const table = editing.kind === "avatar" ? "avatars" : "cosmetic_items";
-      const updatePayload = editing.kind === "avatar" ? payload : { ...payload, category: kind };
+      const updatePayload = editing.kind === "avatar" ? payload : { ...payload, category: kind, ...chestField };
       const res = await supabase.from(table).update(updatePayload).eq("id", editing.id);
       error = res.error;
     } else {
@@ -344,7 +361,7 @@ function RewardFormDialog({
         const res = await supabase.from("avatars").insert({ ...payload, category: "humano" });
         error = res.error;
       } else {
-        const res = await supabase.from("cosmetic_items").insert({ ...payload, category: kind });
+        const res = await supabase.from("cosmetic_items").insert({ ...payload, category: kind, ...chestField });
         error = res.error;
       }
     }
@@ -433,6 +450,31 @@ function RewardFormDialog({
                 <Input value={conditionValueText} onChange={e => setConditionValueText(e.target.value)}
                   placeholder={rule === "atividade" ? '{"activity_id":"..."}' : rule === "categoria" ? '{"category":"saude"}' : '{"shared_mission_id":"..."}'} />
                 <p className="text-[11px] text-muted-foreground mt-1">A avaliação automática destas condições será habilitada em entrega futura; por enquanto servem como configuração.</p>
+              </div>
+            )}
+
+            {kind === "chest" && (
+              <div className="col-span-2">
+                <Label>Item revelado ao abrir o baú *</Label>
+                <Select value={chestRevealsItemId} onValueChange={setChestRevealsItemId}>
+                  <SelectTrigger><SelectValue placeholder="Escolha o item que sai do baú" /></SelectTrigger>
+                  <SelectContent>
+                    {allRows
+                      .filter(r => r.kind === "item" && r.category !== "chest" && (!editing || r.id !== editing.id))
+                      .map(r => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.name} · {r.category} · {RARITY_LABEL[r.rarity]}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground mt-1">Quando a criança ganhar o baú, este item também será desbloqueado automaticamente.</p>
+              </div>
+            )}
+
+            {kind === "especial" && (
+              <div className="col-span-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-900 dark:text-amber-200">
+                Recompensa de evento/temporada. Use os campos <strong>Início</strong> e <strong>Fim</strong> abaixo para limitar a janela.
               </div>
             )}
 
