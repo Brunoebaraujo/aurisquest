@@ -447,6 +447,31 @@ function RewardFormDialog({
               </div>
             )}
 
+            {kind === "chest" && (
+              <div className="col-span-2">
+                <Label>Item revelado ao abrir o baú *</Label>
+                <Select value={chestRevealsItemId} onValueChange={setChestRevealsItemId}>
+                  <SelectTrigger><SelectValue placeholder="Escolha o item que sai do baú" /></SelectTrigger>
+                  <SelectContent>
+                    {allRows
+                      .filter(r => r.kind === "item" && r.category !== "chest" && (!editing || r.id !== editing.id))
+                      .map(r => (
+                        <SelectItem key={r.id} value={r.id}>
+                          {r.name} · {r.category} · {RARITY_LABEL[r.rarity]}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] text-muted-foreground mt-1">Quando a criança ganhar o baú, este item também será desbloqueado automaticamente.</p>
+              </div>
+            )}
+
+            {kind === "especial" && (
+              <div className="col-span-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-900 dark:text-amber-200">
+                Recompensa de evento/temporada. Use os campos <strong>Início</strong> e <strong>Fim</strong> abaixo para limitar a janela.
+              </div>
+            )}
+
             <div>
               <Label>Escopo *</Label>
               <Select value={scopeType} onValueChange={(v) => setScopeType(v as ScopeType)}>
