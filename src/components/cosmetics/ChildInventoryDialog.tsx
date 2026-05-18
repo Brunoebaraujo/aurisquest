@@ -19,6 +19,8 @@ const CATS: { key: string; label: string }[] = [
   { key: "aura", label: "Auras" },
   { key: "moldura", label: "Molduras" },
   { key: "badge", label: "Badges" },
+  { key: "chest", label: "Baús" },
+  { key: "especial", label: "Eventos" },
 ];
 
 const RARITIES: { key: Rarity | "todas"; label: string }[] = [
