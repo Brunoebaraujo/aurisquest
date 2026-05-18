@@ -42,17 +42,6 @@ type RewardRow = {
   ends_at: string | null;
   chest_reveals_item_id: string | null;
 };
-  rarity: Rarity;
-  active: boolean;
-  sort_order: number;
-  unlock_rule_type: UnlockRule;
-  unlock_threshold: number;
-  unlock_condition_value: Record<string, unknown> | null;
-  scope_type: ScopeType;
-  scope_id: string | null;
-  starts_at: string | null;
-  ends_at: string | null;
-};
 
 const RARITIES: Rarity[] = ["comum", "raro", "epico", "lendario"];
 const RARITY_LABEL: Record<Rarity, string> = { comum: "Comum", raro: "Raro", epico: "Épico", lendario: "Lendário" };
