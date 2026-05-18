@@ -238,6 +238,7 @@ const AdminRewards = () => {
         open={open}
         onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}
         editing={editing}
+        allRows={rows}
         onSaved={() => { setOpen(false); setEditing(null); load(); }}
       />
     </div>
