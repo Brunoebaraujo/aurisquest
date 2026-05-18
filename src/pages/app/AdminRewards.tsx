@@ -206,11 +206,16 @@ const AdminRewards = () => {
           ) : (
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
               {filtered.map(r => (
-                <div key={`${r.kind}-${r.id}`} className={`group rounded-2xl border bg-card overflow-hidden shadow-soft transition hover:shadow-card ${!r.active ? "opacity-60" : ""}`}>
+                <div key={`${r.kind}-${r.id}`} className={`group rounded-2xl border bg-card overflow-hidden shadow-soft transition hover:shadow-card ${!r.active ? "opacity-60" : ""} ${r.category === "especial" ? "ring-2 ring-amber-400/60" : ""} ${r.category === "chest" ? "ring-2 ring-violet-400/60" : ""}`}>
                   <div className="aspect-square bg-gradient-to-br from-muted/50 to-background flex items-center justify-center p-2 relative">
                     <img src={r.image_url} alt={r.name} className="w-full h-full object-contain" />
                     <Badge variant="outline" className={`absolute top-2 left-2 text-[10px] ${RARITY_COLOR[r.rarity]}`}>{RARITY_LABEL[r.rarity]}</Badge>
-                    {!r.active && <Badge variant="outline" className="absolute top-2 right-2 text-[10px] bg-background/80">inativo</Badge>}
+                    <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                      {!r.active && <Badge variant="outline" className="text-[10px] bg-background/80">inativo</Badge>}
+                      {r.category === "chest" && <Badge variant="outline" className="text-[10px] bg-violet-500/15 text-violet-700 border-violet-500/30">Baú</Badge>}
+                      {r.category === "especial" && <Badge variant="outline" className="text-[10px] bg-amber-500/15 text-amber-700 border-amber-500/30">Sazonal</Badge>}
+                      {r.category !== "especial" && (r.starts_at || r.ends_at) && <Badge variant="outline" className="text-[10px] bg-amber-500/10 text-amber-700 border-amber-500/20">temporada</Badge>}
+                    </div>
                   </div>
                   <div className="p-3 space-y-2">
                     <div>
