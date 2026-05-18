@@ -269,6 +269,7 @@ function RewardFormDialog({
   const [startsAt, setStartsAt] = useState<string>("");
   const [endsAt, setEndsAt] = useState<string>("");
   const [imageUrl, setImageUrl] = useState<string>("");
+  const [chestRevealsItemId, setChestRevealsItemId] = useState<string>("");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
 
