@@ -320,6 +320,7 @@ function RewardFormDialog({
     if (!name.trim()) { toast.error("Nome obrigatório"); return; }
     if (!imageUrl) { toast.error("Imagem obrigatória"); return; }
     if (scopeType !== "global" && !scopeId.trim()) { toast.error("Informe o ID do escopo"); return; }
+    if (kind === "chest" && !chestRevealsItemId) { toast.error("Escolha o item revelado pelo baú"); return; }
 
     let conditionValue: any = {};
     if (conditionValueText.trim()) {
