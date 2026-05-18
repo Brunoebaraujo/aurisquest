@@ -111,6 +111,7 @@ const AdminRewards = () => {
         unlock_condition_value: a.unlock_condition_value ?? null,
         scope_type: a.scope_type ?? "global", scope_id: a.scope_id ?? null,
         starts_at: a.starts_at, ends_at: a.ends_at,
+        chest_reveals_item_id: null,
       })),
       ...((its ?? []) as any[]).map(i => ({
         kind: "item" as const, id: i.id, name: i.name, description: i.description ?? null,
@@ -119,6 +120,7 @@ const AdminRewards = () => {
         unlock_condition_value: i.unlock_condition_value ?? null,
         scope_type: i.scope_type ?? "global", scope_id: i.scope_id ?? null,
         starts_at: i.starts_at, ends_at: i.ends_at,
+        chest_reveals_item_id: i.chest_reveals_item_id ?? null,
       })),
     ];
     setRows(list);
