@@ -36,6 +36,12 @@ const RARITY_RING: Record<RevealReward["rarity"], string> = {
 const CATEGORY_LABEL: Record<string, string> = {
   avatar: "Avatar", elmo: "Elmo", armadura: "Armadura", arma: "Arma",
   pet: "Pet", aura: "Aura", moldura: "Moldura", badge: "Badge",
+  chest: "Baú", especial: "Especial",
+};
+
+const REVEAL_TITLE: Record<string, string> = {
+  chest: "Você ganhou um baú!",
+  especial: "Recompensa de evento!",
 };
 
 export function RewardRevealModal({
