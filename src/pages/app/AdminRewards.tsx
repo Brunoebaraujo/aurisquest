@@ -61,6 +61,8 @@ const KINDS: { value: RewardKind; label: string }[] = [
   { value: "aura", label: "Aura" },
   { value: "moldura", label: "Moldura" },
   { value: "badge", label: "Badge" },
+  { value: "chest", label: "Baú" },
+  { value: "especial", label: "Especial / Evento" },
 ];
 
 const RULES: { value: UnlockRule; label: string; help: string }[] = [
