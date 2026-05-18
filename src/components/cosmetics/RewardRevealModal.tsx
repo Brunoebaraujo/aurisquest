@@ -183,7 +183,7 @@ export function RewardRevealModal({
                 className="relative z-10 flex flex-col items-center text-center px-6"
               >
                 <div className="text-xs uppercase tracking-[0.3em] text-white/70 mb-1 flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Recompensa desbloqueada
+                  <Sparkles className="w-3 h-3" /> {REVEAL_TITLE[current.category] ?? "Recompensa desbloqueada"}
                 </div>
 
                 <div className={`relative mt-3 w-44 h-44 rounded-3xl bg-white/5 backdrop-blur ring-4 ${RARITY_RING[current.rarity]} flex items-center justify-center overflow-hidden`}>
