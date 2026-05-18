@@ -289,10 +289,12 @@ function RewardFormDialog({
       setStartsAt(editing.starts_at ? editing.starts_at.slice(0, 16) : "");
       setEndsAt(editing.ends_at ? editing.ends_at.slice(0, 16) : "");
       setImageUrl(editing.image_url);
+      setChestRevealsItemId(editing.chest_reveals_item_id ?? "");
     } else {
       setName(""); setDescription(""); setKind("pet"); setRarity("comum");
       setActive(true); setRule("manual"); setThreshold(0); setConditionValueText("");
       setScopeType("global"); setScopeId(""); setStartsAt(""); setEndsAt(""); setImageUrl("");
+      setChestRevealsItemId("");
     }
   }, [editing, open]);
 
