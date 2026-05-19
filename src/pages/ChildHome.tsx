@@ -21,6 +21,7 @@ import { LevelBadge, type LevelInfo } from "@/components/cosmetics/LevelBadge";
 import { WardrobeDialog } from "@/components/cosmetics/WardrobeDialog";
 import { RewardRevealModal, type RevealReward } from "@/components/cosmetics/RewardRevealModal";
 import { ChildInventoryDialog } from "@/components/cosmetics/ChildInventoryDialog";
+import { LevelUpModal } from "@/components/cosmetics/LevelUpModal";
 import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
@@ -66,6 +67,8 @@ const ChildHome = () => {
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
   const [inventoryOpen, setInventoryOpen] = useState(false);
   const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
+  const [levelUp, setLevelUp] = useState<{ level: number; title?: string } | null>(null);
+  const [levelGlow, setLevelGlow] = useState(false);
 
   // Calendar state
   const [cursor, setCursor] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
@@ -105,7 +108,19 @@ const ChildHome = () => {
       avatars_catalog: d.avatars_catalog ?? [],
       items_catalog: d.items_catalog ?? [],
     });
-    setLevelInfo(d.level_info ?? null);
+    const newLevelInfo = d.level_info ?? null;
+    // Detect level up
+    if (newLevelInfo && d.child?.id) {
+      const key = `jk_level_${d.child.id}`;
+      const prev = Number(localStorage.getItem(key) ?? "0");
+      if (prev > 0 && newLevelInfo.level > prev) {
+        setLevelUp({ level: newLevelInfo.level, title: newLevelInfo.title });
+        setLevelGlow(true);
+        setTimeout(() => setLevelGlow(false), 4000);
+      }
+      localStorage.setItem(key, String(newLevelInfo.level));
+    }
+    setLevelInfo(newLevelInfo);
     const lvls: Record<string, number> = {};
     (d.ranking ?? []).forEach((r: any) => { if (r.child_id && typeof r.level === "number") lvls[r.child_id] = r.level; });
     setRankingLevels(lvls);
