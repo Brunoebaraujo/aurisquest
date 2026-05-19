@@ -667,6 +667,14 @@ const ChildHome = () => {
           }
         }}
       />
+
+      <LevelUpModal
+        open={!!levelUp}
+        onClose={() => setLevelUp(null)}
+        childName={child?.name ?? ""}
+        newLevel={levelUp?.level ?? 1}
+        newTitle={levelUp?.title}
+      />
     </div>
   );
 };
