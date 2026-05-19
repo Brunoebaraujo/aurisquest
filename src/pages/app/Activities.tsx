@@ -159,10 +159,14 @@ const Activities = () => {
               <div className="space-y-2">
                 <Label>Frequência</Label>
                 <select className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm" value={form.frequency_hint} onChange={e => setForm({ ...form, frequency_hint: e.target.value })}>
-                  <option value="diaria">Diária</option>
-                  <option value="semanal">Semanal</option>
-                  <option value="ocasional">Ocasional</option>
+                  <option value="diaria">Diária (XP 1x)</option>
+                  <option value="3x_semana">3x por semana (XP 1.5x)</option>
+                  <option value="semanal">Semanal (XP 2x)</option>
+                  <option value="quinzenal">Quinzenal (XP 3x)</option>
+                  <option value="mensal">Mensal (XP 5x)</option>
+                  <option value="quest_especial">Quest especial (XP 8x)</option>
                 </select>
+                <p className="text-[11px] text-muted-foreground">A frequência multiplica o XP da jornada (Auris seguem o tier).</p>
               </div>
               <div className="space-y-2">
                 <Label>Categoria</Label>
