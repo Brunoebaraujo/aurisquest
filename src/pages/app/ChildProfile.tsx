@@ -35,6 +35,9 @@ const ChildProfile = () => {
   const [awards, setAwards] = useState<AwardRow[]>([]);
   const [progress, setProgress] = useState<Record<string, number>>({});
   const [level, setLevel] = useState<number>(1);
+  const [title, setTitle] = useState<string>("Escudeiro");
+  const [xpInLevel, setXpInLevel] = useState<number>(0);
+  const [xpToNext, setXpToNext] = useState<number>(100);
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
 
   useEffect(() => {
@@ -82,7 +85,13 @@ const ChildProfile = () => {
       setProgress(prog);
 
       const { data: lv } = await supabase.rpc("compute_child_level", { _child_id: childId });
-      if (lv && typeof lv === "object" && "level" in (lv as any)) setLevel((lv as any).level ?? 1);
+      if (lv && typeof lv === "object") {
+        const o = lv as any;
+        setLevel(o.level ?? 1);
+        setTitle(o.title ?? "Escudeiro");
+        setXpInLevel(o.xp_in_level ?? 0);
+        setXpToNext(o.xp_to_next ?? 100);
+      }
     };
     load();
   }, [childId, profile?.family_id]);
@@ -101,6 +110,9 @@ const ChildProfile = () => {
       <ChildShowcase
         name={child?.name ?? "..."}
         level={level}
+        title={title}
+        xpInLevel={xpInLevel}
+        xpToNext={xpToNext}
         equipment={(childId && cosmeticsMap[childId]?.equipment) || { avatar: null }}
       />
 

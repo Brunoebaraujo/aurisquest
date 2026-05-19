@@ -1,14 +1,8 @@
 import { RarityFrame, RarityBadge, type Rarity } from "./Rarity";
 import type { Equipment } from "./EquippedAvatar";
 import { Sparkles } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-
-function titleFor(level: number) {
-  if (level >= 50) return "Lenda";
-  if (level >= 25) return "Herói";
-  if (level >= 10) return "Explorador";
-  return "Aventureiro Iniciante";
-}
 
 function SlotCard({
   label, item, className,
@@ -39,13 +33,22 @@ function SlotCard({
 export function ChildShowcase({
   name,
   level,
+  title,
+  xpInLevel,
+  xpToNext,
   equipment,
+  levelGlow = false,
 }: {
   name: string;
   level: number;
+  title?: string;
+  xpInLevel?: number;
+  xpToNext?: number;
   equipment: Equipment;
+  levelGlow?: boolean;
 }) {
   const frameRarity = equipment.frame?.rarity ?? equipment.avatar?.rarity ?? "comum";
+  const pct = xpToNext && xpToNext > 0 ? Math.min(100, Math.round(((xpInLevel ?? 0) / xpToNext) * 100)) : 0;
   return (
     <div className="relative rounded-3xl bg-gradient-to-b from-primary/10 via-background to-secondary/5 border shadow-card p-6 md:p-10">
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 md:gap-10 items-center">
@@ -79,16 +82,25 @@ export function ChildShowcase({
             </RarityFrame>
             {/* Level badge */}
             <div className="absolute -bottom-4 left-1/2 -translate-x-1/2">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-reward shadow-reward flex flex-col items-center justify-center text-accent-foreground border-2 border-background">
+              <div className={cn(
+                "w-14 h-14 rounded-2xl bg-gradient-reward shadow-reward flex flex-col items-center justify-center text-accent-foreground border-2 border-background transition-all",
+                levelGlow && "ring-4 ring-primary/60 animate-pulse scale-110"
+              )}>
                 <Sparkles className="w-3 h-3" />
                 <div className="font-display font-bold text-lg leading-none">{level}</div>
               </div>
             </div>
           </div>
 
-          <div className="mt-5 text-center bg-card rounded-2xl border shadow-soft px-6 py-3 min-w-[220px]">
+          <div className="mt-5 text-center bg-card rounded-2xl border shadow-soft px-6 py-3 min-w-[240px] space-y-2">
             <div className="font-display font-bold text-2xl uppercase tracking-wide">{name}</div>
-            <div className="text-sm text-muted-foreground">{titleFor(level)}</div>
+            <div className="text-sm font-semibold text-primary">{title ?? "Aventureiro"}</div>
+            {typeof xpToNext === "number" && (
+              <div className="space-y-1">
+                <Progress value={pct} className="h-2" />
+                <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Próximo nível</div>
+              </div>
+            )}
           </div>
         </div>
 
