@@ -148,6 +148,22 @@ const AdminRewards = () => {
     load();
   };
 
+  const deleteReward = async (r: RewardRow) => {
+    if (r.active) { toast.error("Desative a recompensa antes de excluir."); return; }
+    const table = r.kind === "avatar" ? "avatars" : "cosmetic_items";
+    const { error } = await supabase.from(table).delete().eq("id", r.id);
+    if (error) {
+      if ((error.message || "").includes("cannot_delete_active_reward")) {
+        toast.error("Não é possível excluir recompensa ativa.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
+    toast.success("Recompensa excluída");
+    load();
+  };
+
   const openNew = () => { setEditing(null); setOpen(true); };
   const openEdit = (r: RewardRow) => { setEditing(r); setOpen(true); };
 
