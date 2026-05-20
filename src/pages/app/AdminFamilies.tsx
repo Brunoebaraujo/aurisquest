@@ -214,7 +214,14 @@ const AdminFamilies = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-muted-foreground">
-                  <tr><th className="py-2">Família</th><th>Responsável</th><th>Status</th><th>Criada em</th><th>Link das crianças</th></tr>
+                  <tr>
+                    <th className="py-2">Família</th>
+                    <th>Responsável</th>
+                    <th>Status</th>
+                    <th>Criada em</th>
+                    <th>Links de acesso</th>
+                    <th className="text-right">Ações</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {families.map(f => {
@@ -222,18 +229,60 @@ const AdminFamilies = () => {
                     const kidUrl = f.slug || f.kid_access_token
                       ? `${window.location.origin}/familia/${f.slug || f.kid_access_token}/entrar`
                       : null;
+                    const canDelete = f.status === "pendente";
+                    const hasGuardianTarget = !!guardianInviteFor(f.id) || f.status === "ativa";
                     return (
-                      <tr key={f.id} className="border-t">
+                      <tr key={f.id} className="border-t align-middle">
                         <td className="py-2 font-medium">{f.name}</td>
                         <td>{p ? (p.full_name || p.email || "—") : <span className="text-muted-foreground">—</span>}</td>
                         <td>{statusBadge(f.status)}</td>
                         <td className="text-muted-foreground">{fmtDate(f.created_at)}</td>
                         <td>
-                          {kidUrl ? (
-                            <Button size="sm" variant="outline" onClick={() => copyLink(kidUrl)}>
-                              <Copy className="w-3 h-3 mr-1" />Copiar
+                          <div className="flex flex-wrap gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={!hasGuardianTarget}
+                              onClick={() => copyGuardianLink(f)}
+                              title={hasGuardianTarget ? "Copiar link do responsável" : "Sem convite válido"}
+                            >
+                              <UserRound className="w-3 h-3 mr-1" />Responsável
                             </Button>
-                          ) : <span className="text-muted-foreground">—</span>}
+                            {kidUrl ? (
+                              <Button size="sm" variant="outline" onClick={() => { copyLink(kidUrl); }}>
+                                <Baby className="w-3 h-3 mr-1" />Crianças
+                              </Button>
+                            ) : <span className="text-muted-foreground self-center">—</span>}
+                          </div>
+                        </td>
+                        <td className="text-right">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                disabled={!canDelete}
+                                title={canDelete ? "Excluir família pendente" : "Só famílias pendentes podem ser excluídas"}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir família "{f.name}"?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Essa ação não pode ser desfeita. Os convites pendentes desta família também serão removidos.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteFamily(f)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </td>
                       </tr>
                     );
