@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Gift, Plus, Pencil, Search, Upload, Loader2, Eye, EyeOff } from "lucide-react";
+import { Gift, Plus, Pencil, Search, Upload, Loader2, Eye, EyeOff, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -147,6 +148,22 @@ const AdminRewards = () => {
     load();
   };
 
+  const deleteReward = async (r: RewardRow) => {
+    if (r.active) { toast.error("Desative a recompensa antes de excluir."); return; }
+    const table = r.kind === "avatar" ? "avatars" : "cosmetic_items";
+    const { error } = await supabase.from(table).delete().eq("id", r.id);
+    if (error) {
+      if ((error.message || "").includes("cannot_delete_active_reward")) {
+        toast.error("Não é possível excluir recompensa ativa.");
+      } else {
+        toast.error(error.message);
+      }
+      return;
+    }
+    toast.success("Recompensa excluída");
+    load();
+  };
+
   const openNew = () => { setEditing(null); setOpen(true); };
   const openEdit = (r: RewardRow) => { setEditing(r); setOpen(true); };
 
@@ -230,6 +247,33 @@ const AdminRewards = () => {
                         {r.active ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
                         {r.active ? "Desativar" : "Ativar"}
                       </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            disabled={r.active}
+                            title={r.active ? "Desative para excluir" : "Excluir recompensa"}
+                            className="h-7 px-2 text-xs text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Excluir "{r.name}"?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Esta ação não pode ser desfeita. A recompensa será removida permanentemente do catálogo.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteReward(r)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 </div>

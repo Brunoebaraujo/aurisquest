@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Shield, Plus, Copy, X, RefreshCw, Clock, CheckCircle2, XCircle } from "lucide-react";
+import { Shield, Plus, Copy, X, RefreshCw, Clock, CheckCircle2, XCircle, Trash2, UserRound, Baby } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -137,6 +138,43 @@ const AdminFamilies = () => {
     load();
   };
 
+  const guardianInviteFor = (familyId: string) => {
+    // pega o convite mais recente, válido e pendente, do tipo onboarding
+    return invites.find(i => i.family_id === familyId && i.status === "pendente" && new Date(i.expires_at) > new Date());
+  };
+
+  const copyGuardianLink = async (fam: Family) => {
+    const inv = guardianInviteFor(fam.id);
+    if (inv) {
+      await copyLink(inviteUrl(inv.token));
+      toast.success("Link do responsável copiado");
+      return;
+    }
+    if (fam.status === "ativa") {
+      await copyLink(`${window.location.origin}/auth`);
+      toast.success("Link de acesso do responsável copiado");
+      return;
+    }
+    toast.error("Sem convite válido. Renove o convite primeiro.");
+  };
+
+  const deleteFamily = async (fam: Family) => {
+    const { error } = await supabase.rpc("admin_delete_pending_family", { _family_id: fam.id });
+    if (error) {
+      const map: Record<string, string> = {
+        family_not_pending: "Só é possível excluir famílias pendentes.",
+        family_has_children: "A família já tem crianças cadastradas.",
+        family_has_users: "A família já tem responsáveis vinculados.",
+        family_has_activity: "A família já possui registros.",
+      };
+      const key = (error.message || "").split(":").pop()?.trim() || "";
+      toast.error(map[key] || error.message);
+      return;
+    }
+    toast.success("Família excluída");
+    load();
+  };
+
   const statusBadge = (s: string) => {
     const map: Record<string, { label: string; cls: string; icon: any }> = {
       ativa: { label: "Ativa", cls: "bg-green-100 text-green-800", icon: CheckCircle2 },
@@ -176,7 +214,14 @@ const AdminFamilies = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="text-left text-muted-foreground">
-                  <tr><th className="py-2">Família</th><th>Responsável</th><th>Status</th><th>Criada em</th><th>Link das crianças</th></tr>
+                  <tr>
+                    <th className="py-2">Família</th>
+                    <th>Responsável</th>
+                    <th>Status</th>
+                    <th>Criada em</th>
+                    <th>Links de acesso</th>
+                    <th className="text-right">Ações</th>
+                  </tr>
                 </thead>
                 <tbody>
                   {families.map(f => {
@@ -184,18 +229,60 @@ const AdminFamilies = () => {
                     const kidUrl = f.slug || f.kid_access_token
                       ? `${window.location.origin}/familia/${f.slug || f.kid_access_token}/entrar`
                       : null;
+                    const canDelete = f.status === "pendente";
+                    const hasGuardianTarget = !!guardianInviteFor(f.id) || f.status === "ativa";
                     return (
-                      <tr key={f.id} className="border-t">
+                      <tr key={f.id} className="border-t align-middle">
                         <td className="py-2 font-medium">{f.name}</td>
                         <td>{p ? (p.full_name || p.email || "—") : <span className="text-muted-foreground">—</span>}</td>
                         <td>{statusBadge(f.status)}</td>
                         <td className="text-muted-foreground">{fmtDate(f.created_at)}</td>
                         <td>
-                          {kidUrl ? (
-                            <Button size="sm" variant="outline" onClick={() => copyLink(kidUrl)}>
-                              <Copy className="w-3 h-3 mr-1" />Copiar
+                          <div className="flex flex-wrap gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={!hasGuardianTarget}
+                              onClick={() => copyGuardianLink(f)}
+                              title={hasGuardianTarget ? "Copiar link do responsável" : "Sem convite válido"}
+                            >
+                              <UserRound className="w-3 h-3 mr-1" />Responsável
                             </Button>
-                          ) : <span className="text-muted-foreground">—</span>}
+                            {kidUrl ? (
+                              <Button size="sm" variant="outline" onClick={() => { copyLink(kidUrl); }}>
+                                <Baby className="w-3 h-3 mr-1" />Crianças
+                              </Button>
+                            ) : <span className="text-muted-foreground self-center">—</span>}
+                          </div>
+                        </td>
+                        <td className="text-right">
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                disabled={!canDelete}
+                                title={canDelete ? "Excluir família pendente" : "Só famílias pendentes podem ser excluídas"}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir família "{f.name}"?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Essa ação não pode ser desfeita. Os convites pendentes desta família também serão removidos.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deleteFamily(f)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                                  Excluir
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
                         </td>
                       </tr>
                     );
