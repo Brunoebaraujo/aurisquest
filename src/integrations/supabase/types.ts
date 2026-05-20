@@ -1093,6 +1093,10 @@ export type Database = {
         Args: { _token: string }
         Returns: Json
       }
+      admin_delete_pending_family: {
+        Args: { _family_id: string }
+        Returns: Json
+      }
       admin_usage_alerts: { Args: never; Returns: Json }
       admin_usage_families: {
         Args: {
