@@ -138,6 +138,43 @@ const AdminFamilies = () => {
     load();
   };
 
+  const guardianInviteFor = (familyId: string) => {
+    // pega o convite mais recente, válido e pendente, do tipo onboarding
+    return invites.find(i => i.family_id === familyId && i.status === "pendente" && new Date(i.expires_at) > new Date());
+  };
+
+  const copyGuardianLink = async (fam: Family) => {
+    const inv = guardianInviteFor(fam.id);
+    if (inv) {
+      await copyLink(inviteUrl(inv.token));
+      toast.success("Link do responsável copiado");
+      return;
+    }
+    if (fam.status === "ativa") {
+      await copyLink(`${window.location.origin}/auth`);
+      toast.success("Link de acesso do responsável copiado");
+      return;
+    }
+    toast.error("Sem convite válido. Renove o convite primeiro.");
+  };
+
+  const deleteFamily = async (fam: Family) => {
+    const { error } = await supabase.rpc("admin_delete_pending_family", { _family_id: fam.id });
+    if (error) {
+      const map: Record<string, string> = {
+        family_not_pending: "Só é possível excluir famílias pendentes.",
+        family_has_children: "A família já tem crianças cadastradas.",
+        family_has_users: "A família já tem responsáveis vinculados.",
+        family_has_activity: "A família já possui registros.",
+      };
+      const key = (error.message || "").split(":").pop()?.trim() || "";
+      toast.error(map[key] || error.message);
+      return;
+    }
+    toast.success("Família excluída");
+    load();
+  };
+
   const statusBadge = (s: string) => {
     const map: Record<string, { label: string; cls: string; icon: any }> = {
       ativa: { label: "Ativa", cls: "bg-green-100 text-green-800", icon: CheckCircle2 },
