@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -16,6 +17,7 @@ import { TierSelector } from "@/components/TierSelector";
 import { TierBadge } from "@/components/TierBadge";
 import { ActivityIconPicker } from "@/components/ActivityIconPicker";
 import { ActivityIcon } from "@/components/ActivityIcon";
+import { ACTIVITY_CATEGORIES, isActivityCategory } from "@/constants/activityCategories";
 
 type Activity = {
   id: string; name: string; description: string | null;
@@ -70,6 +72,10 @@ const Activities = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!profile?.family_id) return;
+    if (!isActivityCategory(form.category)) {
+      toast.error("Selecione uma categoria válida.");
+      return;
+    }
     const payload = {
       family_id: profile.family_id,
       name: form.name.trim(),
@@ -77,7 +83,7 @@ const Activities = () => {
       tier: form.tier,
       icon_key: form.icon_key,
       icon_url: form.icon_url,
-      category: form.category.trim() || null,
+      category: form.category,
       frequency_hint: form.frequency_hint || null,
       active: form.active,
       // reward_auris e reward_amount_cents são definidos pelo trigger no banco
@@ -170,7 +176,19 @@ const Activities = () => {
               </div>
               <div className="space-y-2">
                 <Label>Categoria</Label>
-                <Input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} placeholder="Ex: Higiene" maxLength={40} />
+                <Select
+                  value={isActivityCategory(form.category) ? form.category : ""}
+                  onValueChange={category => setForm({ ...form, category })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ACTIVITY_CATEGORIES.map(category => (
+                      <SelectItem key={category} value={category}>{category}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <div className="flex items-center justify-between rounded-xl bg-muted px-3 py-2">
