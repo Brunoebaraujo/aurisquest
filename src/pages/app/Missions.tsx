@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Progress } from "@/components/ui/progress";
 import { Plus, Trash2, Trophy, Target, Flame, Award, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { formatAuris } from "@/lib/format";
@@ -28,8 +29,23 @@ type Mission = {
   bonus_auris: number;
   medal_url: string | null;
   active: boolean;
+  created_at: string;
 };
 type Award = { mission_id: string; child_id: string };
+type Submission = {
+  activity_id: string;
+  child_id: string;
+  completed_at: string;
+  status: "pendente" | "aprovado" | "recusado";
+};
+
+type RankingRow = {
+  childId: string;
+  name: string;
+  value: number;
+  percent: number;
+  completed: boolean;
+};
 
 const emptyForm = {
   name: "",
@@ -42,6 +58,24 @@ const emptyForm = {
   medalFile: null as File | null,
 };
 
+const toDateKey = (value: string) => value.slice(0, 10);
+
+const longestStreak = (completedDates: string[]) => {
+  const dates = Array.from(new Set(completedDates)).sort();
+  let best = 0;
+  let current = 0;
+  let previous: number | null = null;
+
+  dates.forEach(date => {
+    const time = new Date(`${date}T00:00:00`).getTime();
+    current = previous !== null && time - previous === 24 * 60 * 60 * 1000 ? current + 1 : 1;
+    best = Math.max(best, current);
+    previous = time;
+  });
+
+  return best;
+};
+
 const Missions = () => {
   const { profile } = useAuth();
   const [missions, setMissions] = useState<Mission[]>([]);
@@ -49,19 +83,22 @@ const Missions = () => {
   const [children, setChildren] = useState<Child[]>([]);
   const [participants, setParticipants] = useState<Record<string, string[]>>({});
   const [awards, setAwards] = useState<Award[]>([]);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [open, setOpen] = useState(false);
+  const [rankingMission, setRankingMission] = useState<Mission | null>(null);
   const [form, setForm] = useState(emptyForm);
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
     if (!profile?.family_id) return;
     const fid = profile.family_id;
-    const [m, a, c, mp, ma] = await Promise.all([
+    const [m, a, c, mp, ma, s] = await Promise.all([
       supabase.from("missions").select("*").eq("family_id", fid).order("created_at", { ascending: false }),
       supabase.from("activities").select("id, name, active").eq("family_id", fid).eq("active", true).order("name"),
       supabase.from("children").select("id, name").eq("family_id", fid).eq("active", true).order("name"),
       supabase.from("mission_participants").select("mission_id, child_id").eq("family_id", fid),
       supabase.from("mission_awards").select("mission_id, child_id").eq("family_id", fid),
+      supabase.from("submissions").select("activity_id, child_id, completed_at, status").eq("family_id", fid).eq("status", "aprovado"),
     ]);
     setMissions((m.data ?? []) as Mission[]);
     setActivities((a.data ?? []) as Activity[]);
@@ -72,6 +109,7 @@ const Missions = () => {
     });
     setParticipants(map);
     setAwards((ma.data ?? []) as Award[]);
+    setSubmissions((s.data ?? []) as Submission[]);
   };
 
   useEffect(() => { load(); }, [profile?.family_id]);
@@ -150,6 +188,38 @@ const Missions = () => {
   const childName = (id: string) => children.find(c => c.id === id)?.name ?? "—";
   const awardsFor = (mid: string) => awards.filter(a => a.mission_id === mid);
 
+  const rankingFor = (mission: Mission): RankingRow[] => {
+    const target = Math.max(mission.goal_target, 1);
+    const missionStart = new Date(mission.created_at).getTime();
+    const missionAwards = awardsFor(mission.id);
+
+    return (participants[mission.id] ?? [])
+      .map(childId => {
+        const childSubmissions = submissions.filter(s =>
+          s.activity_id === mission.activity_id &&
+          s.child_id === childId &&
+          new Date(s.completed_at).getTime() >= missionStart
+        );
+        const progress = mission.goal_type === "streak"
+          ? longestStreak(childSubmissions.map(s => toDateKey(s.completed_at)))
+          : childSubmissions.length;
+        const completed = missionAwards.some(a => a.child_id === childId);
+        const value = completed ? Math.max(progress, target) : progress;
+
+        return {
+          childId,
+          name: childName(childId),
+          value,
+          percent: Math.min((value / target) * 100, 100),
+          completed,
+        };
+      })
+      .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name, "pt-BR"));
+  };
+
+  const selectedRanking = rankingMission ? rankingFor(rankingMission) : [];
+  const hasRankingProgress = selectedRanking.some(row => row.value > 0);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -167,7 +237,19 @@ const Missions = () => {
           const parts = participants[m.id] ?? [];
           const conquered = awardsFor(m.id);
           return (
-            <Card key={m.id} className="border-0 shadow-card rounded-2xl overflow-hidden">
+            <Card
+              key={m.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setRankingMission(m)}
+              onKeyDown={e => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  setRankingMission(m);
+                }
+              }}
+              className="border-0 shadow-card rounded-2xl overflow-hidden cursor-pointer transition-transform hover:-translate-y-0.5 hover:shadow-reward focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
               <CardContent className="p-0">
                 <div className="bg-gradient-warm p-4 flex items-center gap-3 text-secondary-foreground">
                   {m.medal_url ? (
@@ -208,7 +290,15 @@ const Missions = () => {
                       {parts.length === 0 && <span className="text-xs text-muted-foreground">—</span>}
                     </div>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(m.id)} className="w-full justify-center">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleDelete(m.id);
+                    }}
+                    className="w-full justify-center"
+                  >
                     <Trash2 className="w-4 h-4" /> Apagar missão
                   </Button>
                 </div>
@@ -220,6 +310,49 @@ const Missions = () => {
           <p className="text-muted-foreground text-sm">Nenhuma missão ainda. Crie uma para motivar a turma!</p>
         )}
       </div>
+
+      <Dialog open={!!rankingMission} onOpenChange={open => !open && setRankingMission(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Ranking da missão</DialogTitle>
+            {rankingMission && <p className="text-sm text-muted-foreground">{rankingMission.name}</p>}
+          </DialogHeader>
+          {rankingMission && (
+            <div className="space-y-4">
+              {selectedRanking.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Esta missão ainda não tem participantes.</p>
+              ) : (
+                <div className="space-y-3">
+                  {!hasRankingProgress && (
+                    <p className="rounded-xl bg-muted px-3 py-2 text-sm text-muted-foreground">
+                      Ainda não há progresso registrado para esta missão.
+                    </p>
+                  )}
+                  {selectedRanking.map((row, index) => (
+                    <div key={row.childId} className="rounded-xl border bg-card p-3 shadow-sm">
+                      <div className="mb-2 flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="text-xs font-semibold text-accent">{index + 1}º lugar</div>
+                          <div className="truncate font-medium">{row.name}</div>
+                        </div>
+                        <div className="shrink-0 text-sm font-semibold text-muted-foreground">
+                          {rankingMission.goal_type === "streak"
+                            ? `${row.value}/${rankingMission.goal_target} dias`
+                            : `${row.value}/${rankingMission.goal_target}`}
+                        </div>
+                      </div>
+                      <Progress value={row.percent} className="h-3" />
+                    </div>
+                  ))}
+                </div>
+              )}
+              <Button variant="outline" className="w-full" onClick={() => setRankingMission(null)}>
+                Fechar
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
