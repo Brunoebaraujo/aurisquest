@@ -199,7 +199,12 @@ const Dashboard = () => {
           <CardContent className="space-y-3">
             {topKids.length === 0 && <p className="text-sm text-muted-foreground">Cadastre crianças para começar.</p>}
             {topKids.map(k => (
-              <div key={k.id} className="flex items-center justify-between p-3 rounded-xl bg-muted/50 gap-3">
+              <Link
+                key={k.id}
+                to={`/app/criancas/${k.id}`}
+                aria-label={`Abrir perfil de ${k.name}`}
+                className="flex items-center justify-between p-3 rounded-xl bg-muted/50 gap-3 cursor-pointer hover:bg-muted/70 hover:shadow-sm active:scale-[0.99] focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all"
+              >
                 <div className="flex items-center gap-3 min-w-0">
                   <EquippedAvatar
                     equipment={cosmeticsMap[k.id]?.equipment ?? { avatar: null }}
@@ -217,7 +222,7 @@ const Dashboard = () => {
                     Total ganho: <AuriIcon size={11} /> {formatAuris(k.earned)}
                   </span>
                 </div>
-              </div>
+              </Link>
             ))}
           </CardContent>
         </Card>
