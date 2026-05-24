@@ -58,7 +58,7 @@ const AdminFamilies = () => {
 
   const load = async () => {
     const [{ data: fams }, { data: invs }] = await Promise.all([
-      supabase.from("families").select("id,name,status,created_at,primary_parent_id,slug,kid_access_token").order("created_at", { ascending: false }),
+      supabase.from("families").select("id,name,status,created_at,primary_parent_id,slug").order("created_at", { ascending: false }),
       supabase.from("invitations").select("*").order("created_at", { ascending: false }),
     ]);
     setFamilies((fams ?? []) as Family[]);
