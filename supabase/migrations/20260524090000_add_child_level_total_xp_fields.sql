@@ -9,9 +9,11 @@ set search_path = public
 as $$
 declare
   v_total_xp integer := 0;
-  v_level integer := 1;
-  v_level_start_total_xp integer := 0;
+  v_level integer := 0;
+  v_current_level_min_xp integer := 0;
+  v_next_level integer := 1;
   v_next_level_total_xp integer := 100;
+  v_xp_required_for_level integer := 100;
   v_xp_in_level integer := 0;
   v_xp_to_next integer := 100;
   v_xp_remaining integer := 100;
@@ -59,18 +61,58 @@ begin
 
   v_total_xp := v_auris;
 
-  while v_total_xp >= v_next_level_total_xp loop
-    v_level := v_level + 1;
-    v_level_start_total_xp := v_next_level_total_xp;
-    v_next_level_total_xp := ((v_level * (v_level + 1)) / 2) * 100;
-  end loop;
+  -- Official Auris Quest XP progression table. Keep level thresholds centralized here.
+  with xp_progression(level, total_xp_required) as (
+    values
+      (0, 0),
+      (1, 100),
+      (2, 220),
+      (3, 364),
+      (4, 537),
+      (5, 744),
+      (6, 993),
+      (7, 1292),
+      (8, 1650),
+      (9, 2080),
+      (10, 2596),
+      (11, 3215),
+      (12, 3958),
+      (13, 4850),
+      (14, 5920),
+      (15, 7204)
+  ), current_level as (
+    select level, total_xp_required
+    from xp_progression
+    where total_xp_required <= v_total_xp
+    order by total_xp_required desc
+    limit 1
+  ), next_level as (
+    select level, total_xp_required
+    from xp_progression
+    where total_xp_required > v_total_xp
+    order by total_xp_required asc
+    limit 1
+  )
+  select
+    c.level,
+    c.total_xp_required,
+    coalesce(n.level, c.level),
+    coalesce(n.total_xp_required, c.total_xp_required),
+    coalesce(n.total_xp_required - c.total_xp_required, 0)
+  into
+    v_level,
+    v_current_level_min_xp,
+    v_next_level,
+    v_next_level_total_xp,
+    v_xp_required_for_level
+  from current_level c
+  left join next_level n on true;
 
-  v_xp_in_level := greatest(v_total_xp - v_level_start_total_xp, 0);
-  v_xp_to_next := greatest(v_next_level_total_xp - v_level_start_total_xp, 1);
+  v_xp_in_level := greatest(v_total_xp - v_current_level_min_xp, 0);
+  v_xp_to_next := greatest(v_next_level_total_xp - v_current_level_min_xp, 1);
   v_xp_remaining := greatest(v_next_level_total_xp - v_total_xp, 0);
 
   v_title := case
-    when v_level >= 20 then 'Lenda Auris'
     when v_level >= 15 then 'Mestre das Missões'
     when v_level >= 10 then 'Guardião Dourado'
     when v_level >= 5 then 'Aventureiro'
@@ -82,7 +124,10 @@ begin
     'title', v_title,
     'xp', v_total_xp,
     'total_xp', v_total_xp,
+    'current_level_min_xp', v_current_level_min_xp,
+    'next_level', v_next_level,
     'next_level_total_xp', v_next_level_total_xp,
+    'xp_required_for_level', v_xp_required_for_level,
     'xp_remaining', v_xp_remaining,
     'xp_in_level', v_xp_in_level,
     'xp_to_next', v_xp_to_next,
