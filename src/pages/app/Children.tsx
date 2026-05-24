@@ -39,7 +39,7 @@ const Children = () => {
       supabase.from("families").select("slug").eq("id", profile.family_id).maybeSingle(),
     ]);
     setList((data ?? []) as Child[]);
-    setFamilySlug(fam?.slug ?? fam?.kid_access_token ?? null);
+    setFamilySlug(fam?.slug ?? null);
   };
 
   useEffect(() => { load(); }, [profile?.family_id]);
