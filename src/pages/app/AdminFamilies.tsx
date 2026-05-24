@@ -20,7 +20,6 @@ type Family = {
   created_at: string;
   primary_parent_id: string | null;
   slug: string | null;
-  kid_access_token: string | null;
 };
 type Invitation = {
   id: string;
@@ -59,7 +58,7 @@ const AdminFamilies = () => {
 
   const load = async () => {
     const [{ data: fams }, { data: invs }] = await Promise.all([
-      supabase.from("families").select("id,name,status,created_at,primary_parent_id,slug,kid_access_token").order("created_at", { ascending: false }),
+      supabase.from("families").select("id,name,status,created_at,primary_parent_id,slug").order("created_at", { ascending: false }),
       supabase.from("invitations").select("*").order("created_at", { ascending: false }),
     ]);
     setFamilies((fams ?? []) as Family[]);
@@ -226,8 +225,8 @@ const AdminFamilies = () => {
                 <tbody>
                   {families.map(f => {
                     const p = f.primary_parent_id ? parents[f.primary_parent_id] : null;
-                    const kidUrl = f.slug || f.kid_access_token
-                      ? `${window.location.origin}/familia/${f.slug || f.kid_access_token}/entrar`
+                    const kidUrl = f.slug
+                      ? `${window.location.origin}/familia/${f.slug}/entrar`
                       : null;
                     const canDelete = f.status === "pendente";
                     const hasGuardianTarget = !!guardianInviteFor(f.id) || f.status === "ativa";

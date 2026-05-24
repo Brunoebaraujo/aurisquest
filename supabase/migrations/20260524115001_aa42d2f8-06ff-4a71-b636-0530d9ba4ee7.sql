@@ -1,0 +1,1 @@
+GRANT SELECT (password_set_at) ON public.children TO authenticated;
