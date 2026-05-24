@@ -225,8 +225,8 @@ const AdminFamilies = () => {
                 <tbody>
                   {families.map(f => {
                     const p = f.primary_parent_id ? parents[f.primary_parent_id] : null;
-                    const kidUrl = f.slug || f.kid_access_token
-                      ? `${window.location.origin}/familia/${f.slug || f.kid_access_token}/entrar`
+                    const kidUrl = f.slug
+                      ? `${window.location.origin}/familia/${f.slug}/entrar`
                       : null;
                     const canDelete = f.status === "pendente";
                     const hasGuardianTarget = !!guardianInviteFor(f.id) || f.status === "ativa";
