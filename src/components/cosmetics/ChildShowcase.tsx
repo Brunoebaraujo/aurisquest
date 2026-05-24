@@ -56,7 +56,8 @@ export function ChildShowcase({
   const frameRarity = equipment.frame?.rarity ?? equipment.avatar?.rarity ?? "comum";
   const pct = xpToNext && xpToNext > 0 ? Math.min(100, Math.round(((xpInLevel ?? 0) / xpToNext) * 100)) : 0;
   const safeTotalXp = totalXp ?? 0;
-  const safeNextLevelTotalXp = nextLevelTotalXp ?? xpToNext ?? 0;
+  const currentLevelMinXp = Math.max(safeTotalXp - (xpInLevel ?? 0), 0);
+  const safeNextLevelTotalXp = nextLevelTotalXp ?? currentLevelMinXp + (xpToNext ?? 0);
   const safeXpRemaining = xpRemaining ?? Math.max(safeNextLevelTotalXp - safeTotalXp, 0);
 
   return (
