@@ -1,4 +1,7 @@
-create or replace function public.compute_child_level(_child_id uuid)
+drop function if exists public.compute_child_level(uuid);
+drop function if exists public.compute_child_level(text);
+
+create function public.compute_child_level(_child_id uuid)
 returns jsonb
 language plpgsql
 security definer
@@ -90,4 +93,14 @@ begin
 end;
 $$;
 
+create function public.compute_child_level(_child_id text)
+returns jsonb
+language sql
+security definer
+set search_path = public
+as $$
+  select public.compute_child_level(_child_id::uuid);
+$$;
+
 grant execute on function public.compute_child_level(uuid) to anon, authenticated;
+grant execute on function public.compute_child_level(text) to anon, authenticated;
