@@ -38,6 +38,9 @@ const ChildProfile = () => {
   const [title, setTitle] = useState<string>("Escudeiro");
   const [xpInLevel, setXpInLevel] = useState<number>(0);
   const [xpToNext, setXpToNext] = useState<number>(100);
+  const [totalXp, setTotalXp] = useState<number>(0);
+  const [nextLevelTotalXp, setNextLevelTotalXp] = useState<number>(100);
+  const [xpRemaining, setXpRemaining] = useState<number>(100);
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
 
   useEffect(() => {
@@ -87,10 +90,15 @@ const ChildProfile = () => {
       const { data: lv } = await supabase.rpc("compute_child_level", { _child_id: childId });
       if (lv && typeof lv === "object") {
         const o = lv as any;
+        const nextTotal = o.next_level_total_xp ?? o.xp_to_next ?? 100;
+        const total = o.total_xp ?? 0;
         setLevel(o.level ?? 1);
         setTitle(o.title ?? "Escudeiro");
         setXpInLevel(o.xp_in_level ?? 0);
         setXpToNext(o.xp_to_next ?? 100);
+        setTotalXp(total);
+        setNextLevelTotalXp(nextTotal);
+        setXpRemaining(o.xp_remaining ?? Math.max(nextTotal - total, 0));
       }
     };
     load();
@@ -113,6 +121,9 @@ const ChildProfile = () => {
         title={title}
         xpInLevel={xpInLevel}
         xpToNext={xpToNext}
+        totalXp={totalXp}
+        nextLevelTotalXp={nextLevelTotalXp}
+        xpRemaining={xpRemaining}
         equipment={(childId && cosmeticsMap[childId]?.equipment) || { avatar: null }}
       />
 
