@@ -36,6 +36,9 @@ export function ChildShowcase({
   title,
   xpInLevel,
   xpToNext,
+  totalXp,
+  nextLevelTotalXp,
+  xpRemaining,
   equipment,
   levelGlow = false,
 }: {
@@ -44,11 +47,18 @@ export function ChildShowcase({
   title?: string;
   xpInLevel?: number;
   xpToNext?: number;
+  totalXp?: number;
+  nextLevelTotalXp?: number;
+  xpRemaining?: number;
   equipment: Equipment;
   levelGlow?: boolean;
 }) {
   const frameRarity = equipment.frame?.rarity ?? equipment.avatar?.rarity ?? "comum";
   const pct = xpToNext && xpToNext > 0 ? Math.min(100, Math.round(((xpInLevel ?? 0) / xpToNext) * 100)) : 0;
+  const safeTotalXp = totalXp ?? 0;
+  const safeNextLevelTotalXp = nextLevelTotalXp ?? xpToNext ?? 0;
+  const safeXpRemaining = xpRemaining ?? Math.max(safeNextLevelTotalXp - safeTotalXp, 0);
+
   return (
     <div className="relative rounded-3xl bg-gradient-to-b from-primary/10 via-background to-secondary/5 border shadow-card p-6 md:p-10">
       <div className="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-6 md:gap-10 items-center">
@@ -99,6 +109,12 @@ export function ChildShowcase({
               <div className="space-y-1">
                 <Progress value={pct} className="h-2" />
                 <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Próximo nível</div>
+                <div className="text-xs font-semibold text-foreground">
+                  {safeTotalXp} / {safeNextLevelTotalXp} XP
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  Faltam {safeXpRemaining} XP
+                </div>
               </div>
             )}
           </div>
