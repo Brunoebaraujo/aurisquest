@@ -36,7 +36,7 @@ const Children = () => {
     const [{ data }, { data: fam }] = await Promise.all([
       supabase.from("children").select("id, name, avatar_url, active, password_set_at")
         .eq("family_id", profile.family_id).order("created_at", { ascending: true }),
-      supabase.from("families").select("slug,kid_access_token").eq("id", profile.family_id).maybeSingle(),
+      supabase.from("families").select("slug").eq("id", profile.family_id).maybeSingle(),
     ]);
     setList((data ?? []) as Child[]);
     setFamilySlug(fam?.slug ?? fam?.kid_access_token ?? null);
