@@ -20,7 +20,6 @@ type Family = {
   created_at: string;
   primary_parent_id: string | null;
   slug: string | null;
-  kid_access_token: string | null;
 };
 type Invitation = {
   id: string;
