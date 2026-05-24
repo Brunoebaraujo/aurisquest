@@ -34,7 +34,7 @@ const ChildProfile = () => {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [awards, setAwards] = useState<AwardRow[]>([]);
   const [progress, setProgress] = useState<Record<string, number>>({});
-  const [level, setLevel] = useState<number>(1);
+  const [level, setLevel] = useState<number>(0);
   const [title, setTitle] = useState<string>("Escudeiro");
   const [xpInLevel, setXpInLevel] = useState<number>(0);
   const [xpToNext, setXpToNext] = useState<number>(100);
@@ -90,12 +90,15 @@ const ChildProfile = () => {
       const { data: lv } = await supabase.rpc("compute_child_level", { _child_id: childId });
       if (lv && typeof lv === "object") {
         const o = lv as any;
-        const nextTotal = o.next_level_total_xp ?? o.xp_to_next ?? 100;
         const total = o.total_xp ?? 0;
-        setLevel(o.level ?? 1);
+        const inLevel = o.xp_in_level ?? 0;
+        const toNext = o.xp_to_next ?? 100;
+        const currentLevelMin = o.current_level_min_xp ?? Math.max(total - inLevel, 0);
+        const nextTotal = o.next_level_total_xp ?? currentLevelMin + toNext;
+        setLevel(o.level ?? 0);
         setTitle(o.title ?? "Escudeiro");
-        setXpInLevel(o.xp_in_level ?? 0);
-        setXpToNext(o.xp_to_next ?? 100);
+        setXpInLevel(inLevel);
+        setXpToNext(toNext);
         setTotalXp(total);
         setNextLevelTotalXp(nextTotal);
         setXpRemaining(o.xp_remaining ?? Math.max(nextTotal - total, 0));
