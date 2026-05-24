@@ -7,6 +7,8 @@ export type LevelInfo = {
   xp_in_level: number;
   xp_to_next: number;
   total_xp: number;
+  next_level_total_xp?: number;
+  xp_remaining?: number;
   title?: string;
   auris?: number;
   medals?: number;
