@@ -699,6 +699,14 @@ const ChildHome = () => {
         newLevel={levelUp?.level ?? 1}
         newTitle={levelUp?.title}
       />
+
+      <SubmissionSuccess
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        sharedMode={sharedMode}
+      />
+
+      <ExitChildModeDialog open={exitOpen} onOpenChange={setExitOpen} />
     </div>
   );
 };
