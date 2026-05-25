@@ -23,16 +23,17 @@ export const useActiveProfile = () => {
   const [profile, setProfileState] = useState<ActiveProfile>(read);
 
   useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === KEY) setProfileState(read());
+    const onChange = () => setProfileState(read());
+    window.addEventListener("storage", onChange);
+    window.addEventListener("aq_active_profile_changed", onChange);
+    return () => {
+      window.removeEventListener("storage", onChange);
+      window.removeEventListener("aq_active_profile_changed", onChange);
     };
-    window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
   }, []);
 
   const setProfile = useCallback((p: ActiveProfile) => {
-    if (p) sessionStorage.setItem(KEY, JSON.stringify(p));
-    else sessionStorage.removeItem(KEY);
+    setActiveProfileDirect(p);
     setProfileState(p);
   }, []);
 
@@ -44,6 +45,9 @@ export const useActiveProfile = () => {
 export const setActiveProfileDirect = (p: ActiveProfile) => {
   if (p) sessionStorage.setItem(KEY, JSON.stringify(p));
   else sessionStorage.removeItem(KEY);
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event("aq_active_profile_changed"));
+  }
 };
 
 export const getActiveProfileDirect = read;
