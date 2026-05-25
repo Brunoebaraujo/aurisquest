@@ -78,7 +78,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await supabase.auth.signOut();
     setProfile(null);
     setRoles([]);
+    const { setActiveProfileDirect } = await import("@/hooks/useActiveProfile");
+    setActiveProfileDirect(null);
   };
+
 
   const isAdmin = roles.includes("admin");
 

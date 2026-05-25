@@ -10,7 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { setActiveProfileDirect } from "@/hooks/useActiveProfile";
 import { toast } from "sonner";
+
 
 const emailSchema = z.string().trim().email("E-mail inválido").max(255);
 const passwordSchema = z.string().min(6, "Senha precisa ter ao menos 6 caracteres").max(72);
@@ -56,11 +58,13 @@ const Auth = () => {
       return;
     }
     setBusy(true);
+    setActiveProfileDirect(null);
     const { error } = await supabase.auth.signInWithPassword({
       email: loginEmail,
       password: loginPwd,
     });
     setBusy(false);
+
     if (error) toast.error("Não foi possível entrar: " + error.message);
     else toast.success("Bem-vindo de volta!");
   };
@@ -76,7 +80,9 @@ const Auth = () => {
       return;
     }
     setBusy(true);
+    setActiveProfileDirect(null);
     const { error } = await supabase.auth.signUp({
+
       email: signupEmail,
       password: signupPwd,
       options: {
