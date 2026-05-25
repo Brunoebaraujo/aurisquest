@@ -30,6 +30,7 @@ import GroupInviteAccept from "./pages/GroupInviteAccept.tsx";
 import AdminUsage from "./pages/app/AdminUsage.tsx";
 import AdminAlerts from "./pages/app/AdminAlerts.tsx";
 import AdminRewards from "./pages/app/AdminRewards.tsx";
+import ProfileSelector from "./pages/app/ProfileSelector.tsx";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,7 @@ const App = () => (
             {/* legado: redireciona para nova tela de login */}
             <Route path="/enviar/:childId" element={<ChildLogin />} />
             <Route path="/app" element={<AppLayout />}>
+              <Route path="quem-entra" element={<ProfileSelector />} />
               <Route index element={<Dashboard />} />
               <Route path="criancas" element={<Children />} />
               <Route path="criancas/:childId" element={<ChildProfile />} />

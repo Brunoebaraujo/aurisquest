@@ -1,11 +1,12 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Wallet, LogOut, Trophy, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus, Gift } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Wallet, LogOut, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus, Gift } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
+import { AuriIcon } from "@/components/AuriIcon";
 
 const items = [
   { title: "Painel", url: "/app", icon: LayoutDashboard, end: true },
@@ -32,8 +33,8 @@ export const AppSidebar = () => {
     <Sidebar collapsible="icon">
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-soft shrink-0">
-            <Trophy className="w-5 h-5 text-primary-foreground" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-100 to-blue-200 flex items-center justify-center shadow-soft shrink-0">
+            <AuriIcon size={26} />
           </div>
           {!collapsed && (
             <div className="flex flex-col leading-tight">

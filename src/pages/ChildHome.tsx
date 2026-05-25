@@ -23,6 +23,8 @@ import { RewardRevealModal, type RevealReward } from "@/components/cosmetics/Rew
 import { ChildInventoryDialog } from "@/components/cosmetics/ChildInventoryDialog";
 import { LevelUpModal } from "@/components/cosmetics/LevelUpModal";
 import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
+import { SubmissionSuccess } from "@/components/SubmissionSuccess";
+import { ExitChildModeDialog } from "@/components/ExitChildModeDialog";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
 type Activity = { id: string; name: string; description: string | null; reward_auris: number; category: string | null; tier?: ActivityTier; icon_key?: string | null; icon_url?: string | null; streak?: number };
@@ -69,6 +71,9 @@ const ChildHome = () => {
   const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
   const [levelUp, setLevelUp] = useState<{ level: number; title?: string } | null>(null);
   const [levelGlow, setLevelGlow] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [exitOpen, setExitOpen] = useState(false);
+  const sharedMode = typeof window !== "undefined" && localStorage.getItem("aq_shared_mode") === "1";
 
   // Calendar state
   const [cursor, setCursor] = useState(() => { const d = new Date(); d.setDate(1); d.setHours(0,0,0,0); return d; });
@@ -78,8 +83,13 @@ const ChildHome = () => {
   const logout = useCallback(() => {
     localStorage.removeItem("jk_child_token");
     localStorage.removeItem("jk_child");
-    nav("/entrar", { replace: true });
-  }, [nav]);
+    localStorage.removeItem("aq_shared_mode");
+    if (sharedMode) {
+      nav("/app/quem-entra", { replace: true });
+    } else {
+      nav("/entrar", { replace: true });
+    }
+  }, [nav, sharedMode]);
 
   const refresh = useCallback(async () => {
     const token = localStorage.getItem("jk_child_token");
@@ -170,6 +180,7 @@ const ChildHome = () => {
       setSelected(null);
       setFile(null);
       setComment("");
+      setSuccessOpen(true);
       refresh();
     } catch (e: any) {
       toast.error(e.message ?? "Erro ao enviar");
@@ -239,6 +250,19 @@ const ChildHome = () => {
 
   return (
     <div className="min-h-screen kid-theme kid-bg pb-10">
+      {sharedMode && (
+        <div className="bg-primary text-primary-foreground text-center text-xs font-bold py-1.5 px-3 flex items-center justify-center gap-2 sticky top-0 z-30">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>MODO CRIANÇA</span>
+          <span className="opacity-70">·</span>
+          <button
+            onClick={() => setExitOpen(true)}
+            className="underline underline-offset-2 hover:opacity-80"
+          >
+            Sair do modo criança
+          </button>
+        </div>
+      )}
       <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
         <div className="flex items-center justify-between text-primary-foreground gap-3">
           <div className="flex items-center gap-3 min-w-0">
@@ -675,6 +699,14 @@ const ChildHome = () => {
         newLevel={levelUp?.level ?? 1}
         newTitle={levelUp?.title}
       />
+
+      <SubmissionSuccess
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+        sharedMode={sharedMode}
+      />
+
+      <ExitChildModeDialog open={exitOpen} onOpenChange={setExitOpen} />
     </div>
   );
 };
