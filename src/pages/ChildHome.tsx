@@ -250,6 +250,19 @@ const ChildHome = () => {
 
   return (
     <div className="min-h-screen kid-theme kid-bg pb-10">
+      {sharedMode && (
+        <div className="bg-primary text-primary-foreground text-center text-xs font-bold py-1.5 px-3 flex items-center justify-center gap-2 sticky top-0 z-30">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>MODO CRIANÇA</span>
+          <span className="opacity-70">·</span>
+          <button
+            onClick={() => setExitOpen(true)}
+            className="underline underline-offset-2 hover:opacity-80"
+          >
+            Sair do modo criança
+          </button>
+        </div>
+      )}
       <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
         <div className="flex items-center justify-between text-primary-foreground gap-3">
           <div className="flex items-center gap-3 min-w-0">
