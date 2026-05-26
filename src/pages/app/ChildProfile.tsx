@@ -13,6 +13,8 @@ import { toast } from "sonner";
 import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
 import { ChildShowcase } from "@/components/cosmetics/ChildShowcase";
 import { ParentWardrobeDialog } from "@/components/cosmetics/ParentWardrobeDialog";
+import { SideQuestHistory } from "@/components/sidequest/SideQuestHistory";
+import type { SideQuestHistoryItem } from "@/hooks/useActiveSideQuest";
 
 type Child = { id: string; name: string; avatar_url: string | null };
 type Mission = {
@@ -26,6 +28,10 @@ type Mission = {
   medal_url: string | null;
 };
 type AwardRow = { mission_id: string; awarded_at: string; bonus_auris: number };
+type SideQuestHistoryRow = Omit<SideQuestHistoryItem, "completed_at"> & {
+  completed_at: string | null;
+  created_at?: string;
+};
 
 const ChildProfile = () => {
   const { childId } = useParams();
@@ -42,23 +48,35 @@ const ChildProfile = () => {
   const [nextLevelTotalXp, setNextLevelTotalXp] = useState<number>(100);
   const [xpRemaining, setXpRemaining] = useState<number>(100);
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
+  const [sideQuestHistory, setSideQuestHistory] = useState<SideQuestHistoryItem[]>([]);
 
   useEffect(() => {
     const load = async () => {
       if (!childId || !profile?.family_id) return;
       const fid = profile.family_id;
 
-      const [c, mList, mp, ma] = await Promise.all([
+      const [c, mList, mp, ma, sq] = await Promise.all([
         supabase.from("children").select("id, name, avatar_url").eq("id", childId).maybeSingle(),
         supabase.from("missions").select("*").eq("family_id", fid),
         supabase.from("mission_participants").select("mission_id").eq("child_id", childId).eq("family_id", fid),
         supabase.from("mission_awards").select("mission_id, awarded_at, bonus_auris").eq("child_id", childId).eq("family_id", fid),
+        supabase.from("side_quests")
+          .select("id, category, mission_key, title, reward_auris, parent_comment, child_comment, child_photo_url, completed_at, created_at, status")
+          .eq("child_id", childId)
+          .eq("family_id", fid)
+          .eq("status", "concluida")
+          .order("completed_at", { ascending: false })
+          .limit(10),
       ]);
       setChild(c.data as Child);
       const myMissionIds = new Set((mp.data ?? []).map((r: any) => r.mission_id));
       const my = ((mList.data ?? []) as Mission[]).filter(m => myMissionIds.has(m.id));
       setMissions(my);
       setAwards((ma.data ?? []) as AwardRow[]);
+      setSideQuestHistory(((sq.data ?? []) as SideQuestHistoryRow[]).map(({ created_at, completed_at, ...item }) => ({
+        ...item,
+        completed_at: completed_at ?? created_at ?? new Date(0).toISOString(),
+      })));
 
       // compute progress per mission
       const prog: Record<string, number> = {};
@@ -183,6 +201,8 @@ const ChildProfile = () => {
           )}
         </CardContent>
       </Card>
+
+      <SideQuestHistory items={sideQuestHistory} showEmptyState showStatus />
 
       <Card className="border-0 shadow-card rounded-2xl bg-primary/5">
         <CardContent className="p-5 flex items-center justify-between gap-4 flex-wrap">
