@@ -192,6 +192,8 @@ const Dashboard = () => {
         ))}
       </div>
 
+      <SideQuestInviteCard />
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="border-0 shadow-card rounded-2xl">
           <CardHeader>
