@@ -10,6 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLe
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
+import { SideQuestInviteCard } from "@/components/sidequest/SideQuestInviteCard";
 
 type ApprovedRow = { child_id: string; reward_auris: number; completed_at: string };
 type KidRow = { id: string; name: string; created_at: string };
