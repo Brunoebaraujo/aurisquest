@@ -14,7 +14,7 @@ const formatRemaining = (ms: number) => {
 
 type Props = {
   quest: ActiveSideQuest;
-  onComplete: () => void | Promise<void>;
+  onRequestComplete: () => void;
   busy?: boolean;
 };
 
