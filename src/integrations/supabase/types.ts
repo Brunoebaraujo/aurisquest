@@ -988,6 +988,54 @@ export type Database = {
           },
         ]
       }
+      side_quests: {
+        Row: {
+          category: Database["public"]["Enums"]["side_quest_category"]
+          child_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          expires_at: string
+          family_id: string
+          id: string
+          mission_key: string
+          parent_comment: string | null
+          reward_auris: number
+          status: Database["public"]["Enums"]["side_quest_status"]
+          title: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["side_quest_category"]
+          child_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          family_id: string
+          id?: string
+          mission_key: string
+          parent_comment?: string | null
+          reward_auris?: number
+          status?: Database["public"]["Enums"]["side_quest_status"]
+          title: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["side_quest_category"]
+          child_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          family_id?: string
+          id?: string
+          mission_key?: string
+          parent_comment?: string | null
+          reward_auris?: number
+          status?: Database["public"]["Enums"]["side_quest_status"]
+          title?: string
+        }
+        Relationships: []
+      }
       submissions: {
         Row: {
           activity_id: string
@@ -1116,6 +1164,10 @@ export type Database = {
         }
         Returns: Json
       }
+      complete_side_quest: {
+        Args: { _side_quest_id: string; _token: string }
+        Returns: Json
+      }
       compute_child_level: { Args: { _child_id: string }; Returns: Json }
       compute_streak: {
         Args: { _activity_id: string; _child_id: string }
@@ -1132,6 +1184,11 @@ export type Database = {
       expire_invitations: { Args: never; Returns: number }
       get_child_dashboard: { Args: { _token: string }; Returns: Json }
       get_child_new_unlocks: { Args: { _token: string }; Returns: Json }
+      get_child_side_quest: { Args: { _token: string }; Returns: Json }
+      get_child_side_quest_history: {
+        Args: { _limit?: number; _token: string }
+        Returns: Json
+      }
       get_family_id_by_token: { Args: { _token: string }; Returns: string }
       get_invitation_by_token: {
         Args: { _token: string }
@@ -1214,6 +1271,8 @@ export type Database = {
       group_type: "familia_estendida" | "escola" | "condominio" | "outro"
       mission_goal_type: "total" | "streak"
       shared_mission_mode: "coletiva" | "individual"
+      side_quest_category: "bondade" | "criatividade" | "socializacao"
+      side_quest_status: "pendente" | "concluida" | "expirada"
       submission_status: "pendente" | "aprovado" | "recusado"
       unlock_rule_type:
         | "starter"
@@ -1370,6 +1429,8 @@ export const Constants = {
       group_type: ["familia_estendida", "escola", "condominio", "outro"],
       mission_goal_type: ["total", "streak"],
       shared_mission_mode: ["coletiva", "individual"],
+      side_quest_category: ["bondade", "criatividade", "socializacao"],
+      side_quest_status: ["pendente", "concluida", "expirada"],
       submission_status: ["pendente", "aprovado", "recusado"],
       unlock_rule_type: [
         "starter",

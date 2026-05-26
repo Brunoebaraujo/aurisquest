@@ -25,6 +25,9 @@ import { LevelUpModal } from "@/components/cosmetics/LevelUpModal";
 import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 import { SubmissionSuccess } from "@/components/SubmissionSuccess";
 import { ExitChildModeDialog } from "@/components/ExitChildModeDialog";
+import { SideQuestScroll } from "@/components/sidequest/SideQuestScroll";
+import { SideQuestHistory } from "@/components/sidequest/SideQuestHistory";
+import { useActiveSideQuest } from "@/hooks/useActiveSideQuest";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
 type Activity = { id: string; name: string; description: string | null; reward_auris: number; category: string | null; tier?: ActivityTier; icon_key?: string | null; icon_url?: string | null; streak?: number };
@@ -73,6 +76,9 @@ const ChildHome = () => {
   const [levelGlow, setLevelGlow] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
+  const [sqBusy, setSqBusy] = useState(false);
+  const token = typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null;
+  const { active: activeSideQuest, history: sideQuestHistory, refresh: refreshSideQuest } = useActiveSideQuest(token);
   const sharedMode = typeof window !== "undefined" && localStorage.getItem("aq_shared_mode") === "1";
 
   // Calendar state
@@ -309,6 +315,23 @@ const ChildHome = () => {
           </Card>
         )}
 
+        {activeSideQuest && (
+          <SideQuestScroll
+            quest={activeSideQuest}
+            busy={sqBusy}
+            onComplete={async () => {
+              if (!token) return;
+              setSqBusy(true);
+              try {
+                const { data, error } = await supabase.rpc("complete_side_quest", { _token: token, _side_quest_id: activeSideQuest.id });
+                if (error) { toast.error(error.message); return; }
+                toast.success(`SideQuest concluída! +${(data as any)?.reward_auris ?? activeSideQuest.reward_auris} Auris ✨`);
+                await Promise.all([refreshSideQuest(), refresh()]);
+              } finally { setSqBusy(false); }
+            }}
+          />
+        )}
+
         <div className="grid grid-cols-3 gap-3">
           <Card className="border-0 shadow-card rounded-2xl bg-card">
             <CardContent className="p-3 text-center">
@@ -498,6 +521,10 @@ const ChildHome = () => {
                 </CardContent>
               </Card>
             )}
+
+            <SideQuestHistory items={sideQuestHistory} />
+
+
 
             <Card className="border-0 shadow-card rounded-3xl">
               <CardContent className="p-5">

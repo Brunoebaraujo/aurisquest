@@ -10,6 +10,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLe
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
+import { SideQuestInviteCard } from "@/components/sidequest/SideQuestInviteCard";
 
 type ApprovedRow = { child_id: string; reward_auris: number; completed_at: string };
 type KidRow = { id: string; name: string; created_at: string };
@@ -190,6 +191,8 @@ const Dashboard = () => {
           </Link>
         ))}
       </div>
+
+      <SideQuestInviteCard />
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card className="border-0 shadow-card rounded-2xl">
