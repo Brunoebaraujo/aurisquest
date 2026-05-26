@@ -23,6 +23,7 @@ export type SideQuestHistoryItem = {
   child_comment: string | null;
   child_photo_url: string | null;
   completed_at: string;
+  status?: "pendente" | "concluida" | "expirada";
 };
 
 export const useActiveSideQuest = (token: string | null) => {
