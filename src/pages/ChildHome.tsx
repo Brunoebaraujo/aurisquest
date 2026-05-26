@@ -315,6 +315,23 @@ const ChildHome = () => {
           </Card>
         )}
 
+        {activeSideQuest && (
+          <SideQuestScroll
+            quest={activeSideQuest}
+            busy={sqBusy}
+            onComplete={async () => {
+              if (!token) return;
+              setSqBusy(true);
+              try {
+                const { data, error } = await supabase.rpc("complete_side_quest", { _token: token, _side_quest_id: activeSideQuest.id });
+                if (error) { toast.error(error.message); return; }
+                toast.success(`SideQuest concluída! +${(data as any)?.reward_auris ?? activeSideQuest.reward_auris} Auris ✨`);
+                await Promise.all([refreshSideQuest(), refresh()]);
+              } finally { setSqBusy(false); }
+            }}
+          />
+        )}
+
         <div className="grid grid-cols-3 gap-3">
           <Card className="border-0 shadow-card rounded-2xl bg-card">
             <CardContent className="p-3 text-center">
