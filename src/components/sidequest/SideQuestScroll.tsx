@@ -83,7 +83,7 @@ export const SideQuestScroll = ({ quest, onRequestComplete, busy }: Props) => {
 
           <div className="mt-4 flex justify-center">
             <Button
-              onClick={onComplete}
+              onClick={onRequestComplete}
               disabled={busy || remainingMs <= 0}
               className="rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-display font-bold shadow-md"
             >
