@@ -25,6 +25,9 @@ import { LevelUpModal } from "@/components/cosmetics/LevelUpModal";
 import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 import { SubmissionSuccess } from "@/components/SubmissionSuccess";
 import { ExitChildModeDialog } from "@/components/ExitChildModeDialog";
+import { SideQuestScroll } from "@/components/sidequest/SideQuestScroll";
+import { SideQuestHistory } from "@/components/sidequest/SideQuestHistory";
+import { useActiveSideQuest } from "@/hooks/useActiveSideQuest";
 
 type ChildSession = { id: string; name: string; family_id: string; avatar_url?: string | null };
 type Activity = { id: string; name: string; description: string | null; reward_auris: number; category: string | null; tier?: ActivityTier; icon_key?: string | null; icon_url?: string | null; streak?: number };
