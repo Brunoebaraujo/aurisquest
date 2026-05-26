@@ -991,7 +991,9 @@ export type Database = {
       side_quests: {
         Row: {
           category: Database["public"]["Enums"]["side_quest_category"]
+          child_comment: string | null
           child_id: string
+          child_photo_url: string | null
           completed_at: string | null
           created_at: string
           created_by: string
@@ -1006,7 +1008,9 @@ export type Database = {
         }
         Insert: {
           category: Database["public"]["Enums"]["side_quest_category"]
+          child_comment?: string | null
           child_id: string
+          child_photo_url?: string | null
           completed_at?: string | null
           created_at?: string
           created_by: string
@@ -1021,7 +1025,9 @@ export type Database = {
         }
         Update: {
           category?: Database["public"]["Enums"]["side_quest_category"]
+          child_comment?: string | null
           child_id?: string
+          child_photo_url?: string | null
           completed_at?: string | null
           created_at?: string
           created_by?: string
@@ -1165,7 +1171,12 @@ export type Database = {
         Returns: Json
       }
       complete_side_quest: {
-        Args: { _side_quest_id: string; _token: string }
+        Args: {
+          _child_comment?: string
+          _child_photo_url?: string
+          _side_quest_id: string
+          _token: string
+        }
         Returns: Json
       }
       compute_child_level: { Args: { _child_id: string }; Returns: Json }
