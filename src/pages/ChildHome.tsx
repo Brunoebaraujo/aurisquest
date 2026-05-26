@@ -76,6 +76,9 @@ const ChildHome = () => {
   const [levelGlow, setLevelGlow] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
+  const [sqBusy, setSqBusy] = useState(false);
+  const token = typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null;
+  const { active: activeSideQuest, history: sideQuestHistory, refresh: refreshSideQuest } = useActiveSideQuest(token);
   const sharedMode = typeof window !== "undefined" && localStorage.getItem("aq_shared_mode") === "1";
 
   // Calendar state
