@@ -13,7 +13,7 @@ type Props = {
 };
 
 const statusMeta = {
-  concluida: { label: "Concluida", icon: CheckCircle2, className: "bg-success/10 text-success border-success/20" },
+  concluida: { label: "Concluída", icon: CheckCircle2, className: "bg-success/10 text-success border-success/20" },
   pendente: { label: "Pendente", icon: Clock, className: "bg-warning/10 text-warning border-warning/20" },
   expirada: { label: "Expirada", icon: Hourglass, className: "bg-muted text-muted-foreground border-border" },
 } as const;
@@ -59,7 +59,7 @@ export const SideQuestHistory = ({
                         {cat.label} · {d.toLocaleDateString("pt-BR")}
                       </div>
                     </div>
-                    <div className="shrink-0 flex items-center gap-2">
+                    <div className="shrink-0 flex flex-wrap items-center justify-end gap-2">
                       <span className="font-display font-bold text-sm inline-flex items-center gap-0.5">
                         <AuriIcon size={12} /> {it.reward_auris}
                       </span>
