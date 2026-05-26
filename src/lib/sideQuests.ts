@@ -26,7 +26,7 @@ export const SIDE_QUEST_CATEGORIES: Record<SideQuestCategory, SideQuestCategoryD
     ring: "ring-rose-300",
     badge: "bg-rose-500 text-white",
     missions: [
-      { key: "bondade.ajudar",  title: "Ajude alguém sem que pedam!", emoji: "🤝" },
+      { key: "bondade.ajudar",  title: "Ajude alguém de forma espontânea!", emoji: "🤝" },
       { key: "bondade.elogio",  title: "Faça um elogio sincero para alguém.", emoji: "💬" },
       { key: "bondade.dividir", title: "Divida algo que você gosta.", emoji: "🎁" },
     ],
