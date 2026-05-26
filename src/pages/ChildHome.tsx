@@ -26,6 +26,7 @@ import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 import { SubmissionSuccess } from "@/components/SubmissionSuccess";
 import { ExitChildModeDialog } from "@/components/ExitChildModeDialog";
 import { SideQuestScroll } from "@/components/sidequest/SideQuestScroll";
+import { CompleteSideQuestDialog } from "@/components/sidequest/CompleteSideQuestDialog";
 import { SideQuestHistory } from "@/components/sidequest/SideQuestHistory";
 import { useActiveSideQuest } from "@/hooks/useActiveSideQuest";
 
