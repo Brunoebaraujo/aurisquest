@@ -20,6 +20,8 @@ export type SideQuestHistoryItem = {
   title: string;
   reward_auris: number;
   parent_comment: string | null;
+  child_comment: string | null;
+  child_photo_url: string | null;
   completed_at: string;
 };
 
