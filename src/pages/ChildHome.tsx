@@ -26,6 +26,7 @@ import { buildEquipment, type DashboardCosmetics } from "@/lib/cosmetics";
 import { SubmissionSuccess } from "@/components/SubmissionSuccess";
 import { ExitChildModeDialog } from "@/components/ExitChildModeDialog";
 import { SideQuestScroll } from "@/components/sidequest/SideQuestScroll";
+import { CompleteSideQuestDialog } from "@/components/sidequest/CompleteSideQuestDialog";
 import { SideQuestHistory } from "@/components/sidequest/SideQuestHistory";
 import { useActiveSideQuest } from "@/hooks/useActiveSideQuest";
 
@@ -77,6 +78,7 @@ const ChildHome = () => {
   const [successOpen, setSuccessOpen] = useState(false);
   const [exitOpen, setExitOpen] = useState(false);
   const [sqBusy, setSqBusy] = useState(false);
+  const [sqDialogOpen, setSqDialogOpen] = useState(false);
   const token = typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null;
   const { active: activeSideQuest, history: sideQuestHistory, refresh: refreshSideQuest } = useActiveSideQuest(token);
   const sharedMode = typeof window !== "undefined" && localStorage.getItem("aq_shared_mode") === "1";
@@ -319,14 +321,40 @@ const ChildHome = () => {
           <SideQuestScroll
             quest={activeSideQuest}
             busy={sqBusy}
-            onComplete={async () => {
-              if (!token) return;
+            onRequestComplete={() => setSqDialogOpen(true)}
+          />
+        )}
+
+        {activeSideQuest && (
+          <CompleteSideQuestDialog
+            quest={activeSideQuest}
+            open={sqDialogOpen}
+            onOpenChange={setSqDialogOpen}
+            busy={sqBusy}
+            onConfirm={async ({ comment, file }) => {
+              if (!token || !child) return;
               setSqBusy(true);
               try {
-                const { data, error } = await supabase.rpc("complete_side_quest", { _token: token, _side_quest_id: activeSideQuest.id });
+                let photoUrl: string | null = null;
+                if (file) {
+                  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+                  const path = `sidequests/${child.family_id}/${child.id}/${Date.now()}.${ext}`;
+                  const up = await supabase.storage.from("proofs").upload(path, file, { upsert: false });
+                  if (up.error) throw up.error;
+                  photoUrl = supabase.storage.from("proofs").getPublicUrl(path).data.publicUrl;
+                }
+                const { data, error } = await supabase.rpc("complete_side_quest", {
+                  _token: token,
+                  _side_quest_id: activeSideQuest.id,
+                  _child_comment: comment,
+                  _child_photo_url: photoUrl,
+                });
                 if (error) { toast.error(error.message); return; }
-                toast.success(`SideQuest concluída! +${(data as any)?.reward_auris ?? activeSideQuest.reward_auris} Auris ✨`);
+                toast.success(`Pergaminho registrado! +${(data as any)?.reward_auris ?? activeSideQuest.reward_auris} Auris ✨`);
+                setSqDialogOpen(false);
                 await Promise.all([refreshSideQuest(), refresh()]);
+              } catch (e: any) {
+                toast.error(e.message ?? "Erro ao concluir");
               } finally { setSqBusy(false); }
             }}
           />

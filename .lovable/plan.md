@@ -1,80 +1,60 @@
-## SideQuest do Dia — Plano de Implementação
+## Comprovação leve da SideQuest do Dia
 
-### 1. Banco de Dados (migration)
+Adicionar um modal mágico de conclusão exigindo pelo menos comentário OU foto, salvar no histórico e exibir esses registros em "Minhas Side-Quests". Sem aprovação do responsável.
 
-Nova tabela `side_quests`:
-- `id` (uuid pk), `family_id`, `child_id`, `created_by` (parent user)
-- `category` (enum: bondade, criatividade, socializacao)
-- `title` (texto fixo da missão sugerida)
-- `mission_key` (slug para impedir repetição: ex. `bondade.ajudar`)
-- `reward_auris` (int, 2 ou 3)
-- `parent_comment` (text, opcional, max 80)
-- `status` (pendente | concluida | expirada)
-- `created_at`, `expires_at` (created_at + 24h), `completed_at`
-- Índices: (child_id, status), (child_id, mission_key) onde status='concluida'
-- RLS: responsáveis da família veem/criam; criança (via app) vê as próprias
+### 1. Banco de dados (migration)
 
-Regra: máximo 1 SideQuest com status='pendente' e expires_at > now() por child_id por dia (validado em código + índice parcial único).
+Adicionar colunas em `public.side_quests`:
+- `child_comment text` (até 120 chars)
+- `child_photo_url text`
 
-### 2. Catálogo de missões (frontend, `src/lib/sideQuests.ts`)
+Atualizar RPCs existentes para incluir esses campos no retorno:
+- `get_child_side_quest_history` — incluir `child_comment` e `child_photo_url` em cada item.
+- `complete_side_quest` — aceitar dois novos parâmetros `_child_comment text DEFAULT NULL` e `_child_photo_url text DEFAULT NULL`; validar que ao menos um seja não-nulo/não-vazio (caso contrário `RAISE EXCEPTION 'empty_proof'`); persistir no UPDATE; demais regras inalteradas (crédito de Auris, expiração, status). Limitar comentário a 120 chars no servidor.
 
-Constantes com 3 categorias × 3 missões cada (exatamente os textos do brief), com `mission_key`, `title`, `icon` (lucide ou emoji), `cor temática`. Categorias: Bondade (rosa/vermelho, Heart), Criatividade (amarelo/roxo, Lightbulb), Socialização (azul/verde, MessageCircle).
+Bucket de fotos: reutilizar `proofs` (já público) — caminho `sidequests/{family_id}/{child_id}/{timestamp}.{ext}`. Nenhuma migration de storage necessária — política atual `Upload de provas autenticado` é `TO authenticated`, e o child usa o anon client. Vamos relaxar essa policy adicionando role `anon` para `bucket_id = 'proofs'` (mesma migration), mantendo escrita restrita ao bucket de provas. Leitura já é pública.
 
-Função `pickRandomCategory()` — sorteio determinístico do dia opcional.
+### 2. Frontend
 
-### 3. Responsável — Card de convite + Modal de criação
+**`src/hooks/useActiveSideQuest.ts`** — estender `SideQuestHistoryItem` com `child_comment` e `child_photo_url`.
 
-- **`src/components/sidequest/SideQuestInviteCard.tsx`**: card pergaminho compacto no Dashboard do responsável (acima de "Saldos por criança"). Mostra apenas se há ao menos uma criança sem SideQuest ativa hoje. Botão "Criar SideQuest do Dia".
-- **`src/components/sidequest/CreateSideQuestDialog.tsx`**: modal com:
-  1. Seletor de criança (se >1)
-  2. Categoria sorteada (ícone grande + nome + cor) — botão "Sortear outra"
-  3. 3 missões sugeridas como cards selecionáveis
-  4. Recompensa automática (2 ou 3 Auris, aleatório)
-  5. Textarea opcional (80 chars) com placeholder
-  6. Botão "Confirmar missão" → insert na tabela com expires_at = now()+24h
+**Novo `src/components/sidequest/CompleteSideQuestDialog.tsx`** — modal estilo pergaminho:
+- Cabeçalho mágico ("Como foi sua aventura hoje? ✨")
+- Textarea (max 120) "Conte o que aconteceu..." com contador suave
+- Botão "Enviar foto 📸" (input file `accept="image/*" capture="environment"`) com preview e botão remover
+- Texto auxiliar: "Conte como foi sua missão ou envie uma foto ✨" (só aparece em vermelho amigável se tentar concluir vazio)
+- Botão "Concluir missão" desabilitado quando ambos vazios
+- Visual: gradiente âmbar/dourado, ring `cat.ring`, sparkles, sem aparência burocrática
 
-### 4. Criança — Pergaminho no topo
+**`src/components/sidequest/SideQuestScroll.tsx`** — trocar `onComplete: () => void` por `onRequestComplete: () => void`; o botão abre o novo modal (controlado pelo pai).
 
-- **`src/components/sidequest/SideQuestScroll.tsx`**: o pergaminho horizontal grande (estilo do mockup). Gradiente âmbar/dourado, bordas arredondadas, "carretéis" laterais simples em CSS, badge da categoria à esquerda, título central, timer regressivo à direita (atualiza a cada 1s via `setInterval`), comentário do responsável abaixo, botão "Marcar como concluída".
-- Integrar em `src/pages/ChildHome.tsx` entre o card de nível/XP e os cards de totais (pendente/aprovado/pago). Hook `useActiveSideQuest(childId)` faz query + realtime.
-- Ao concluir: update status='concluida', completed_at=now(); credita Auris via insert em `submissions` com tipo especial OU adiciona coluna `side_quest_id` em submissions. **Decisão:** criar submission `aprovado` com `reward_auris` e flag — mais simples: criar tabela própria de créditos não. Melhor: somar direto no saldo via `side_quests` aprovadas (atualizar query de saldo).
+**`src/pages/ChildHome.tsx`** — refatorar fluxo de conclusão:
+1. Botão do pergaminho abre `CompleteSideQuestDialog`.
+2. Ao confirmar: se `file` presente, upload para `proofs` em `sidequests/...` (mesmo padrão do `submit`). Pegar publicUrl.
+3. Chamar `supabase.rpc("complete_side_quest", { _token, _side_quest_id, _child_comment, _child_photo_url })`.
+4. Toast de sucesso ("Pergaminho registrado no histórico ✨"), fechar modal, refresh, manter crédito de Auris.
 
-  **Abordagem mais simples e isolada**: criar uma `activity` virtual "SideQuest" oculta de listagens (`active=false, hidden=true`) e gerar `submission` aprovada. Porém menos limpo. **Escolha**: incluir `side_quests` concluídas no cálculo de saldo do dashboard e child home — atualizar `Dashboard.tsx` e ChildHome para somar `reward_auris` das side_quests concluídas. SideQuests NÃO entram em "Missões ativas" nem em submissions.
+**`src/components/sidequest/SideQuestHistory.tsx`** — para cada item concluído renderizar (quando existirem):
+- Comentário do responsável (já temos via `parent_comment` — adicionar exibição se houver, em balão "💌")
+- Comentário da criança em balão "🗯️"
+- Miniatura clicável da foto (thumb 56–72px, `rounded-xl`, abre em nova aba)
+- Manter ícone, nome, categoria · data, Auris, check verde
 
-### 5. Histórico "Minhas Side-Quests"
+### 3. Critério de aceite
 
-- **`src/components/sidequest/SideQuestHistory.tsx`**: card com lista das últimas 5 concluídas (ícone, nome, categoria · data, Auris, check verde). Botão "Ver todas".
-- Renderizar em `ChildHome.tsx` ao lado/abaixo de "Minhas medalhas" (na mesma região, sem remover nada existente).
+- Conclusão vazia bloqueada com mensagem amigável.
+- Comentário OU foto (ou ambos) liberam a confirmação.
+- Auris creditados automaticamente, sem aprovação do responsável.
+- Histórico mostra comentário do responsável, comentário da criança e miniatura da foto quando existirem.
+- Pergaminho ativo desaparece após conclusão; entra no histórico.
+- Visual mantém estética mágica/RPG do Auris Quest.
 
-### 6. Expiração
+### Arquivos
 
-- Filtros nas queries usam `status='pendente' AND expires_at > now()` — expiração implícita, sem cron. Para histórico só mostramos `status='concluida'`.
+**Migration**: nova migration única — adiciona colunas, atualiza 2 RPCs, ajusta policy de upload do bucket `proofs` para incluir `anon`.
 
-### 7. Saldo de Auris
+**Criar**: `src/components/sidequest/CompleteSideQuestDialog.tsx`
 
-Atualizar pontos de leitura de saldo da criança (ChildHome e Dashboard responsável "Saldos por criança") para somar `SUM(reward_auris)` de `side_quests` onde `status='concluida'` da criança. Pagamentos continuam descontando normalmente.
-
-### Arquivos a criar/editar
-
-**Migration**: tabela `side_quests` + RLS + índice único parcial.
-
-**Criar**:
-- `src/lib/sideQuests.ts` (catálogo)
-- `src/hooks/useActiveSideQuest.ts`
-- `src/hooks/useSideQuestHistory.ts`
-- `src/components/sidequest/SideQuestScroll.tsx`
-- `src/components/sidequest/SideQuestInviteCard.tsx`
-- `src/components/sidequest/CreateSideQuestDialog.tsx`
-- `src/components/sidequest/SideQuestHistory.tsx`
-
-**Editar**:
-- `src/pages/ChildHome.tsx` — inserir pergaminho no topo + histórico; somar Auris de side_quests no saldo
-- `src/pages/app/Dashboard.tsx` — inserir InviteCard; somar Auris de side_quests em earnedTotals/balances
-
-### Garantias de não-regressão
-
-- Não tocar em `Activities`, `Calendar`, `Ranking`, barra inferior.
-- SideQuests ficam isoladas em tabela própria — não aparecem em "Missões ativas" (que lê de `activities`/`submissions`).
-- Não geram medalhas.
+**Editar**: `src/components/sidequest/SideQuestScroll.tsx`, `src/components/sidequest/SideQuestHistory.tsx`, `src/pages/ChildHome.tsx`, `src/hooks/useActiveSideQuest.ts`
 
 Aprove para eu executar a migration e implementar.

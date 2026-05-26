@@ -14,11 +14,11 @@ const formatRemaining = (ms: number) => {
 
 type Props = {
   quest: ActiveSideQuest;
-  onComplete: () => void | Promise<void>;
+  onRequestComplete: () => void;
   busy?: boolean;
 };
 
-export const SideQuestScroll = ({ quest, onComplete, busy }: Props) => {
+export const SideQuestScroll = ({ quest, onRequestComplete, busy }: Props) => {
   const meta = findMission(quest.mission_key);
   const cat = meta?.category ?? SIDE_QUEST_CATEGORIES[quest.category];
   const emoji = meta?.mission.emoji ?? cat.emoji;
@@ -83,7 +83,7 @@ export const SideQuestScroll = ({ quest, onComplete, busy }: Props) => {
 
           <div className="mt-4 flex justify-center">
             <Button
-              onClick={onComplete}
+              onClick={onRequestComplete}
               disabled={busy || remainingMs <= 0}
               className="rounded-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-display font-bold shadow-md"
             >
