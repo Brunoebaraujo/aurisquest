@@ -18,7 +18,7 @@ type Props = {
   busy?: boolean;
 };
 
-export const SideQuestScroll = ({ quest, onComplete, busy }: Props) => {
+export const SideQuestScroll = ({ quest, onRequestComplete, busy }: Props) => {
   const meta = findMission(quest.mission_key);
   const cat = meta?.category ?? SIDE_QUEST_CATEGORIES[quest.category];
   const emoji = meta?.mission.emoji ?? cat.emoji;
