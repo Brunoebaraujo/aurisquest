@@ -522,6 +522,10 @@ const ChildHome = () => {
               </Card>
             )}
 
+            <SideQuestHistory items={sideQuestHistory} />
+
+
+
             <Card className="border-0 shadow-card rounded-3xl">
               <CardContent className="p-5">
                 <h2 className="font-display font-bold text-lg mb-3">Meu histórico</h2>
