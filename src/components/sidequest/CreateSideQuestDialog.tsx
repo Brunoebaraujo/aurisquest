@@ -76,9 +76,9 @@ export const CreateSideQuestDialog = ({ open, onOpenChange, children, blockedChi
         .eq("child_id", childId)
         .gte("created_at", start)
         .lt("created_at", end)
-        .maybeSingle();
+        .limit(1);
       if (checkError) { toast.error(checkError.message); return; }
-      if (existingToday) {
+      if ((existingToday?.length ?? 0) > 0) {
         toast.error(`${selectedChild?.name ?? "Essa criança"} já tem uma SideQuest hoje.`);
         return;
       }
