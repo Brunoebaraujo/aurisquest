@@ -32,7 +32,7 @@ begin
 end $$;
 
 create unique index if not exists side_quests_one_per_child_per_day_idx
-  on public.side_quests (child_id, ((created_at at time zone 'UTC')::date));
+  on public.side_quests (child_id, ((created_at at time zone 'America/Sao_Paulo')::date));
 
 create index if not exists side_quests_family_created_child_idx
   on public.side_quests (family_id, created_at, child_id);
