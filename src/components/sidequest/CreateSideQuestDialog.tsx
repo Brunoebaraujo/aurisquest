@@ -17,13 +17,22 @@ type Props = {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   children: ChildOpt[];
+  blockedChildIds?: Set<string>;
   defaultChildId?: string | null;
   onCreated?: () => void;
 };
 
-export const CreateSideQuestDialog = ({ open, onOpenChange, children, defaultChildId, onCreated }: Props) => {
+const getTodayBounds = () => {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start: start.toISOString(), end: end.toISOString() };
+};
+
+export const CreateSideQuestDialog = ({ open, onOpenChange, children, blockedChildIds = new Set(), defaultChildId, onCreated }: Props) => {
   const { user, profile } = useAuth();
-  const [childId, setChildId] = useState<string>(defaultChildId ?? children[0]?.id ?? "");
+  const [childId, setChildId] = useState<string>(defaultChildId ?? children.find(c => !blockedChildIds.has(c.id))?.id ?? "");
   const [category, setCategory] = useState<SideQuestCategory>(() => pickRandomCategory());
   const [missionKey, setMissionKey] = useState<string>("");
   const [reward, setReward] = useState<number>(() => pickRandomReward());
@@ -32,17 +41,19 @@ export const CreateSideQuestDialog = ({ open, onOpenChange, children, defaultChi
 
   useEffect(() => {
     if (open) {
-      setChildId(defaultChildId ?? children[0]?.id ?? "");
+      setChildId(defaultChildId ?? children.find(c => !blockedChildIds.has(c.id))?.id ?? "");
       const c = pickRandomCategory();
       setCategory(c);
       setMissionKey("");
       setReward(pickRandomReward());
       setComment("");
     }
-  }, [open, defaultChildId, children]);
+  }, [open, defaultChildId, children, blockedChildIds]);
 
   const cat = SIDE_QUEST_CATEGORIES[category];
   const selectedMission = useMemo(() => cat.missions.find(m => m.key === missionKey), [cat, missionKey]);
+  const selectedChild = children.find(c => c.id === childId);
+  const selectedChildBlocked = !!childId && blockedChildIds.has(childId);
 
   const reroll = () => {
     const others = ALL_CATEGORIES.filter(c => c !== category);
@@ -53,9 +64,25 @@ export const CreateSideQuestDialog = ({ open, onOpenChange, children, defaultChi
   const submit = async () => {
     if (!user || !profile?.family_id) { toast.error("Sessão inválida."); return; }
     if (!childId) { toast.error("Escolha uma criança."); return; }
+    if (selectedChildBlocked) { toast.error(`${selectedChild?.name ?? "Essa criança"} já tem uma SideQuest hoje.`); return; }
     if (!selectedMission) { toast.error("Escolha uma missão."); return; }
     setBusy(true);
     try {
+      const { start, end } = getTodayBounds();
+      const { data: existingToday, error: checkError } = await supabase
+        .from("side_quests")
+        .select("id")
+        .eq("family_id", profile.family_id)
+        .eq("child_id", childId)
+        .gte("created_at", start)
+        .lt("created_at", end)
+        .maybeSingle();
+      if (checkError) { toast.error(checkError.message); return; }
+      if (existingToday) {
+        toast.error(`${selectedChild?.name ?? "Essa criança"} já tem uma SideQuest hoje.`);
+        return;
+      }
+
       const { error } = await supabase.from("side_quests").insert({
         family_id: profile.family_id,
         child_id: childId,
@@ -68,7 +95,7 @@ export const CreateSideQuestDialog = ({ open, onOpenChange, children, defaultChi
       });
       if (error) {
         if (error.code === "23505") {
-          toast.error("Essa criança já tem uma SideQuest ativa ou já concluiu essa missão.");
+          toast.error(`${selectedChild?.name ?? "Essa criança"} já tem uma SideQuest hoje.`);
         } else {
           toast.error(error.message);
         }
@@ -101,9 +128,16 @@ export const CreateSideQuestDialog = ({ open, onOpenChange, children, defaultChi
               <Select value={childId} onValueChange={setChildId}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {children.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                  {children.map(c => (
+                    <SelectItem key={c.id} value={c.id} disabled={blockedChildIds.has(c.id)}>
+                      {c.name}{blockedChildIds.has(c.id) ? " (já tem hoje)" : ""}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              {selectedChildBlocked && (
+                <p className="mt-1 text-xs text-muted-foreground">{selectedChild?.name ?? "Essa criança"} já recebeu a SideQuest de hoje.</p>
+              )}
             </div>
           )}
 
@@ -170,7 +204,7 @@ export const CreateSideQuestDialog = ({ open, onOpenChange, children, defaultChi
 
         <DialogFooter>
           <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={busy}>Cancelar</Button>
-          <Button onClick={submit} disabled={busy || !missionKey || !childId} className="bg-gradient-primary">
+          <Button onClick={submit} disabled={busy || !missionKey || !childId || selectedChildBlocked} className="bg-gradient-primary">
             Confirmar missão
           </Button>
         </DialogFooter>
