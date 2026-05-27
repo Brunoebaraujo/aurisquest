@@ -6,29 +6,43 @@ import { Feather, Sparkles } from "lucide-react";
 import { CreateSideQuestDialog } from "./CreateSideQuestDialog";
 
 type KidRow = { id: string; name: string };
-type ActiveRow = { child_id: string };
+type TodayRow = { child_id: string };
+
+const getTodayBounds = () => {
+  const start = new Date();
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+  return { start: start.toISOString(), end: end.toISOString() };
+};
 
 export const SideQuestInviteCard = () => {
   const { profile } = useAuth();
   const [kids, setKids] = useState<KidRow[]>([]);
-  const [activeChildIds, setActiveChildIds] = useState<Set<string>>(new Set());
+  const [blockedChildIds, setBlockedChildIds] = useState<Set<string>>(new Set());
   const [open, setOpen] = useState(false);
   const [defaultChildId, setDefaultChildId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!profile?.family_id) return;
-    const [kidsRes, actRes] = await Promise.all([
+    const { start, end } = getTodayBounds();
+    const [kidsRes, todayRes] = await Promise.all([
       supabase.from("children").select("id, name").eq("family_id", profile.family_id).eq("active", true),
-      supabase.from("side_quests").select("child_id").eq("family_id", profile.family_id).eq("status", "pendente").gt("expires_at", new Date().toISOString()),
+      supabase
+        .from("side_quests")
+        .select("child_id")
+        .eq("family_id", profile.family_id)
+        .gte("created_at", start)
+        .lt("created_at", end),
     ]);
     setKids((kidsRes.data ?? []) as KidRow[]);
-    setActiveChildIds(new Set(((actRes.data ?? []) as ActiveRow[]).map(r => r.child_id)));
+    setBlockedChildIds(new Set(((todayRes.data ?? []) as TodayRow[]).map(r => r.child_id)));
   }, [profile?.family_id]);
 
   useEffect(() => { load(); }, [load]);
 
   if (kids.length === 0) return null;
-  const availableKids = kids.filter(k => !activeChildIds.has(k.id));
+  const availableKids = kids.filter(k => !blockedChildIds.has(k.id));
   if (availableKids.length === 0) return null;
 
   return (
@@ -58,7 +72,8 @@ export const SideQuestInviteCard = () => {
       <CreateSideQuestDialog
         open={open}
         onOpenChange={setOpen}
-        children={availableKids}
+        children={kids}
+        blockedChildIds={blockedChildIds}
         defaultChildId={defaultChildId}
         onCreated={load}
       />
