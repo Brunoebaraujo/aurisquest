@@ -1002,6 +1002,7 @@ export type Database = {
           id: string
           mission_key: string
           parent_comment: string | null
+          quest_date: string
           reward_auris: number
           status: Database["public"]["Enums"]["side_quest_status"]
           title: string
@@ -1019,6 +1020,7 @@ export type Database = {
           id?: string
           mission_key: string
           parent_comment?: string | null
+          quest_date?: string
           reward_auris?: number
           status?: Database["public"]["Enums"]["side_quest_status"]
           title: string
@@ -1036,6 +1038,7 @@ export type Database = {
           id?: string
           mission_key?: string
           parent_comment?: string | null
+          quest_date?: string
           reward_auris?: number
           status?: Database["public"]["Enums"]["side_quest_status"]
           title?: string
