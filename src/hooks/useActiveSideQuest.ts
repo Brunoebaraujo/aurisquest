@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { SideQuestCategory } from "@/lib/sideQuests";
+import { getTodayQuestDate } from "@/lib/sideQuestDailyLimit";
 
 export type ActiveSideQuest = {
   id: string;
@@ -11,6 +12,7 @@ export type ActiveSideQuest = {
   parent_comment: string | null;
   expires_at: string;
   created_at: string;
+  quest_date: string;
 };
 
 export type SideQuestHistoryItem = {
@@ -23,6 +25,7 @@ export type SideQuestHistoryItem = {
   child_comment: string | null;
   child_photo_url: string | null;
   completed_at: string;
+  quest_date?: string;
   status?: "pendente" | "concluida" | "expirada";
 };
 
@@ -33,8 +36,9 @@ export const useActiveSideQuest = (token: string | null) => {
 
   const refresh = useCallback(async () => {
     if (!token) { setActive(null); setHistory([]); setLoading(false); return; }
+    const todayQuestDate = getTodayQuestDate();
     const [a, h] = await Promise.all([
-      supabase.rpc("get_child_side_quest", { _token: token }),
+      (supabase.rpc as any)("get_child_side_quest", { _token: token, _quest_date: todayQuestDate }),
       supabase.rpc("get_child_side_quest_history", { _token: token, _limit: 10 }),
     ]);
     setActive((a.data as ActiveSideQuest | null) ?? null);
