@@ -123,7 +123,7 @@ export const CreateSideQuestDialog = ({ open, onOpenChange, children, blockedChi
                 <SelectContent>
                   {children.map(c => (
                     <SelectItem key={c.id} value={c.id} disabled={blockedChildIds.has(c.id)}>
-                      {c.name}{blockedChildIds.has(c.id) ? " (já tem hoje)" : ""}
+                      {c.name}{blockedChildIds.has(c.id) ? " (already has today's SideQuest)" : ""}
                     </SelectItem>
                   ))}
                 </SelectContent>
