@@ -1198,7 +1198,10 @@ export type Database = {
       expire_invitations: { Args: never; Returns: number }
       get_child_dashboard: { Args: { _token: string }; Returns: Json }
       get_child_new_unlocks: { Args: { _token: string }; Returns: Json }
-      get_child_side_quest: { Args: { _token: string }; Returns: Json }
+      get_child_side_quest: {
+        Args: { _quest_date?: string; _token: string }
+        Returns: Json
+      }
       get_child_side_quest_history: {
         Args: { _limit?: number; _token: string }
         Returns: Json
