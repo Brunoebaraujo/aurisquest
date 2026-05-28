@@ -1,4 +1,5 @@
 type SideQuestDateRow = {
+  family_id?: string
   child_id: string
   quest_date: string
 }
@@ -22,4 +23,16 @@ export const canCreateSideQuestForChild = (
   sideQuests: SideQuestDateRow[],
   childId: string,
   questDate: string,
-) => !sideQuests.some(row => row.child_id === childId && row.quest_date === questDate)
+  familyId?: string,
+) => !sideQuests.some(row => {
+  const sameFamily = !familyId || !row.family_id || row.family_id === familyId
+  return sameFamily && row.child_id === childId && row.quest_date === questDate
+})
+
+export const childDashboardMatchesBlockedSideQuest = (
+  blockedSideQuest: SideQuestDateRow,
+  dashboardSideQuest: SideQuestDateRow | null,
+) => !!dashboardSideQuest
+  && blockedSideQuest.child_id === dashboardSideQuest.child_id
+  && blockedSideQuest.quest_date === dashboardSideQuest.quest_date
+  && (!blockedSideQuest.family_id || !dashboardSideQuest.family_id || blockedSideQuest.family_id === dashboardSideQuest.family_id)
