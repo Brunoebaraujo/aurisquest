@@ -10,6 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { SIDE_QUEST_CATEGORIES, ALL_CATEGORIES, pickRandomCategory, pickRandomReward, type SideQuestCategory } from "@/lib/sideQuests";
 import { AuriIcon } from "@/components/AuriIcon";
+import { getTodayQuestDate } from "@/lib/sideQuestDailyLimit";
 
 type ChildOpt = { id: string; name: string };
 
@@ -20,14 +21,6 @@ type Props = {
   blockedChildIds?: Set<string>;
   defaultChildId?: string | null;
   onCreated?: () => void;
-};
-
-const getTodayBounds = () => {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-  return { start: start.toISOString(), end: end.toISOString() };
 };
 
 export const CreateSideQuestDialog = ({ open, onOpenChange, children, blockedChildIds = new Set(), defaultChildId, onCreated }: Props) => {
@@ -68,14 +61,13 @@ export const CreateSideQuestDialog = ({ open, onOpenChange, children, blockedChi
     if (!selectedMission) { toast.error("Escolha uma missão."); return; }
     setBusy(true);
     try {
-      const { start, end } = getTodayBounds();
-      const { data: existingToday, error: checkError } = await supabase
-        .from("side_quests")
+      const todayQuestDate = getTodayQuestDate();
+      const sideQuestsQuery = supabase.from("side_quests") as any;
+      const { data: existingToday, error: checkError } = await sideQuestsQuery
         .select("id")
         .eq("family_id", profile.family_id)
         .eq("child_id", childId)
-        .gte("created_at", start)
-        .lt("created_at", end)
+        .eq("quest_date", todayQuestDate)
         .limit(1);
       if (checkError) { toast.error(checkError.message); return; }
       if ((existingToday?.length ?? 0) > 0) {
@@ -83,10 +75,11 @@ export const CreateSideQuestDialog = ({ open, onOpenChange, children, blockedChi
         return;
       }
 
-      const { error } = await supabase.from("side_quests").insert({
+      const { error } = await sideQuestsQuery.insert({
         family_id: profile.family_id,
         child_id: childId,
         created_by: user.id,
+        quest_date: todayQuestDate,
         category,
         mission_key: selectedMission.key,
         title: selectedMission.title,
