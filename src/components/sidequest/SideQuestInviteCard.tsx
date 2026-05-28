@@ -4,17 +4,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Feather, Sparkles } from "lucide-react";
 import { CreateSideQuestDialog } from "./CreateSideQuestDialog";
+import { getTodayQuestDate } from "@/lib/sideQuestDailyLimit";
 
 type KidRow = { id: string; name: string };
 type TodayRow = { child_id: string };
-
-const getTodayBounds = () => {
-  const start = new Date();
-  start.setHours(0, 0, 0, 0);
-  const end = new Date(start);
-  end.setDate(end.getDate() + 1);
-  return { start: start.toISOString(), end: end.toISOString() };
-};
 
 export const SideQuestInviteCard = () => {
   const { profile } = useAuth();
@@ -25,15 +18,14 @@ export const SideQuestInviteCard = () => {
 
   const load = useCallback(async () => {
     if (!profile?.family_id) return;
-    const { start, end } = getTodayBounds();
+    const todayQuestDate = getTodayQuestDate();
+    const sideQuestsQuery = supabase.from("side_quests") as any;
     const [kidsRes, todayRes] = await Promise.all([
       supabase.from("children").select("id, name").eq("family_id", profile.family_id).eq("active", true),
-      supabase
-        .from("side_quests")
+      sideQuestsQuery
         .select("child_id")
         .eq("family_id", profile.family_id)
-        .gte("created_at", start)
-        .lt("created_at", end),
+        .eq("quest_date", todayQuestDate),
     ]);
     setKids((kidsRes.data ?? []) as KidRow[]);
     setBlockedChildIds(new Set(((todayRes.data ?? []) as TodayRow[]).map(r => r.child_id)));
@@ -43,7 +35,26 @@ export const SideQuestInviteCard = () => {
 
   if (kids.length === 0) return null;
   const availableKids = kids.filter(k => !blockedChildIds.has(k.id));
-  if (availableKids.length === 0) return null;
+  if (availableKids.length === 0) {
+    return (
+      <div className="relative">
+        <div className="absolute -inset-1 bg-gradient-to-r from-amber-300/30 to-yellow-200/20 blur-xl rounded-3xl pointer-events-none" />
+        <div className="relative rounded-3xl ring-2 ring-amber-200 bg-gradient-to-r from-amber-50 via-yellow-50 to-amber-100 p-4 shadow-card flex items-center gap-4">
+          <div className="shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-b from-amber-100 to-yellow-200 ring-2 ring-amber-300 flex items-center justify-center shadow-md">
+            <Sparkles className="w-7 h-7 text-amber-800" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] uppercase font-bold tracking-wide text-amber-700 inline-flex items-center gap-1">
+              <Feather className="w-3 h-3" /> Side Quest do dia
+            </div>
+            <p className="text-sm font-medium text-amber-950">
+              Todas as crianças já receberam a SideQuest de hoje. Amanhã novas SideQuests estarão disponíveis.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
