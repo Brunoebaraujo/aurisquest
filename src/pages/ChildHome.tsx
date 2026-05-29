@@ -559,7 +559,7 @@ const ChildHome = () => {
           </TabsContent>
 
           {/* ===== CALENDÁRIO ===== */}
-          <TabsContent value="calendario" className="mt-4 space-y-4">
+          <TabsContent ref={calendarRef} value="calendario" className="mt-4 space-y-4 scroll-mt-4">
             <Card className="border-0 shadow-card rounded-3xl">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -649,7 +649,7 @@ const ChildHome = () => {
           </TabsContent>
 
           {/* ===== RANKING ===== */}
-          <TabsContent value="ranking" className="mt-4 space-y-4">
+          <TabsContent ref={rankingRef} value="ranking" className="mt-4 space-y-4 scroll-mt-4">
             <Card className="border-0 shadow-card rounded-3xl">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
