@@ -233,18 +233,18 @@ export function CharacterSheet({
             aria-label="Editar visual"
           >
             <EquippedAvatar
-              equipment={equipment}
+              equipment={{ avatar: equipment.avatar, frame: equipment.frame }}
               size={108}
               fallbackName={name}
               className={cn(levelGlow && "ring-4 ring-primary/60 rounded-full animate-pulse")}
             />
-            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 inline-flex items-center gap-0.5 rounded-full bg-gradient-reward text-accent-foreground px-2 py-0.5 text-[10px] font-display font-bold border-2 border-background shadow-reward">
-              <Sparkles className="w-2.5 h-2.5" /> Lv {level}
-            </span>
           </button>
           <div className="min-w-0 flex-1 space-y-1.5">
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2 flex-wrap">
               <h1 className="font-display font-bold text-2xl md:text-3xl truncate">{name}</h1>
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-gradient-reward text-accent-foreground px-2 py-0.5 text-[11px] font-display font-bold border-2 border-background shadow-reward">
+                <Sparkles className="w-2.5 h-2.5" /> Lv {level}
+              </span>
               {onNameEdit && (
                 <button
                   type="button"
@@ -256,6 +256,7 @@ export function CharacterSheet({
                 </button>
               )}
             </div>
+
             <div className="flex items-center gap-1 text-accent text-sm font-semibold">
               <Crown className="w-4 h-4" /> {title ?? "Aventureiro"}
             </div>
