@@ -307,11 +307,12 @@ export function CharacterSheet({
             >
               <EquippedAvatar
                 equipment={{ avatar: equipment.avatar, frame: equipment.frame }}
-                size={280}
+                size={180}
                 fallbackName={name}
               />
             </button>
           </div>
+
           <div className="flex flex-col gap-2">
             {SLOTS_RIGHT.map(renderSlot)}
           </div>
@@ -325,7 +326,7 @@ export function CharacterSheet({
 
       {/* SECTION 4 — Profile Navigation */}
       {(onActivities || onCalendar || onRanking) && (
-        <div className="grid grid-cols-3 gap-2 sticky bottom-2 md:static z-20">
+        <div className="grid grid-cols-3 gap-2">
           {onActivities && (
             <NavBtn icon={<ClipboardList className="w-5 h-5" />} label="Atividades" onClick={onActivities} badge={hasActivityBadge} />
           )}
