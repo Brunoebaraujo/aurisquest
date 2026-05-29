@@ -707,6 +707,7 @@ const ChildHome = () => {
             data={cosmetics}
             token={typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null}
             onChanged={refresh}
+            defaultTab={wardrobeTab}
           />
           <ChildInventoryDialog
             open={inventoryOpen}
