@@ -1,60 +1,141 @@
-## Comprovação leve da SideQuest do Dia
+## Goal
 
-Adicionar um modal mágico de conclusão exigindo pelo menos comentário OU foto, salvar no histórico e exibir esses registros em "Minhas Side-Quests". Sem aprovação do responsável.
+Transform the child's `/c` (ChildHome) and parent's `/app/criancas/:id` (ChildProfile) screens into a true RPG character sheet matching the mockup, while preserving all current data, APIs, and behaviors. No DB changes.
 
-### 1. Banco de dados (migration)
+## Slot mapping (visual-only, no backend changes)
 
-Adicionar colunas em `public.side_quests`:
-- `child_comment text` (até 120 chars)
-- `child_photo_url text`
+The mockup shows 9 slots. The cosmetics system today has 6 real slots. Mapping:
 
-Atualizar RPCs existentes para incluir esses campos no retorno:
-- `get_child_side_quest_history` — incluir `child_comment` e `child_photo_url` em cada item.
-- `complete_side_quest` — aceitar dois novos parâmetros `_child_comment text DEFAULT NULL` e `_child_photo_url text DEFAULT NULL`; validar que ao menos um seja não-nulo/não-vazio (caso contrário `RAISE EXCEPTION 'empty_proof'`); persistir no UPDATE; demais regras inalteradas (crédito de Auris, expiração, status). Limitar comentário a 120 chars no servidor.
+| Mockup slot | Real backend slot | Behavior |
+|---|---|---|
+| Cabeça (Head) | `helmet_item_id` | Clickable → wardrobe |
+| Peito (Chest) | `armor_item_id` | Clickable → wardrobe |
+| Luvas (Gloves) | — | Locked silhouette, badge "Em breve" |
+| Amuleto (Amulet) | `aura_item_id` | Clickable → wardrobe (Aura) |
+| Anel (Ring) | — | Locked silhouette |
+| Cinto (Belt) | — | Locked silhouette |
+| Mão Principal | `weapon_item_id` | Clickable → wardrobe |
+| Botas (Boots) | — | Locked silhouette |
+| Mão Secundária | `pet_item_id` | Clickable (Pet appears here) |
 
-Bucket de fotos: reutilizar `proofs` (já público) — caminho `sidequests/{family_id}/{child_id}/{timestamp}.{ext}`. Nenhuma migration de storage necessária — política atual `Upload de provas autenticado` é `TO authenticated`, e o child usa o anon client. Vamos relaxar essa policy adicionando role `anon` para `bucket_id = 'proofs'` (mesma migration), mantendo escrita restrita ao bucket de provas. Leitura já é pública.
+The center character keeps using `EquippedAvatar` so the avatar always reflects real equipment. Frame stays as the avatar's rarity border.
 
-### 2. Frontend
+## New / changed components
 
-**`src/hooks/useActiveSideQuest.ts`** — estender `SideQuestHistoryItem` com `child_comment` e `child_photo_url`.
+### 1. `src/components/cosmetics/CharacterSheet.tsx` (new, shared)
 
-**Novo `src/components/sidequest/CompleteSideQuestDialog.tsx`** — modal estilo pergaminho:
-- Cabeçalho mágico ("Como foi sua aventura hoje? ✨")
-- Textarea (max 120) "Conte o que aconteceu..." com contador suave
-- Botão "Enviar foto 📸" (input file `accept="image/*" capture="environment"`) com preview e botão remover
-- Texto auxiliar: "Conte como foi sua missão ou envie uma foto ✨" (só aparece em vermelho amigável se tentar concluir vazio)
-- Botão "Concluir missão" desabilitado quando ambos vazios
-- Visual: gradiente âmbar/dourado, ring `cat.ring`, sparkles, sem aparência burocrática
+The single source of truth for the RPG layout. Used by both child and parent views.
 
-**`src/components/sidequest/SideQuestScroll.tsx`** — trocar `onComplete: () => void` por `onRequestComplete: () => void`; o botão abre o novo modal (controlado pelo pai).
+Props:
+```ts
+type Props = {
+  name: string;
+  level: number;
+  title?: string;
+  xpInLevel: number;
+  xpToNext: number;
+  totalXp: number;
+  nextLevelTotalXp: number;
+  auris: number;       // balance
+  medals: number;
+  streak: number;
+  pending: number;
+  approved: number;
+  paid: number;
+  equipment: Equipment;
+  onAvatarClick?: () => void;       // opens wardrobe
+  onSlotClick?: (slot: SlotKey) => void; // opens wardrobe on that tab
+  showBack?: boolean;
+  onBack?: () => void;
+  onClose?: () => void;
+  levelGlow?: boolean;
+};
+```
 
-**`src/pages/ChildHome.tsx`** — refatorar fluxo de conclusão:
-1. Botão do pergaminho abre `CompleteSideQuestDialog`.
-2. Ao confirmar: se `file` presente, upload para `proofs` em `sidequests/...` (mesmo padrão do `submit`). Pegar publicUrl.
-3. Chamar `supabase.rpc("complete_side_quest", { _token, _side_quest_id, _child_comment, _child_photo_url })`.
-4. Toast de sucesso ("Pergaminho registrado no histórico ✨"), fechar modal, refresh, manter crédito de Auris.
+Internal layout (mobile-first, single column ≤640px, comfortable on desktop too):
 
-**`src/components/sidequest/SideQuestHistory.tsx`** — para cada item concluído renderizar (quando existirem):
-- Comentário do responsável (já temos via `parent_comment` — adicionar exibição se houver, em balão "💌")
-- Comentário da criança em balão "🗯️"
-- Miniatura clicável da foto (thumb 56–72px, `rounded-xl`, abre em nova aba)
-- Manter ícone, nome, categoria · data, Auris, check verde
+```text
+┌───────────────────────────────────────────────────┐
+│ [←]                                          [×]  │  Header
+├───────────────────────────────────────────────────┤
+│ ┌─avatar─┐   Name ✏️                              │  Character Overview
+│ │ portrait│   ◆ Title                              │
+│ │   Lv N │   ┌─ XP bar ──────── 21/120 XP ┐       │
+│ └────────┘                                        │
+│ ┌Auris┐ ┌Medals┐ ┌Streak┐                         │
+├───────────────────────────────────────────────────┤
+│ ┌Pending┐ ┌Approved┐ ┌Paid┐ (blue / gold / green) │  Financial
+├───────────────────────────────────────────────────┤
+│           ◆ EQUIPAMENTOS ◆                        │  Equipment panel
+│  ┌Cabeça┐                              ┌Amuleto┐  │
+│  ┌Peito ┐         [Center avatar      ┌ Anel  ┐  │
+│  ┌Luvas ┐          with equipment]    ┌ Cinto ┐  │
+│         ┌Mão Princ.┐ ┌Botas┐ ┌Mão Sec.┐          │
+├───────────────────────────────────────────────────┤
+│ [📋 Atividades •]  [📅 Calendário]  [🏆 Ranking]  │  Sticky nav strip
+└───────────────────────────────────────────────────┘
+```
 
-### 3. Critério de aceite
+Sub-components inside the same file:
+- `<SlotTile label item locked onClick rarity>` — renders one slot. Min 44×44px touch target. Common = gray, Rare = blue, Epic = orange, Legendary = purple border via existing `RarityFrame`. Locked tiles render a faint silhouette icon (lucide: `HardHat`, `Hand`, `Circle`, `Minus`, `Footprints`) with an "Em breve" pill.
+- `<ResourceCard icon value label tone>` — for Auris / Medals / Streak.
+- `<MoneyCard tone="pending|approved|paid">` — for the three financial cards. Tones map to existing tokens (warning / accent / success) with a softly themed bg.
+- `<NavStrip onActivities onCalendar onRanking activityBadge>` — the sticky nav. Uses `scrollIntoView({ behavior: "smooth", block: "start" })` against refs passed in by the page.
 
-- Conclusão vazia bloqueada com mensagem amigável.
-- Comentário OU foto (ou ambos) liberam a confirmação.
-- Auris creditados automaticamente, sem aprovação do responsável.
-- Histórico mostra comentário do responsável, comentário da criança e miniatura da foto quando existirem.
-- Pergaminho ativo desaparece após conclusão; entra no histórico.
-- Visual mantém estética mágica/RPG do Auris Quest.
+Visuals: dark fantasy gradient on the equipment panel only (`bg-gradient-to-b from-primary/15 via-background to-secondary/10` plus a subtle inner shadow), gold accents for headings (`text-accent`). Card chrome uses existing semantic tokens — no hex colors in JSX.
 
-### Arquivos
+### 2. `src/pages/ChildHome.tsx`
 
-**Migration**: nova migration única — adiciona colunas, atualiza 2 RPCs, ajusta policy de upload do bucket `proofs` para incluir `anon`.
+- Replace the existing top "Oi, {name}" block + LevelBadge card + 3 financial cards with `<CharacterSheet ... />`.
+- Wire `onAvatarClick` and `onSlotClick(slot)` to open the existing `WardrobeDialog`. Add a `defaultTab` prop to `WardrobeDialog` so slot click pre-selects the matching tab (`elmo`, `armadura`, `arma`, `pet`, `aura`).
+- Keep `activeSideQuest`, missions, Tabs (Atividades / Calendário / Ranking), SideQuestHistory, history, etc. untouched below the sheet.
+- Add three section refs:
+  - `activitiesRef` → wraps the existing Atividades Tab content (or the `<Tabs>` block, scrolling to the tablist and setting `tab="atividades"`).
+  - `calendarRef` → existing Calendário tab.
+  - `rankingRef` → existing Ranking tab.
+- `<NavStrip>` switches the `<Tabs>` value and scrolls to it. Activities red-dot badge appears if `activeSideQuest && !activeSideQuest.completed_at`, or `missions.length > 0`.
 
-**Criar**: `src/components/sidequest/CompleteSideQuestDialog.tsx`
+### 3. `src/pages/app/ChildProfile.tsx`
 
-**Editar**: `src/components/sidequest/SideQuestScroll.tsx`, `src/components/sidequest/SideQuestHistory.tsx`, `src/pages/ChildHome.tsx`, `src/hooks/useActiveSideQuest.ts`
+- Replace `<ChildShowcase>` and the "X medalhas conquistadas" header with `<CharacterSheet ... />` using the parent's data.
+- Resource numbers: `auris` from existing `approvedAuris - paidAuris` (or fetch `wallet`), `medals = wonMissions.length`, `streak` from the highest mission streak (or 0 if not readily available — derive via existing submissions logic already there).
+- Financial cards (Pending / Approved / Paid): the parent screen doesn't expose these today. Fetch them in the same `load()` Promise.all using existing tables: `submissions` aggregated by `status` for pending/approved, and `payouts` (or whatever the parent dashboard already uses) for paid. **Spike note:** if a single RPC exists, prefer it; otherwise inline aggregation in `load()`.
+- Slot clicks open the existing `<ParentWardrobeDialog>` (add same `defaultTab` prop).
+- Below the sheet, keep: `<SideQuestHistory>`, "Visualizar como a criança" CTA, "Missões em andamento" card, "Medalhas conquistadas" card — unchanged.
+- NavStrip targets refs around those sections (Atividades = missions in progress + history, Calendário = placeholder "Calendário de Aventuras — Em breve" card, Ranking = scroll to a small ranking placeholder or to the medals card if no ranking exists on this page).
 
-Aprove para eu executar a migration e implementar.
+### 4. `WardrobeDialog` / `ParentWardrobeDialog` (small change)
+
+Add optional `defaultTab?: string` prop (forwarded to `<Tabs defaultValue={...}>`). Used by `CharacterSheet` to deep-link the wardrobe to the right slot.
+
+## Mobile constraints
+
+- All slot tiles, nav buttons, header buttons ≥ 44×44px.
+- Equipment panel uses a 3-column grid on mobile: `[left slots] [center avatar] [right slots]` with `grid-template-columns: minmax(72px,1fr) minmax(140px,1.6fr) minmax(72px,1fr)`. Bottom row is a separate 3-column grid below.
+- No horizontal scroll: panel `overflow-hidden`, slot tiles size with `w-full aspect-square`.
+- The sticky `NavStrip` becomes `sticky bottom-0` only on mobile (`md:static`) so it acts like a quick-jump tab bar.
+
+## Not changing
+
+- No DB migrations.
+- No edge function changes.
+- No changes to XP / Auris / Medals / Streak / Missions / Side Quests / Rewards business logic.
+- No changes to `EquippedAvatar` rendering rules.
+- Existing `ChildShowcase` stays in the repo (still used by the parent screen until the swap; safe to remove after).
+
+## Files touched
+
+- new: `src/components/cosmetics/CharacterSheet.tsx`
+- edit: `src/pages/ChildHome.tsx` (swap top section, add nav refs)
+- edit: `src/pages/app/ChildProfile.tsx` (swap showcase, add Pending/Approved/Paid fetch, add nav refs + Calendar placeholder)
+- edit: `src/components/cosmetics/WardrobeDialog.tsx` (add `defaultTab`)
+- edit: `src/components/cosmetics/ParentWardrobeDialog.tsx` (add `defaultTab`)
+
+## Acceptance
+
+1. Child opens `/c`: sees the RPG sheet with their avatar, level, XP bar, Auris/Medals/Streak, Pending/Approved/Paid, equipment panel with their 6 real items shown + 3 silhouettes labeled "Em breve". Below, all current sections still work (Side Quest, missions, Atividades/Calendário/Ranking).
+2. Tapping a real slot opens the wardrobe on that slot's tab; tapping a locked slot shows a soft "Em breve" toast or just stays inert.
+3. Tapping the avatar opens the wardrobe on the "Avatar" tab.
+4. NavStrip buttons smooth-scroll to the right section and switch the underlying Tab on the child page.
+5. Parent at `/app/criancas/:id` sees the same RPG sheet with the child's real numbers and equipment (read-only equip via the existing `ParentWardrobeDialog`).
+6. No horizontal scroll at 360px width. All touch targets ≥ 44px.
