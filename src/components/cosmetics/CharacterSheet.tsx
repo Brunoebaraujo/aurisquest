@@ -305,8 +305,8 @@ export function CharacterSheet({
               aria-label="Editar visual"
             >
               <EquippedAvatar
-                equipment={equipment}
-                size={160}
+                equipment={{ avatar: equipment.avatar, frame: equipment.frame }}
+                size={280}
                 fallbackName={name}
               />
             </button>
