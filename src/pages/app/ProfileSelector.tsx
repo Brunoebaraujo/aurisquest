@@ -103,7 +103,7 @@ const ProfileSelector = () => {
                 <div className="w-full aspect-square rounded-2xl bg-gradient-to-b from-sky-100 to-sky-50 overflow-hidden flex items-center justify-center group-hover:scale-[1.02] transition-transform">
                   <img src={wizardImg} alt="Responsável" className="w-full h-full object-contain" loading="lazy" />
                 </div>
-                <div className="font-display font-bold text-2xl mt-3">{profile?.name || "Responsável"}</div>
+                <div className="font-display font-bold text-2xl mt-3">{profile?.full_name || "Responsável"}</div>
                 <div className="text-sm text-muted-foreground">Painel completo</div>
               </Card>
             </button>
