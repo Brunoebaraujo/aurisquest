@@ -119,19 +119,26 @@ const ProfileSelector = () => {
                     className="group focus:outline-none focus:ring-4 focus:ring-accent/40 rounded-3xl disabled:opacity-60"
                   >
                     <Card className="p-3 rounded-3xl border-0 shadow-xl hover:-translate-y-1 hover:shadow-glow transition-all bg-white/95 backdrop-blur flex flex-col items-center">
-                      {c.avatar_url ? (
-                        <img
-                          src={c.avatar_url}
-                          alt={c.name}
-                          className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover group-hover:scale-110 transition-transform border-4 border-white shadow-md"
-                        />
-                      ) : (
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-warm flex items-center justify-center group-hover:scale-110 transition-transform border-4 border-white shadow-md">
-                          <span className="font-display font-bold text-3xl text-secondary-foreground">
-                            {c.name[0]?.toUpperCase()}
-                          </span>
-                        </div>
-                      )}
+                      {(() => {
+                        const eq = cosmetics[c.id]?.equipment;
+                        const avatarUrl = eq?.avatar?.image_url ?? c.avatar_url;
+                        if (avatarUrl) {
+                          return (
+                            <img
+                              src={avatarUrl}
+                              alt={c.name}
+                              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover group-hover:scale-110 transition-transform border-4 border-white shadow-md"
+                            />
+                          );
+                        }
+                        return (
+                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-warm flex items-center justify-center group-hover:scale-110 transition-transform border-4 border-white shadow-md">
+                            <span className="font-display font-bold text-3xl text-secondary-foreground">
+                              {c.name[0]?.toUpperCase()}
+                            </span>
+                          </div>
+                        );
+                      })()}
                       <div className="font-display font-bold text-base mt-2 truncate max-w-full">{c.name}</div>
                       <div className="text-[11px] text-muted-foreground">
                         {enteringId === c.id ? "Entrando..." : "Modo criança"}
