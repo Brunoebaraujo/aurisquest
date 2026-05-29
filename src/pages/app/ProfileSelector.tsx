@@ -21,6 +21,9 @@ const ProfileSelector = () => {
   const [children, setChildren] = useState<ChildRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [enteringId, setEnteringId] = useState<string | null>(null);
+  const cosmetics = useFamilyCosmetics(children.map((c) => c.id));
+
+
 
   useEffect(() => {
     let alive = true;
