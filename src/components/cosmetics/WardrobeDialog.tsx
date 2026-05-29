@@ -25,13 +25,14 @@ const SLOT_COL: Record<string, string> = {
 };
 
 export function WardrobeDialog({
-  open, onOpenChange, data, token, onChanged,
+  open, onOpenChange, data, token, onChanged, defaultTab,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   data: DashboardCosmetics;
   token: string | null;
   onChanged: () => void;
+  defaultTab?: string;
 }) {
   const [busy, setBusy] = useState(false);
   const unlockedAv = useMemo(() => new Set(data.unlocked_avatars.map(a => a.avatar_id)), [data.unlocked_avatars]);
@@ -54,7 +55,7 @@ export function WardrobeDialog({
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">Guarda-roupa</DialogTitle>
         </DialogHeader>
-        <Tabs defaultValue="avatar">
+        <Tabs defaultValue={defaultTab ?? "avatar"} key={defaultTab ?? "avatar"}>
           <TabsList className="flex flex-wrap h-auto">
             {CATEGORIES.map(c => <TabsTrigger key={c.key} value={c.key}>{c.label}</TabsTrigger>)}
           </TabsList>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -17,8 +17,9 @@ import { ActivityIcon } from "@/components/ActivityIcon";
 import { TierBadge } from "@/components/TierBadge";
 import { type ActivityTier, tierFromAuris } from "@/lib/tiers";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
-import { LevelBadge, type LevelInfo } from "@/components/cosmetics/LevelBadge";
+import { type LevelInfo } from "@/components/cosmetics/LevelBadge";
 import { WardrobeDialog } from "@/components/cosmetics/WardrobeDialog";
+import { CharacterSheet, type RealSlotKey } from "@/components/cosmetics/CharacterSheet";
 import { RewardRevealModal, type RevealReward } from "@/components/cosmetics/RewardRevealModal";
 import { ChildInventoryDialog } from "@/components/cosmetics/ChildInventoryDialog";
 import { LevelUpModal } from "@/components/cosmetics/LevelUpModal";
@@ -71,7 +72,12 @@ const ChildHome = () => {
   const [levelInfo, setLevelInfo] = useState<LevelInfo | null>(null);
   const [rankingLevels, setRankingLevels] = useState<Record<string, number>>({});
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
+  const [wardrobeTab, setWardrobeTab] = useState<string | undefined>(undefined);
   const [inventoryOpen, setInventoryOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("atividades");
+  const activitiesRef = useRef<HTMLDivElement | null>(null);
+  const calendarRef = useRef<HTMLDivElement | null>(null);
+  const rankingRef = useRef<HTMLDivElement | null>(null);
   const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
   const [levelUp, setLevelUp] = useState<{ level: number; title?: string } | null>(null);
   const [levelGlow, setLevelGlow] = useState(false);
@@ -272,50 +278,52 @@ const ChildHome = () => {
         </div>
       )}
       <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
-        <div className="flex items-center justify-between text-primary-foreground gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="rounded-2xl bg-card/95 shadow-glow p-1">
-              {cosmetics ? (
-                <EquippedAvatar equipment={buildEquipment(cosmetics)} size={56} fallbackName={child.name} />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-gradient-warm flex items-center justify-center font-display font-bold text-secondary-foreground">
-                  {child.name[0]?.toUpperCase()}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-2xl font-display font-bold drop-shadow truncate">Oi, {child.name}!</h1>
-              <div className="flex items-center gap-2 mt-0.5">
-                {levelInfo && <LevelBadge info={levelInfo} compact />}
-                <p className="text-xs flex items-center gap-1 opacity-90"><Sparkles className="w-3 h-3" /> Bora brilhar!</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={() => setInventoryOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Inventário">
-              <Package className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setWardrobeOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Guarda-roupa">
-              <Shirt className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={logout} className="text-primary-foreground hover:bg-white/10">
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
+        <div className="flex items-center justify-end gap-1">
+          <Button variant="ghost" size="sm" onClick={() => setInventoryOpen(true)} title="Inventário" className="min-h-[44px] min-w-[44px]">
+            <Package className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => { setWardrobeTab(undefined); setWardrobeOpen(true); }} title="Guarda-roupa" className="min-h-[44px] min-w-[44px]">
+            <Shirt className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={logout} title="Sair" className="min-h-[44px] min-w-[44px]">
+            <LogOut className="w-4 h-4" />
+          </Button>
         </div>
 
-        {levelInfo && (
-          <Card className="border-0 shadow-card rounded-2xl">
-            <CardContent className="p-4">
-              <LevelBadge info={levelInfo} />
-              <div className="mt-2 text-[11px] text-muted-foreground flex flex-wrap gap-3">
-                <span><AuriIcon size={10} className="inline mr-0.5" />{levelInfo.auris ?? 0} Auris</span>
-                <span>🏅 {levelInfo.medals ?? 0} medalhas</span>
-                <span>🔥 {levelInfo.best_streak ?? 0} dias seguidos</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <CharacterSheet
+          name={child.name}
+          title={levelInfo?.title}
+          level={levelInfo?.level ?? 1}
+          xpInLevel={levelInfo?.xp_in_level ?? 0}
+          xpToNext={levelInfo?.xp_to_next ?? 100}
+          totalXp={levelInfo?.total_xp ?? 0}
+          nextLevelTotalXp={levelInfo?.next_level_total_xp ?? Math.max((levelInfo?.total_xp ?? 0) + (levelInfo?.xp_to_next ?? 100) - (levelInfo?.xp_in_level ?? 0), 100)}
+          auris={Math.max(approvedAuris - paidAuris, 0)}
+          medals={awards.length}
+          streak={levelInfo?.best_streak ?? 0}
+          pending={pendingAuris}
+          approved={approvedAuris}
+          paid={paidAuris}
+          equipment={cosmetics ? buildEquipment(cosmetics) : { avatar: null }}
+          levelGlow={levelGlow}
+          hasActivityBadge={!!activeSideQuest || missions.length > 0}
+          onAvatarClick={() => { setWardrobeTab("avatar"); setWardrobeOpen(true); }}
+          onSlotClick={(slot: RealSlotKey) => { setWardrobeTab(slot); setWardrobeOpen(true); }}
+          onLockedSlotClick={(label) => toast.info(`${label}: em breve! ✨`)}
+          onActivities={() => {
+            setActiveTab("atividades");
+            requestAnimationFrame(() => activitiesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+          onCalendar={() => {
+            setActiveTab("calendario");
+            requestAnimationFrame(() => calendarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+          onRanking={() => {
+            setActiveTab("ranking");
+            requestAnimationFrame(() => rankingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+        />
+
 
         {activeSideQuest && (
           <SideQuestScroll
@@ -360,35 +368,7 @@ const ChildHome = () => {
           />
         )}
 
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="border-0 shadow-card rounded-2xl bg-card">
-            <CardContent className="p-3 text-center">
-              <div className="flex items-center justify-center gap-1 text-warning mb-1">
-                <Clock className="w-4 h-4" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pendente</span>
-              </div>
-              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(pendingAuris)}</span></div>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-card rounded-2xl bg-gradient-reward text-accent-foreground">
-            <CardContent className="p-3 text-center">
-              <div className="flex items-center justify-center gap-1 mb-1 opacity-90">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide">Total Aprovado</span>
-              </div>
-              <div className="text-lg sm:text-xl font-display font-bold leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(approvedAuris)}</span></div>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-card rounded-2xl bg-card">
-            <CardContent className="p-3 text-center">
-              <div className="flex items-center justify-center gap-1 text-success mb-1">
-                <CheckCircle2 className="w-4 h-4" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pago</span>
-              </div>
-              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(paidAuris)}</span></div>
-            </CardContent>
-          </Card>
-        </div>
+
 
         {missions.length > 0 && (
           <Card className="border-0 shadow-card rounded-3xl">
@@ -448,7 +428,7 @@ const ChildHome = () => {
           </Card>
         )}
 
-        <Tabs defaultValue="atividades" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 w-full bg-card/95 rounded-2xl p-1 h-auto">
             <TabsTrigger value="atividades" className="rounded-xl">Atividades</TabsTrigger>
             <TabsTrigger value="calendario" className="rounded-xl">Calendário</TabsTrigger>
@@ -456,7 +436,7 @@ const ChildHome = () => {
           </TabsList>
 
           {/* ===== ATIVIDADES ===== */}
-          <TabsContent value="atividades" className="space-y-6 mt-4">
+          <TabsContent ref={activitiesRef} value="atividades" className="space-y-6 mt-4 scroll-mt-4">
             {!selected && (
               <Card className="border-0 shadow-card rounded-3xl">
                 <CardContent className="p-5">
@@ -579,7 +559,7 @@ const ChildHome = () => {
           </TabsContent>
 
           {/* ===== CALENDÁRIO ===== */}
-          <TabsContent value="calendario" className="mt-4 space-y-4">
+          <TabsContent ref={calendarRef} value="calendario" className="mt-4 space-y-4 scroll-mt-4">
             <Card className="border-0 shadow-card rounded-3xl">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -669,7 +649,7 @@ const ChildHome = () => {
           </TabsContent>
 
           {/* ===== RANKING ===== */}
-          <TabsContent value="ranking" className="mt-4 space-y-4">
+          <TabsContent ref={rankingRef} value="ranking" className="mt-4 space-y-4 scroll-mt-4">
             <Card className="border-0 shadow-card rounded-3xl">
               <CardContent className="p-5">
                 <div className="flex items-center gap-2 mb-4">
@@ -727,6 +707,7 @@ const ChildHome = () => {
             data={cosmetics}
             token={typeof window !== "undefined" ? localStorage.getItem("jk_child_token") : null}
             onChanged={refresh}
+            defaultTab={wardrobeTab}
           />
           <ChildInventoryDialog
             open={inventoryOpen}

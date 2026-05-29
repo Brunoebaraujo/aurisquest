@@ -19,13 +19,14 @@ const CATEGORIES: { key: string; label: string; col: string }[] = [
 ];
 
 export function ParentWardrobeDialog({
-  open, onOpenChange, childId, childName, onChanged,
+  open, onOpenChange, childId, childName, onChanged, defaultTab,
 }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   childId: string | null;
   childName?: string;
   onChanged?: () => void;
+  defaultTab?: string;
 }) {
   const [busy, setBusy] = useState(false);
   const [avatars, setAvatars] = useState<AvatarRow[]>([]);
@@ -77,7 +78,7 @@ export function ParentWardrobeDialog({
             Como responsável, você pode escolher qualquer avatar humano comum, e os itens comuns que a criança já desbloqueou.
           </p>
         </DialogHeader>
-        <Tabs defaultValue="avatar">
+        <Tabs defaultValue={defaultTab ?? "avatar"} key={defaultTab ?? "avatar"}>
           <TabsList className="flex flex-wrap h-auto">
             {CATEGORIES.map(c => <TabsTrigger key={c.key} value={c.key}>{c.label}</TabsTrigger>)}
           </TabsList>
