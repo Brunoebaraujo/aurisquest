@@ -278,50 +278,52 @@ const ChildHome = () => {
         </div>
       )}
       <div className="max-w-2xl mx-auto px-4 pt-6 space-y-6">
-        <div className="flex items-center justify-between text-primary-foreground gap-3">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="rounded-2xl bg-card/95 shadow-glow p-1">
-              {cosmetics ? (
-                <EquippedAvatar equipment={buildEquipment(cosmetics)} size={56} fallbackName={child.name} />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-gradient-warm flex items-center justify-center font-display font-bold text-secondary-foreground">
-                  {child.name[0]?.toUpperCase()}
-                </div>
-              )}
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-2xl font-display font-bold drop-shadow truncate">Oi, {child.name}!</h1>
-              <div className="flex items-center gap-2 mt-0.5">
-                {levelInfo && <LevelBadge info={levelInfo} compact />}
-                <p className="text-xs flex items-center gap-1 opacity-90"><Sparkles className="w-3 h-3" /> Bora brilhar!</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="sm" onClick={() => setInventoryOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Inventário">
-              <Package className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={() => setWardrobeOpen(true)} className="text-primary-foreground hover:bg-white/10" title="Guarda-roupa">
-              <Shirt className="w-4 h-4" />
-            </Button>
-            <Button variant="ghost" size="sm" onClick={logout} className="text-primary-foreground hover:bg-white/10">
-              <LogOut className="w-4 h-4" />
-            </Button>
-          </div>
+        <div className="flex items-center justify-end gap-1">
+          <Button variant="ghost" size="sm" onClick={() => setInventoryOpen(true)} title="Inventário" className="min-h-[44px] min-w-[44px]">
+            <Package className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => { setWardrobeTab(undefined); setWardrobeOpen(true); }} title="Guarda-roupa" className="min-h-[44px] min-w-[44px]">
+            <Shirt className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" onClick={logout} title="Sair" className="min-h-[44px] min-w-[44px]">
+            <LogOut className="w-4 h-4" />
+          </Button>
         </div>
 
-        {levelInfo && (
-          <Card className="border-0 shadow-card rounded-2xl">
-            <CardContent className="p-4">
-              <LevelBadge info={levelInfo} />
-              <div className="mt-2 text-[11px] text-muted-foreground flex flex-wrap gap-3">
-                <span><AuriIcon size={10} className="inline mr-0.5" />{levelInfo.auris ?? 0} Auris</span>
-                <span>🏅 {levelInfo.medals ?? 0} medalhas</span>
-                <span>🔥 {levelInfo.best_streak ?? 0} dias seguidos</span>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <CharacterSheet
+          name={child.name}
+          title={levelInfo?.title}
+          level={levelInfo?.level ?? 1}
+          xpInLevel={levelInfo?.xp_in_level ?? 0}
+          xpToNext={levelInfo?.xp_to_next ?? 100}
+          totalXp={levelInfo?.total_xp ?? 0}
+          nextLevelTotalXp={levelInfo?.next_level_total_xp ?? Math.max((levelInfo?.total_xp ?? 0) + (levelInfo?.xp_to_next ?? 100) - (levelInfo?.xp_in_level ?? 0), 100)}
+          auris={Math.max(approvedAuris - paidAuris, 0)}
+          medals={awards.length}
+          streak={levelInfo?.best_streak ?? 0}
+          pending={pendingAuris}
+          approved={approvedAuris}
+          paid={paidAuris}
+          equipment={cosmetics ? buildEquipment(cosmetics) : { avatar: null }}
+          levelGlow={levelGlow}
+          hasActivityBadge={!!activeSideQuest || missions.length > 0}
+          onAvatarClick={() => { setWardrobeTab("avatar"); setWardrobeOpen(true); }}
+          onSlotClick={(slot: RealSlotKey) => { setWardrobeTab(slot); setWardrobeOpen(true); }}
+          onLockedSlotClick={(label) => toast.info(`${label}: em breve! ✨`)}
+          onActivities={() => {
+            setActiveTab("atividades");
+            requestAnimationFrame(() => activitiesRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+          onCalendar={() => {
+            setActiveTab("calendario");
+            requestAnimationFrame(() => calendarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+          onRanking={() => {
+            setActiveTab("ranking");
+            requestAnimationFrame(() => rankingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+        />
+
 
         {activeSideQuest && (
           <SideQuestScroll
