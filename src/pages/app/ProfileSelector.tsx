@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { setActiveProfileDirect } from "@/hooks/useActiveProfile";
 import authBg from "@/assets/auth-bg.jpg";
 import wizardImg from "@/assets/wizard.png";
+import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
+import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 
 type ChildRow = { id: string; name: string; avatar_url: string | null };
 
