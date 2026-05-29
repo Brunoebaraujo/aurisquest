@@ -32,7 +32,7 @@ const SLOTS_RIGHT: SlotConfig[] = [
 const SLOTS_BOTTOM: SlotConfig[] = [
   { label: "Mão Principal", realSlot: "arma", emptyIcon: Sword,      equipKey: "weapon" },
   { label: "Botas",         realSlot: null,   emptyIcon: Footprints },
-  { label: "Mão Secundária", realSlot: "pet", emptyIcon: Shield,     equipKey: "pet" },
+  { label: "PET", realSlot: "pet", emptyIcon: Shield,     equipKey: "pet" },
 ];
 
 function SlotTile({
