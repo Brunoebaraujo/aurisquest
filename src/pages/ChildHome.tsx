@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -72,7 +72,12 @@ const ChildHome = () => {
   const [levelInfo, setLevelInfo] = useState<LevelInfo | null>(null);
   const [rankingLevels, setRankingLevels] = useState<Record<string, number>>({});
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
+  const [wardrobeTab, setWardrobeTab] = useState<string | undefined>(undefined);
   const [inventoryOpen, setInventoryOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("atividades");
+  const activitiesRef = useRef<HTMLDivElement | null>(null);
+  const calendarRef = useRef<HTMLDivElement | null>(null);
+  const rankingRef = useRef<HTMLDivElement | null>(null);
   const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
   const [levelUp, setLevelUp] = useState<{ level: number; title?: string } | null>(null);
   const [levelGlow, setLevelGlow] = useState(false);
