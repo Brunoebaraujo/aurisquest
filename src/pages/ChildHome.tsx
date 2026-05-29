@@ -368,35 +368,7 @@ const ChildHome = () => {
           />
         )}
 
-        <div className="grid grid-cols-3 gap-3">
-          <Card className="border-0 shadow-card rounded-2xl bg-card">
-            <CardContent className="p-3 text-center">
-              <div className="flex items-center justify-center gap-1 text-warning mb-1">
-                <Clock className="w-4 h-4" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pendente</span>
-              </div>
-              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(pendingAuris)}</span></div>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-card rounded-2xl bg-gradient-reward text-accent-foreground">
-            <CardContent className="p-3 text-center">
-              <div className="flex items-center justify-center gap-1 mb-1 opacity-90">
-                <Sparkles className="w-4 h-4" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide">Total Aprovado</span>
-              </div>
-              <div className="text-lg sm:text-xl font-display font-bold leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(approvedAuris)}</span></div>
-            </CardContent>
-          </Card>
-          <Card className="border-0 shadow-card rounded-2xl bg-card">
-            <CardContent className="p-3 text-center">
-              <div className="flex items-center justify-center gap-1 text-success mb-1">
-                <CheckCircle2 className="w-4 h-4" />
-                <span className="text-[10px] font-semibold uppercase tracking-wide">Total Pago</span>
-              </div>
-              <div className="text-lg sm:text-xl font-display font-bold text-foreground leading-tight"><span className="inline-flex items-center justify-center gap-1"><AuriIcon size={14} />{formatAuris(paidAuris)}</span></div>
-            </CardContent>
-          </Card>
-        </div>
+
 
         {missions.length > 0 && (
           <Card className="border-0 shadow-card rounded-3xl">
@@ -456,7 +428,7 @@ const ChildHome = () => {
           </Card>
         )}
 
-        <Tabs defaultValue="atividades" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid grid-cols-3 w-full bg-card/95 rounded-2xl p-1 h-auto">
             <TabsTrigger value="atividades" className="rounded-xl">Atividades</TabsTrigger>
             <TabsTrigger value="calendario" className="rounded-xl">Calendário</TabsTrigger>
@@ -464,7 +436,7 @@ const ChildHome = () => {
           </TabsList>
 
           {/* ===== ATIVIDADES ===== */}
-          <TabsContent value="atividades" className="space-y-6 mt-4">
+          <TabsContent ref={activitiesRef} value="atividades" className="space-y-6 mt-4 scroll-mt-4">
             {!selected && (
               <Card className="border-0 shadow-card rounded-3xl">
                 <CardContent className="p-5">
