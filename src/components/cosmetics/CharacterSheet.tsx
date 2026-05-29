@@ -234,7 +234,7 @@ export function CharacterSheet({
           >
             <EquippedAvatar
               equipment={{ avatar: equipment.avatar, frame: equipment.frame }}
-              size={108}
+              size={76}
               fallbackName={name}
               className={cn(levelGlow && "ring-4 ring-primary/60 rounded-full animate-pulse")}
             />
