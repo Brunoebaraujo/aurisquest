@@ -301,14 +301,13 @@ export function CharacterSheet({
             <button
               type="button"
               onClick={onAvatarClick}
-              className="transition-bounce hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full w-full"
+              className="transition-bounce hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
               aria-label="Editar visual"
             >
               <EquippedAvatar
                 equipment={{ avatar: equipment.avatar, frame: equipment.frame }}
                 size={280}
                 fallbackName={name}
-                className="mx-auto w-[min(80vw,320px)] h-[min(80vw,320px)]"
               />
             </button>
           </div>
