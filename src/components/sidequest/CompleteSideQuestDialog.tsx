@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Camera, Sparkles, X, CheckCircle2, ImagePlus } from "lucide-react";
+import { Sparkles, X, CheckCircle2, ImagePlus } from "lucide-react";
 import { findMission, SIDE_QUEST_CATEGORIES } from "@/lib/sideQuests";
 import type { ActiveSideQuest } from "@/hooks/useActiveSideQuest";
 
