@@ -10,6 +10,8 @@ type Props = {
   showEmptyState?: boolean;
   emptyMessage?: string;
   showStatus?: boolean;
+  childName?: string | null;
+  title?: string;
 };
 
 const statusMeta = {
@@ -23,6 +25,8 @@ export const SideQuestHistory = ({
   showEmptyState = false,
   emptyMessage = "Nenhuma side-quest registrada ainda.",
   showStatus = false,
+  childName,
+  title = "Minhas Side-Quests",
 }: Props) => {
   if (items.length === 0 && !showEmptyState) return null;
 
@@ -31,7 +35,7 @@ export const SideQuestHistory = ({
       <CardContent className="p-5">
         <div className="flex items-center justify-between mb-3">
           <h2 className="font-display font-bold text-lg flex items-center gap-2">
-            <ScrollText className="w-5 h-5 text-violet-500" /> Minhas Side-Quests
+            <ScrollText className="w-5 h-5 text-violet-500" /> {title}
           </h2>
         </div>
 
@@ -56,7 +60,7 @@ export const SideQuestHistory = ({
                     <div className="flex-1 min-w-0">
                       <div className="font-display font-semibold text-sm leading-tight truncate">{it.title}</div>
                       <div className="text-[11px] text-muted-foreground">
-                        {cat.label} · {d.toLocaleDateString("pt-BR")}
+                        {childName ? `${childName} · ` : ""}{cat.label} · {d.toLocaleDateString("pt-BR")} às {d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                       </div>
                     </div>
                     <div className="shrink-0 flex flex-wrap items-center justify-end gap-2">
@@ -82,7 +86,7 @@ export const SideQuestHistory = ({
                           rel="noopener noreferrer"
                           className="shrink-0 block rounded-xl overflow-hidden ring-2 ring-amber-200 hover:ring-amber-400 transition"
                         >
-                          <img src={it.child_photo_url} alt="Foto da missão" className="w-16 h-16 object-cover" />
+                          <img src={it.child_photo_url} alt="Foto enviada na Sidequest" className="w-16 h-16 object-cover" />
                         </a>
                       )}
                       <div className="flex-1 min-w-0 space-y-1">
