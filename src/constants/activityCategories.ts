@@ -1,8 +1,10 @@
 export const ACTIVITY_CATEGORIES = [
+  "Rotina",
   "Higiene",
+  "Saúde",
+  "Escola",
   "Estudos",
   "Casa",
-  "Saúde",
   "Comportamento",
   "Criatividade",
   "Família",
