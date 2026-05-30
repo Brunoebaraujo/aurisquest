@@ -14,7 +14,9 @@ type Props = {
   onConfirm: (payload: { comment: string | null; file: File | null }) => void | Promise<void>;
 };
 
-const MAX = 120;
+const MIN_COMMENT_LENGTH = 50;
+const MAX_COMMENT_LENGTH = 500;
+const EVIDENCE_ERROR = "Para concluir a Sidequest, envie uma foto ou escreva um comentário com pelo menos 50 caracteres contando o que você fez.";
 
 export const CompleteSideQuestDialog = ({ quest, open, onOpenChange, busy, onConfirm }: Props) => {
   const meta = findMission(quest.mission_key);
@@ -27,6 +29,10 @@ export const CompleteSideQuestDialog = ({ quest, open, onOpenChange, busy, onCon
   const [showError, setShowError] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const trimmedComment = comment.trim();
+  const commentMeetsRequirement = trimmedComment.length >= MIN_COMMENT_LENGTH;
+  const hasEvidence = commentMeetsRequirement || !!file;
+
   const reset = () => { setComment(""); setFile(null); setPreview(null); setShowError(false); };
 
   const handlePick = (f: File | null) => {
@@ -36,11 +42,15 @@ export const CompleteSideQuestDialog = ({ quest, open, onOpenChange, busy, onCon
     if (f) setShowError(false);
   };
 
-  const canSubmit = comment.trim().length > 0 || !!file;
+  const handleCommentChange = (value: string) => {
+    const next = value.slice(0, MAX_COMMENT_LENGTH);
+    setComment(next);
+    if (next.trim().length >= MIN_COMMENT_LENGTH) setShowError(false);
+  };
 
   const handleConfirm = async () => {
-    if (!canSubmit) { setShowError(true); return; }
-    await onConfirm({ comment: comment.trim() ? comment.trim().slice(0, MAX) : null, file });
+    if (!hasEvidence) { setShowError(true); return; }
+    await onConfirm({ comment: trimmedComment ? trimmedComment : null, file });
   };
 
   return (
@@ -66,16 +76,22 @@ export const CompleteSideQuestDialog = ({ quest, open, onOpenChange, busy, onCon
           </div>
 
           <div className="mt-4 space-y-3">
+            <p className="rounded-2xl bg-white/70 px-3 py-2 text-center text-xs font-semibold text-amber-900 ring-1 ring-amber-200">
+              Conte o que você fez com pelo menos 50 caracteres ou envie uma foto.
+            </p>
+
             <div>
               <label className="text-xs font-bold text-amber-900 ml-1">Conte o que aconteceu</label>
               <Textarea
                 value={comment}
-                onChange={(e) => { setComment(e.target.value.slice(0, MAX)); if (e.target.value) setShowError(false); }}
+                onChange={(e) => handleCommentChange(e.target.value)}
                 placeholder="Conte o que aconteceu..."
-                maxLength={MAX}
-                className="mt-1 rounded-2xl bg-white/80 border-amber-200 focus-visible:ring-amber-400 min-h-[80px] text-sm"
+                maxLength={MAX_COMMENT_LENGTH}
+                className="mt-1 rounded-2xl bg-white/80 border-amber-200 focus-visible:ring-amber-400 min-h-[96px] text-sm"
               />
-              <div className="text-[10px] text-amber-900/60 text-right mt-0.5">{comment.length}/{MAX}</div>
+              <div className={`text-[10px] text-right mt-0.5 font-semibold ${commentMeetsRequirement ? "text-emerald-700" : "text-amber-900/60"}`}>
+                {trimmedComment.length}/{MIN_COMMENT_LENGTH} caracteres{commentMeetsRequirement ? " · comentário suficiente" : ""}
+              </div>
             </div>
 
             <div>
@@ -115,7 +131,7 @@ export const CompleteSideQuestDialog = ({ quest, open, onOpenChange, busy, onCon
 
             {showError && (
               <div className="rounded-2xl bg-rose-100/80 text-rose-700 text-xs font-semibold text-center py-2 px-3">
-                Conte como foi sua missão ou envie uma foto ✨
+                {EVIDENCE_ERROR}
               </div>
             )}
           </div>
