@@ -71,3 +71,6 @@ end $$;
 
 select public.seed_comportamento_activities_for_family(id)
 from public.families;
+
+revoke execute on function public.seed_comportamento_activities_for_family(uuid) from public, anon, authenticated;
+revoke execute on function public.seed_comportamento_activities_after_family_insert() from public, anon, authenticated;
