@@ -26,7 +26,7 @@ export type SideQuestHistoryItem = {
   child_photo_url: string | null;
   completed_at: string;
   quest_date?: string;
-  status?: "pendente" | "concluida" | "expirada";
+  status?: "pendente" | "aprovado" | "concluida" | "recusado" | "expirada";
 };
 
 export const useActiveSideQuest = (token: string | null) => {
