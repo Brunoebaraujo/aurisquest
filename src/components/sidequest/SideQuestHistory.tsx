@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ScrollText, CheckCircle2, Clock, Hourglass } from "lucide-react";
+import { ScrollText, CheckCircle2, Clock, Hourglass, XCircle } from "lucide-react";
 import { findMission, SIDE_QUEST_CATEGORIES } from "@/lib/sideQuests";
 import type { SideQuestHistoryItem } from "@/hooks/useActiveSideQuest";
 import { AuriIcon } from "@/components/AuriIcon";
@@ -15,8 +15,10 @@ type Props = {
 };
 
 const statusMeta = {
-  concluida: { label: "Concluída", icon: CheckCircle2, className: "bg-success/10 text-success border-success/20" },
-  pendente: { label: "Pendente", icon: Clock, className: "bg-warning/10 text-warning border-warning/20" },
+  concluida: { label: "Aprovada", icon: CheckCircle2, className: "bg-success/10 text-success border-success/20" },
+  aprovado: { label: "Aprovada", icon: CheckCircle2, className: "bg-success/10 text-success border-success/20" },
+  pendente: { label: "Aguardando aprovação", icon: Clock, className: "bg-warning/10 text-warning border-warning/20" },
+  recusado: { label: "Recusada", icon: XCircle, className: "bg-destructive/10 text-destructive border-destructive/20" },
   expirada: { label: "Expirada", icon: Hourglass, className: "bg-muted text-muted-foreground border-border" },
 } as const;
 
@@ -51,6 +53,7 @@ export const SideQuestHistory = ({
               const hasExtras = !!(it.parent_comment || it.child_comment || it.child_photo_url);
               const status = it.status ? statusMeta[it.status] : null;
               const StatusIcon = status?.icon;
+              const approved = it.status === "concluida" || it.status === "aprovado";
               return (
                 <div key={it.id} className="p-2.5 rounded-2xl bg-gradient-to-r from-violet-50 to-amber-50 ring-1 ring-violet-100">
                   <div className="flex items-center gap-3">
@@ -64,16 +67,18 @@ export const SideQuestHistory = ({
                       </div>
                     </div>
                     <div className="shrink-0 flex flex-wrap items-center justify-end gap-2">
-                      <span className="font-display font-bold text-sm inline-flex items-center gap-0.5">
+                      <span className={`font-display font-bold text-sm inline-flex items-center gap-0.5 ${it.status === "recusado" ? "text-muted-foreground line-through" : ""}`}>
                         <AuriIcon size={12} /> {it.reward_auris}
                       </span>
                       {showStatus && status && StatusIcon ? (
                         <Badge variant="outline" className={`gap-1 px-2 py-0.5 text-[11px] ${status.className}`}>
                           <StatusIcon className="w-3 h-3" /> {status.label}
                         </Badge>
-                      ) : (
+                      ) : approved ? (
                         <CheckCircle2 className="w-5 h-5 text-success" />
-                      )}
+                      ) : status && StatusIcon ? (
+                        <StatusIcon className={`w-5 h-5 ${it.status === "recusado" ? "text-destructive" : "text-warning"}`} />
+                      ) : null}
                     </div>
                   </div>
 
