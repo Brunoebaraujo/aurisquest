@@ -26,7 +26,7 @@ export const SideQuestHistory = ({
   items,
   showEmptyState = false,
   emptyMessage = "Nenhuma side-quest registrada ainda.",
-  showStatus = false,
+  showStatus = true,
   childName,
   title = "Minhas Side-Quests",
 }: Props) => {
