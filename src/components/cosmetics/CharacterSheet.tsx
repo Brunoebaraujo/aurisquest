@@ -176,7 +176,7 @@ export function CharacterSheet({
   auris, medals, streak, pending, approved, paid,
   equipment, hasActivityBadge, levelGlow,
   onAvatarClick, onSlotClick, onLockedSlotClick, onNameEdit,
-  onBack, onClose, onActivities, onCalendar, onRanking,
+  onBack, onClose, onActivities, onCalendar, onRanking, onShop, hasPendingRedemptionBadge,
 }: CharacterSheetProps) {
   const pct = xpToNext > 0 ? Math.min(100, Math.round((xpInLevel / xpToNext) * 100)) : 0;
 
