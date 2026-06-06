@@ -1,141 +1,113 @@
-## Goal
+# Rewards Marketplace — Implementation Plan
 
-Transform the child's `/c` (ChildHome) and parent's `/app/criancas/:id` (ChildProfile) screens into a true RPG character sheet matching the mockup, while preserving all current data, APIs, and behaviors. No DB changes.
+Evolves the existing **Payments** module into a flexible **Rewards** system. No data is deleted; legacy payments become reward-history entries automatically.
 
-## Slot mapping (visual-only, no backend changes)
+---
 
-The mockup shows 9 slots. The cosmetics system today has 6 real slots. Mapping:
+## 1. Database changes (single migration)
 
-| Mockup slot | Real backend slot | Behavior |
-|---|---|---|
-| Cabeça (Head) | `helmet_item_id` | Clickable → wardrobe |
-| Peito (Chest) | `armor_item_id` | Clickable → wardrobe |
-| Luvas (Gloves) | — | Locked silhouette, badge "Em breve" |
-| Amuleto (Amulet) | `aura_item_id` | Clickable → wardrobe (Aura) |
-| Anel (Ring) | — | Locked silhouette |
-| Cinto (Belt) | — | Locked silhouette |
-| Mão Principal | `weapon_item_id` | Clickable → wardrobe |
-| Botas (Boots) | — | Locked silhouette |
-| Mão Secundária | `pet_item_id` | Clickable (Pet appears here) |
+### New tables
 
-The center character keeps using `EquippedAvatar` so the avatar always reflects real equipment. Frame stays as the avatar's rarity border.
+**`rewards`** — parent-managed catalog
+- `family_id` (fk families)
+- `name` (text)
+- `description` (text, nullable)
+- `auris_cost` (int, >0)
+- `category` (enum: `money`, `screen_time`, `privilege`, `experience`, `item`, `custom`)
+- `active` (bool, default true)
+- `created_by` (uuid)
+- Future-ready (nullable, unused for now): `image_url`, `stock`, `available_from`, `available_until`, `metadata jsonb`
+- Standard `id`, `created_at`, `updated_at`
 
-## New / changed components
+**`reward_redemptions`** — request/approval ledger
+- `family_id`, `child_id`, `reward_id` (nullable so legacy survives if reward deleted)
+- `reward_name_snapshot` (text) — preserves name even if catalog changes
+- `reward_category_snapshot` (text)
+- `auris_cost` (int) — locked at request time
+- `status` (enum: `pendente`, `aprovado`, `recusado`, `concluido`)
+- `requested_at`, `reviewed_at`, `reviewed_by`, `review_note`
+- `legacy_payment_id` (nullable, for migrated rows)
 
-### 1. `src/components/cosmetics/CharacterSheet.tsx` (new, shared)
+Both tables get GRANTs + RLS scoped to `family_id = get_user_family_id(auth.uid())`, plus `service_role` for edge functions.
 
-The single source of truth for the RPG layout. Used by both child and parent views.
-
-Props:
-```ts
-type Props = {
-  name: string;
-  level: number;
-  title?: string;
-  xpInLevel: number;
-  xpToNext: number;
-  totalXp: number;
-  nextLevelTotalXp: number;
-  auris: number;       // balance
-  medals: number;
-  streak: number;
-  pending: number;
-  approved: number;
-  paid: number;
-  equipment: Equipment;
-  onAvatarClick?: () => void;       // opens wardrobe
-  onSlotClick?: (slot: SlotKey) => void; // opens wardrobe on that tab
-  showBack?: boolean;
-  onBack?: () => void;
-  onClose?: () => void;
-  levelGlow?: boolean;
-};
+### Balance logic
+A child's current Auris balance becomes:
 ```
-
-Internal layout (mobile-first, single column ≤640px, comfortable on desktop too):
-
-```text
-┌───────────────────────────────────────────────────┐
-│ [←]                                          [×]  │  Header
-├───────────────────────────────────────────────────┤
-│ ┌─avatar─┐   Name ✏️                              │  Character Overview
-│ │ portrait│   ◆ Title                              │
-│ │   Lv N │   ┌─ XP bar ──────── 21/120 XP ┐       │
-│ └────────┘                                        │
-│ ┌Auris┐ ┌Medals┐ ┌Streak┐                         │
-├───────────────────────────────────────────────────┤
-│ ┌Pending┐ ┌Approved┐ ┌Paid┐ (blue / gold / green) │  Financial
-├───────────────────────────────────────────────────┤
-│           ◆ EQUIPAMENTOS ◆                        │  Equipment panel
-│  ┌Cabeça┐                              ┌Amuleto┐  │
-│  ┌Peito ┐         [Center avatar      ┌ Anel  ┐  │
-│  ┌Luvas ┐          with equipment]    ┌ Cinto ┐  │
-│         ┌Mão Princ.┐ ┌Botas┐ ┌Mão Sec.┐          │
-├───────────────────────────────────────────────────┤
-│ [📋 Atividades •]  [📅 Calendário]  [🏆 Ranking]  │  Sticky nav strip
-└───────────────────────────────────────────────────┘
+approved submissions − (approved + completed redemptions) − legacy payments.auris_redeemed
 ```
+Legacy `payments` rows stay untouched **and** also get a mirrored row in `reward_redemptions` (status `concluido`, `legacy_payment_id` set, category `money`, name `"Dinheiro — R$X,XX"`). To avoid double-counting, the balance query subtracts redemptions **excluding** rows where `legacy_payment_id IS NOT NULL` OR continues to subtract from `payments` and skips legacy mirror rows. Plan: **balance subtracts redemptions only when `legacy_payment_id IS NULL`** + the existing `payments` table. This way nothing in the existing dashboard/Auris math breaks.
 
-Sub-components inside the same file:
-- `<SlotTile label item locked onClick rarity>` — renders one slot. Min 44×44px touch target. Common = gray, Rare = blue, Epic = orange, Legendary = purple border via existing `RarityFrame`. Locked tiles render a faint silhouette icon (lucide: `HardHat`, `Hand`, `Circle`, `Minus`, `Footprints`) with an "Em breve" pill.
-- `<ResourceCard icon value label tone>` — for Auris / Medals / Streak.
-- `<MoneyCard tone="pending|approved|paid">` — for the three financial cards. Tones map to existing tokens (warning / accent / success) with a softly themed bg.
-- `<NavStrip onActivities onCalendar onRanking activityBadge>` — the sticky nav. Uses `scrollIntoView({ behavior: "smooth", block: "start" })` against refs passed in by the page.
+### Migration data step
+Insert mirror rows into `reward_redemptions` for every existing `payments` row (status `concluido`, snapshot name `"Dinheiro — R$ X,XX"`, category `money`).
 
-Visuals: dark fantasy gradient on the equipment panel only (`bg-gradient-to-b from-primary/15 via-background to-secondary/10` plus a subtle inner shadow), gold accents for headings (`text-accent`). Card chrome uses existing semantic tokens — no hex colors in JSX.
+### Child dashboard RPC
+Extend `get_child_dashboard` to include:
+- `rewards_catalog` (active rewards for family)
+- `reward_redemptions` (child's history)
+- balance fields (lifetime earned, lifetime redeemed, current)
 
-### 2. `src/pages/ChildHome.tsx`
+### Edge function `redeem-reward`
+Validates child token, checks balance, inserts `reward_redemptions` row with status `pendente`. Reuses `validate_child_token` pattern from existing `child-submit`.
 
-- Replace the existing top "Oi, {name}" block + LevelBadge card + 3 financial cards with `<CharacterSheet ... />`.
-- Wire `onAvatarClick` and `onSlotClick(slot)` to open the existing `WardrobeDialog`. Add a `defaultTab` prop to `WardrobeDialog` so slot click pre-selects the matching tab (`elmo`, `armadura`, `arma`, `pet`, `aura`).
-- Keep `activeSideQuest`, missions, Tabs (Atividades / Calendário / Ranking), SideQuestHistory, history, etc. untouched below the sheet.
-- Add three section refs:
-  - `activitiesRef` → wraps the existing Atividades Tab content (or the `<Tabs>` block, scrolling to the tablist and setting `tab="atividades"`).
-  - `calendarRef` → existing Calendário tab.
-  - `rankingRef` → existing Ranking tab.
-- `<NavStrip>` switches the `<Tabs>` value and scrolls to it. Activities red-dot badge appears if `activeSideQuest && !activeSideQuest.completed_at`, or `missions.length > 0`.
+---
 
-### 3. `src/pages/app/ChildProfile.tsx`
+## 2. Parent UI
 
-- Replace `<ChildShowcase>` and the "X medalhas conquistadas" header with `<CharacterSheet ... />` using the parent's data.
-- Resource numbers: `auris` from existing `approvedAuris - paidAuris` (or fetch `wallet`), `medals = wonMissions.length`, `streak` from the highest mission streak (or 0 if not readily available — derive via existing submissions logic already there).
-- Financial cards (Pending / Approved / Paid): the parent screen doesn't expose these today. Fetch them in the same `load()` Promise.all using existing tables: `submissions` aggregated by `status` for pending/approved, and `payouts` (or whatever the parent dashboard already uses) for paid. **Spike note:** if a single RPC exists, prefer it; otherwise inline aggregation in `load()`.
-- Slot clicks open the existing `<ParentWardrobeDialog>` (add same `defaultTab` prop).
-- Below the sheet, keep: `<SideQuestHistory>`, "Visualizar como a criança" CTA, "Missões em andamento" card, "Medalhas conquistadas" card — unchanged.
-- NavStrip targets refs around those sections (Atividades = missions in progress + history, Calendário = placeholder "Calendário de Aventuras — Em breve" card, Ranking = scroll to a small ranking placeholder or to the medals card if no ranking exists on this page).
+### `src/pages/app/Rewards.tsx` (renamed file, replaces `Payments.tsx`)
+- Header: **Recompensas** / "Crianças podem trocar Auris pelas recompensas que você criar."
+- Keep: rate-config dialog, cleanup-photos button.
+- Summary stat cards: Total Earned, Total Redeemed, Current Family Balance, Most Redeemed Reward.
+- Per-child cards: Name, Current Balance, Lifetime Earned, Lifetime Redeemed.
+- **Pending Approvals** section: list of `pendente` redemptions with Approve/Reject buttons.
+- **Reward History**: unified list (legacy + new), filterable by child.
 
-### 4. `WardrobeDialog` / `ParentWardrobeDialog` (small change)
+### `src/pages/app/RewardCatalog.tsx` (new route)
+- List of rewards with Create / Edit / Deactivate / Delete actions.
+- Form fields: name, description, category, auris_cost, active toggle.
+- Delete blocked when redemptions exist (deactivate instead).
 
-Add optional `defaultTab?: string` prop (forwarded to `<Tabs defaultValue={...}>`). Used by `CharacterSheet` to deep-link the wardrobe to the right slot.
+### Sidebar/Route updates
+- `AppLayout` / `AppSidebar` / `App.tsx`: rename "Pagamentos" → "Recompensas"; add sub-route "Catálogo".
 
-## Mobile constraints
+---
 
-- All slot tiles, nav buttons, header buttons ≥ 44×44px.
-- Equipment panel uses a 3-column grid on mobile: `[left slots] [center avatar] [right slots]` with `grid-template-columns: minmax(72px,1fr) minmax(140px,1.6fr) minmax(72px,1fr)`. Bottom row is a separate 3-column grid below.
-- No horizontal scroll: panel `overflow-hidden`, slot tiles size with `w-full aspect-square`.
-- The sticky `NavStrip` becomes `sticky bottom-0` only on mobile (`md:static`) so it acts like a quick-jump tab bar.
+## 3. Child UI
 
-## Not changing
+### `src/pages/ChildHome.tsx` (or its rewards section)
+- Show current Auris balance prominently.
+- **Loja de Recompensas** grid: cards with name, cost (with AuriIcon), description, "Resgatar" button.
+- Disabled state + "Auris insuficientes" when balance < cost.
+- Click → call `redeem-reward` edge function → toast "Pedido enviado para aprovação".
+- Show child's own redemption history (status badges).
 
-- No DB migrations.
-- No edge function changes.
-- No changes to XP / Auris / Medals / Streak / Missions / Side Quests / Rewards business logic.
-- No changes to `EquippedAvatar` rendering rules.
-- Existing `ChildShowcase` stays in the repo (still used by the parent screen until the swap; safe to remove after).
+---
 
-## Files touched
+## 4. Files touched
 
-- new: `src/components/cosmetics/CharacterSheet.tsx`
-- edit: `src/pages/ChildHome.tsx` (swap top section, add nav refs)
-- edit: `src/pages/app/ChildProfile.tsx` (swap showcase, add Pending/Approved/Paid fetch, add nav refs + Calendar placeholder)
-- edit: `src/components/cosmetics/WardrobeDialog.tsx` (add `defaultTab`)
-- edit: `src/components/cosmetics/ParentWardrobeDialog.tsx` (add `defaultTab`)
+**Migration:** 1 new file via `supabase--migration`
+**New files:**
+- `supabase/functions/redeem-reward/index.ts`
+- `src/pages/app/Rewards.tsx` (replaces Payments)
+- `src/pages/app/RewardCatalog.tsx`
+- `src/components/rewards/RewardCard.tsx`
+- `src/components/rewards/RewardFormDialog.tsx`
+- `src/components/rewards/PendingApprovalsList.tsx`
 
-## Acceptance
+**Edited:**
+- `src/App.tsx` (routes)
+- `src/components/AppSidebar.tsx` (nav labels)
+- `src/pages/ChildHome.tsx` (rewards shop section)
+- `src/integrations/supabase/types.ts` regenerates automatically after migration
 
-1. Child opens `/c`: sees the RPG sheet with their avatar, level, XP bar, Auris/Medals/Streak, Pending/Approved/Paid, equipment panel with their 6 real items shown + 3 silhouettes labeled "Em breve". Below, all current sections still work (Side Quest, missions, Atividades/Calendário/Ranking).
-2. Tapping a real slot opens the wardrobe on that slot's tab; tapping a locked slot shows a soft "Em breve" toast or just stays inert.
-3. Tapping the avatar opens the wardrobe on the "Avatar" tab.
-4. NavStrip buttons smooth-scroll to the right section and switch the underlying Tab on the child page.
-5. Parent at `/app/criancas/:id` sees the same RPG sheet with the child's real numbers and equipment (read-only equip via the existing `ParentWardrobeDialog`).
-6. No horizontal scroll at 360px width. All touch targets ≥ 44px.
+**Removed:** `src/pages/app/Payments.tsx` (replaced by Rewards.tsx)
+
+---
+
+## 5. Acceptance check
+- [ ] Legacy payments visible in Reward History as "Dinheiro — R$X"
+- [ ] Balances unchanged for every child after migration
+- [ ] Parent can CRUD rewards
+- [ ] Child redeem → pending → parent approve → Auris deducted
+- [ ] Reject → no deduction
+- [ ] Stat cards calculated live
+- [ ] Mobile-first layout, AuriQuest visual identity preserved
