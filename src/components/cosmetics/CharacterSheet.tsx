@@ -7,7 +7,7 @@ import { RarityFrame, type Rarity } from "./Rarity";
 import {
   ArrowLeft, X, Sparkles, Crown, Flame, Medal, Clock, CheckCircle2,
   HardHat, Shirt, Hand, Gem, Circle, Minus, Sword, Footprints, Shield, Lock,
-  ClipboardList, Calendar, Trophy, Pencil,
+  ClipboardList, Calendar, Trophy, Pencil, ShoppingBag,
 } from "lucide-react";
 
 export type RealSlotKey = "elmo" | "armadura" | "arma" | "pet" | "aura";
