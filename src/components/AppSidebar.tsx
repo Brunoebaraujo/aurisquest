@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Wallet, LogOut, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus, Gift } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Gift as GiftIcon, LogOut, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus, Gift } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter,
@@ -15,7 +15,7 @@ const items = [
   { title: "Missões", url: "/app/missoes", icon: Award },
   { title: "Pendências", url: "/app/pendencias", icon: ClipboardCheck },
   { title: "Calendário", url: "/app/calendario", icon: CalendarDays },
-  { title: "Pagamentos", url: "/app/pagamentos", icon: Wallet },
+  { title: "Recompensas", url: "/app/recompensas", icon: GiftIcon },
   { title: "Grupos", url: "/app/grupos", icon: UsersRound },
   { title: "Responsáveis", url: "/app/responsaveis", icon: UserPlus },
 ];
