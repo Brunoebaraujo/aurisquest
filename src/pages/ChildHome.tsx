@@ -220,6 +220,29 @@ const ChildHome = () => {
   const childName = (id: string) => familyChildren.find(c => c.id === id)?.name ?? "—";
   const actName = (id: string) => activities.find(a => a.id === id)?.name ?? "Atividade";
 
+  const availableAuris = Math.max(approvedAuris - paidAuris - pendingRedemptionAuris, 0);
+
+  const redeem = async (r: RewardCat) => {
+    const t = localStorage.getItem("jk_child_token");
+    if (!t) return;
+    if (availableAuris < r.auris_cost) { toast.error("Auris insuficientes 😢"); return; }
+    if (!confirm(`Pedir "${r.name}" por ${r.auris_cost} Auris?`)) return;
+    setRedeemingId(r.id);
+    try {
+      const { data, error } = await supabase.functions.invoke("redeem-reward", {
+        body: { token: t, reward_id: r.id },
+      });
+      if (error || !(data as any)?.ok) throw new Error((data as any)?.error || error?.message || "Erro");
+      toast.success("Pedido enviado! Aguardando aprovação 🎁");
+      refresh();
+    } catch (e: any) {
+      toast.error(e.message === "insufficient_auris" ? "Auris insuficientes" : (e.message ?? "Erro ao resgatar"));
+    } finally {
+      setRedeemingId(null);
+    }
+  };
+
+
   // ===== Calendar derived =====
   const calendarCells = useMemo(() => {
     const year = cursor.getFullYear();
