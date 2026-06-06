@@ -360,6 +360,11 @@ const ChildHome = () => {
             setActiveTab("ranking");
             requestAnimationFrame(() => rankingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
           }}
+          onShop={() => {
+            setActiveTab("loja");
+            requestAnimationFrame(() => lojaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+          hasPendingRedemptionBadge={pendingRedemptionAuris > 0}
         />
 
 
