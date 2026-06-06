@@ -89,6 +89,7 @@ const ChildHome = () => {
   const activitiesRef = useRef<HTMLDivElement | null>(null);
   const calendarRef = useRef<HTMLDivElement | null>(null);
   const rankingRef = useRef<HTMLDivElement | null>(null);
+  const lojaRef = useRef<HTMLDivElement | null>(null);
   const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
   const [levelUp, setLevelUp] = useState<{ level: number; title?: string } | null>(null);
   const [levelGlow, setLevelGlow] = useState(false);
@@ -359,6 +360,11 @@ const ChildHome = () => {
             setActiveTab("ranking");
             requestAnimationFrame(() => rankingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
           }}
+          onShop={() => {
+            setActiveTab("loja");
+            requestAnimationFrame(() => lojaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+          }}
+          hasPendingRedemptionBadge={pendingRedemptionAuris > 0}
         />
 
 
@@ -474,7 +480,7 @@ const ChildHome = () => {
           </TabsList>
 
           {/* ===== LOJA DE RECOMPENSAS ===== */}
-          <TabsContent value="loja" className="space-y-4 mt-4 scroll-mt-4">
+          <TabsContent ref={lojaRef} value="loja" className="space-y-4 mt-4 scroll-mt-4">
             <Card className="border-0 shadow-card rounded-3xl bg-gradient-warm text-secondary-foreground">
               <CardContent className="p-5 text-center">
                 <div className="text-xs uppercase tracking-wide opacity-80">Você tem</div>
