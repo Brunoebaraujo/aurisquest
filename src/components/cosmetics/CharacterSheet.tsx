@@ -327,10 +327,13 @@ export function CharacterSheet({
       </div>
 
       {/* SECTION 4 — Profile Navigation */}
-      {(onActivities || onCalendar || onRanking) && (
-        <div className="grid grid-cols-3 gap-2">
+      {(onActivities || onCalendar || onRanking || onShop) && (
+        <div className={cn("grid gap-2", onShop ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3")}>
           {onActivities && (
             <NavBtn icon={<ClipboardList className="w-5 h-5" />} label="Atividades" onClick={onActivities} badge={hasActivityBadge} />
+          )}
+          {onShop && (
+            <NavBtn icon={<ShoppingBag className="w-5 h-5" />} label="Loja" onClick={onShop} badge={hasPendingRedemptionBadge} />
           )}
           {onCalendar && (
             <NavBtn icon={<Calendar className="w-5 h-5" />} label="Calendário" onClick={onCalendar} />
