@@ -135,6 +135,9 @@ const ChildHome = () => {
     setPendingAuris(totals.pending_auris ?? 0);
     setApprovedAuris(totals.approved_auris ?? 0);
     setPaidAuris(d.paid_auris ?? 0);
+    setPendingRedemptionAuris(d.pending_redemption_auris ?? 0);
+    setRewardsCatalog(d.rewards_catalog ?? []);
+    setMyRedemptions(d.reward_redemptions ?? []);
 
     setCosmetics({
       equipment: d.equipment ?? null,
