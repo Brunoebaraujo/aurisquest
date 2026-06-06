@@ -13,7 +13,8 @@ import Dashboard from "./pages/app/Dashboard.tsx";
 import Children from "./pages/app/Children.tsx";
 import Activities from "./pages/app/Activities.tsx";
 import Pending from "./pages/app/Pending.tsx";
-import Payments from "./pages/app/Payments.tsx";
+import Rewards from "./pages/app/Rewards.tsx";
+import RewardCatalog from "./pages/app/RewardCatalog.tsx";
 import CalendarPage from "./pages/app/Calendar.tsx";
 import Missions from "./pages/app/Missions.tsx";
 import ChildProfile from "./pages/app/ChildProfile.tsx";
@@ -60,7 +61,9 @@ const App = () => (
               <Route path="atividades" element={<Activities />} />
               <Route path="missoes" element={<Missions />} />
               <Route path="pendencias" element={<Pending />} />
-              <Route path="pagamentos" element={<Payments />} />
+              <Route path="pagamentos" element={<Rewards />} />
+              <Route path="recompensas" element={<Rewards />} />
+              <Route path="recompensas/catalogo" element={<RewardCatalog />} />
               <Route path="calendario" element={<CalendarPage />} />
               <Route path="auris-mes" element={<AurisMonth />} />
               <Route path="grupos" element={<Groups />} />
