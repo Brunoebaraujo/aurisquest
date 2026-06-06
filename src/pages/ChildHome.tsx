@@ -466,11 +466,94 @@ const ChildHome = () => {
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 w-full bg-card/95 rounded-2xl p-1 h-auto">
-            <TabsTrigger value="atividades" className="rounded-xl">Atividades</TabsTrigger>
-            <TabsTrigger value="calendario" className="rounded-xl">Calendário</TabsTrigger>
-            <TabsTrigger value="ranking" className="rounded-xl">Ranking</TabsTrigger>
+          <TabsList className="grid grid-cols-4 w-full bg-card/95 rounded-2xl p-1 h-auto">
+            <TabsTrigger value="atividades" className="rounded-xl text-xs sm:text-sm">Atividades</TabsTrigger>
+            <TabsTrigger value="loja" className="rounded-xl text-xs sm:text-sm">Loja</TabsTrigger>
+            <TabsTrigger value="calendario" className="rounded-xl text-xs sm:text-sm">Calendário</TabsTrigger>
+            <TabsTrigger value="ranking" className="rounded-xl text-xs sm:text-sm">Ranking</TabsTrigger>
           </TabsList>
+
+          {/* ===== LOJA DE RECOMPENSAS ===== */}
+          <TabsContent value="loja" className="space-y-4 mt-4 scroll-mt-4">
+            <Card className="border-0 shadow-card rounded-3xl bg-gradient-warm text-secondary-foreground">
+              <CardContent className="p-5 text-center">
+                <div className="text-xs uppercase tracking-wide opacity-80">Você tem</div>
+                <div className="text-4xl font-display font-bold inline-flex items-center gap-2 mt-1">
+                  <AuriIcon size={32} />{formatAuris(availableAuris)}
+                </div>
+                <div className="text-xs opacity-80 mt-1">para gastar</div>
+                {pendingRedemptionAuris > 0 && (
+                  <div className="text-[11px] opacity-80 mt-1">⏳ {formatAuris(pendingRedemptionAuris)} aguardando aprovação</div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="border-0 shadow-card rounded-3xl">
+              <CardContent className="p-5">
+                <h2 className="font-display font-bold text-xl mb-4 flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-accent" /> Recompensas disponíveis
+                </h2>
+                {rewardsCatalog.length === 0 && (
+                  <p className="text-sm text-muted-foreground">Ainda não há recompensas. Peça pro seu responsável criar algumas!</p>
+                )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {rewardsCatalog.map(r => {
+                    const canAfford = availableAuris >= r.auris_cost;
+                    return (
+                      <div key={r.id} className={`p-4 rounded-2xl border-4 transition-bounce ${canAfford ? "border-border bg-card kid-sticker" : "border-border/40 bg-muted/30 opacity-70"}`}>
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="min-w-0">
+                            <div className="font-display font-bold leading-tight">{r.name}</div>
+                            <Badge variant="secondary" className="text-[10px] mt-1">{CAT_LABEL[r.category] ?? r.category}</Badge>
+                          </div>
+                          <Badge className="bg-gradient-reward text-accent-foreground border-0 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1"><AuriIcon size={12} />{formatAuris(r.auris_cost)}</span>
+                          </Badge>
+                        </div>
+                        {r.description && <p className="text-xs text-muted-foreground mb-2">{r.description}</p>}
+                        <Button
+                          variant={canAfford ? "reward" : "outline"}
+                          size="sm"
+                          className="w-full"
+                          disabled={!canAfford || redeemingId === r.id}
+                          onClick={() => redeem(r)}
+                        >
+                          {redeemingId === r.id ? "Enviando..." : canAfford ? "Resgatar" : "Auris insuficientes"}
+                        </Button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {myRedemptions.length > 0 && (
+              <Card className="border-0 shadow-card rounded-3xl">
+                <CardContent className="p-5">
+                  <h3 className="font-display font-bold text-lg mb-3">Meus resgates</h3>
+                  <div className="space-y-2">
+                    {myRedemptions.map(r => (
+                      <div key={r.id} className="flex items-center justify-between gap-2 p-3 rounded-xl bg-muted/40">
+                        <div className="flex items-center gap-2 min-w-0">
+                          {r.status === "pendente" ? <Clock className="w-4 h-4 text-warning" />
+                            : r.status === "recusado" ? <XCircle className="w-4 h-4 text-destructive" />
+                            : <CheckCircle2 className="w-4 h-4 text-success" />}
+                          <div className="min-w-0">
+                            <div className="font-medium truncate">{r.reward_name}</div>
+                            <div className="text-[10px] text-muted-foreground">{formatDateTime(r.requested_at)} · {r.status}</div>
+                          </div>
+                        </div>
+                        <span className="font-display font-bold text-xs whitespace-nowrap inline-flex items-center gap-1">
+                          <AuriIcon size={11} />{formatAuris(r.auris_cost)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
 
           {/* ===== ATIVIDADES ===== */}
           <TabsContent ref={activitiesRef} value="atividades" className="space-y-6 mt-4 scroll-mt-4">
