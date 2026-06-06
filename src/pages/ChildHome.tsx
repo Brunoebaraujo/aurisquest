@@ -89,6 +89,7 @@ const ChildHome = () => {
   const activitiesRef = useRef<HTMLDivElement | null>(null);
   const calendarRef = useRef<HTMLDivElement | null>(null);
   const rankingRef = useRef<HTMLDivElement | null>(null);
+  const lojaRef = useRef<HTMLDivElement | null>(null);
   const [newRewards, setNewRewards] = useState<RevealReward[]>([]);
   const [levelUp, setLevelUp] = useState<{ level: number; title?: string } | null>(null);
   const [levelGlow, setLevelGlow] = useState(false);
