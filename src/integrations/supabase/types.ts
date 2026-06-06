@@ -756,6 +756,154 @@ export type Database = {
           },
         ]
       }
+      reward_redemptions: {
+        Row: {
+          auris_cost: number
+          child_id: string
+          created_at: string
+          family_id: string
+          id: string
+          legacy_payment_id: string | null
+          metadata: Json
+          requested_at: string
+          review_note: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reward_category_snapshot: string
+          reward_id: string | null
+          reward_name_snapshot: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auris_cost: number
+          child_id: string
+          created_at?: string
+          family_id: string
+          id?: string
+          legacy_payment_id?: string | null
+          metadata?: Json
+          requested_at?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reward_category_snapshot?: string
+          reward_id?: string | null
+          reward_name_snapshot: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auris_cost?: number
+          child_id?: string
+          created_at?: string
+          family_id?: string
+          id?: string
+          legacy_payment_id?: string | null
+          metadata?: Json
+          requested_at?: string
+          review_note?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reward_category_snapshot?: string
+          reward_id?: string | null
+          reward_name_snapshot?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reward_redemptions_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_redemptions_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_redemptions_legacy_payment_id_fkey"
+            columns: ["legacy_payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reward_redemptions_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "rewards"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rewards: {
+        Row: {
+          active: boolean
+          auris_cost: number
+          available_from: string | null
+          available_until: string | null
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          family_id: string
+          id: string
+          image_url: string | null
+          metadata: Json
+          name: string
+          stock: number | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          auris_cost: number
+          available_from?: string | null
+          available_until?: string | null
+          category?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          family_id: string
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          name: string
+          stock?: number | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          auris_cost?: number
+          available_from?: string | null
+          available_until?: string | null
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          family_id?: string
+          id?: string
+          image_url?: string | null
+          metadata?: Json
+          name?: string
+          stock?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rewards_family_id_fkey"
+            columns: ["family_id"]
+            isOneToOne: false
+            referencedRelation: "families"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_group_invitations: {
         Row: {
           accepted_at: string | null
