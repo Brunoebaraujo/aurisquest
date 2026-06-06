@@ -167,6 +167,8 @@ export type CharacterSheetProps = {
   onActivities?: () => void;
   onCalendar?: () => void;
   onRanking?: () => void;
+  onShop?: () => void;
+  hasPendingRedemptionBadge?: boolean;
 };
 
 export function CharacterSheet({
