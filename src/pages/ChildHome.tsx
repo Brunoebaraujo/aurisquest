@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Trophy, Camera, Sparkles, CheckCircle2, Clock, XCircle, LogOut, Award,
-  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown, Shirt, Package,
+  CalendarDays, ChevronLeft, ChevronRight, Medal, Crown, Shirt, Package, Gift,
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatAuris, formatDateTime } from "@/lib/format";
@@ -44,6 +44,13 @@ type MissionItem = {
   goal_type: "total" | "streak"; goal_target: number;
   bonus_auris: number; activity_id: string; activity_name: string | null;
   medal_url: string | null; participants: MissionParticipant[];
+};
+type RewardCat = { id: string; name: string; description: string | null; auris_cost: number; category: string };
+type RedemptionItem = { id: string; reward_name: string; auris_cost: number; status: string; requested_at: string; category: string };
+
+const CAT_LABEL: Record<string, string> = {
+  money: "Dinheiro", screen_time: "Tempo de tela", privilege: "Privilégio",
+  experience: "Experiência", item: "Item", custom: "Personalizado",
 };
 
 const monthNames = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
