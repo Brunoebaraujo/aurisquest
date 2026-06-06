@@ -70,6 +70,10 @@ const ChildHome = () => {
   const [pendingAuris, setPendingAuris] = useState(0);
   const [approvedAuris, setApprovedAuris] = useState(0);
   const [paidAuris, setPaidAuris] = useState(0);
+  const [pendingRedemptionAuris, setPendingRedemptionAuris] = useState(0);
+  const [rewardsCatalog, setRewardsCatalog] = useState<RewardCat[]>([]);
+  const [myRedemptions, setMyRedemptions] = useState<RedemptionItem[]>([]);
+  const [redeemingId, setRedeemingId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Activity | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [comment, setComment] = useState("");
