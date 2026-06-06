@@ -480,7 +480,7 @@ const ChildHome = () => {
           </TabsList>
 
           {/* ===== LOJA DE RECOMPENSAS ===== */}
-          <TabsContent value="loja" className="space-y-4 mt-4 scroll-mt-4">
+          <TabsContent ref={lojaRef} value="loja" className="space-y-4 mt-4 scroll-mt-4">
             <Card className="border-0 shadow-card rounded-3xl bg-gradient-warm text-secondary-foreground">
               <CardContent className="p-5 text-center">
                 <div className="text-xs uppercase tracking-wide opacity-80">Você tem</div>
