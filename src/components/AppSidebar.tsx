@@ -15,7 +15,7 @@ const items = [
   { title: "Missões", url: "/app/missoes", icon: Award },
   { title: "Pendências", url: "/app/pendencias", icon: ClipboardCheck },
   { title: "Calendário", url: "/app/calendario", icon: CalendarDays },
-  { title: "Recompensas", url: "/app/recompensas", icon: GiftIcon },
+  { title: "Mercador", url: "/app/recompensas", icon: GiftIcon },
   { title: "Grupos", url: "/app/grupos", icon: UsersRound },
   { title: "Responsáveis", url: "/app/responsaveis", icon: UserPlus },
 ];
