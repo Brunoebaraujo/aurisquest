@@ -138,7 +138,7 @@ const Rewards = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-display font-bold">Recompensas</h2>
+          <h2 className="text-2xl font-display font-bold">Mercador</h2>
           <p className="text-muted-foreground text-sm">Crianças podem trocar Auris pelas recompensas que você criar.</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -245,7 +245,7 @@ const Rewards = () => {
       <Card className="border-0 shadow-card rounded-2xl">
         <CardContent className="p-4">
           <h3 className="font-display font-semibold text-lg mb-3 flex items-center gap-2">
-            <Gift className="w-5 h-5" /> Histórico de Recompensas
+            <Gift className="w-5 h-5" /> Histórico de Resgates
           </h3>
           {redemptions.length === 0 && <p className="text-sm text-muted-foreground">Nenhum resgate registrado.</p>}
           <div className="space-y-2">

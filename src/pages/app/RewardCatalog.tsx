@@ -40,9 +40,9 @@ const RewardCatalog = () => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <Link to="/app/pagamentos" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground mb-1">
-            <ArrowLeft className="w-3 h-3" /> Voltar para Recompensas
+            <ArrowLeft className="w-3 h-3" /> Voltar para Mercador
           </Link>
-          <h2 className="text-2xl font-display font-bold">Catálogo de Recompensas</h2>
+          <h2 className="text-2xl font-display font-bold">Catálogo do Mercador</h2>
           <p className="text-muted-foreground text-sm">Crie as recompensas que as crianças poderão resgatar com seus Auris.</p>
         </div>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
