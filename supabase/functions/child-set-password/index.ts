@@ -27,7 +27,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     const childId = String(body.child_id ?? "");
     const password = String(body.password ?? "");
-    if (!childId || password.length < 4 || password.length > 72) {
+    if (!childId || password.length < 6 || password.length > 72) {
       return json({ error: "invalid_input" }, 400);
     }
 

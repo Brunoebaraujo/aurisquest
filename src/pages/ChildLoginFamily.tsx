@@ -45,7 +45,15 @@ const ChildLoginFamily = () => {
       const { data, error } = await supabase.functions.invoke("child-login", {
         body: { child_id: selected.child_id, password, family_token: familyToken },
       });
-      if (error || !data?.token) { toast.error("Senha incorreta. Tente de novo."); return; }
+      if (error || !data?.token) {
+        const status = (error as { context?: { status?: number } })?.context?.status;
+        if (status === 429) {
+          toast.error("Muitas tentativas. Espere alguns minutos e tente de novo.");
+        } else {
+          toast.error("Senha incorreta. Tente de novo.");
+        }
+        return;
+      }
       localStorage.setItem("jk_child_token", data.token);
       localStorage.setItem("jk_child", JSON.stringify(data.child));
       nav("/c", { replace: true });

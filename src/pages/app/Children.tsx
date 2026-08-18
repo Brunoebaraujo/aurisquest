@@ -62,7 +62,7 @@ const Children = () => {
   const setPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!pwdChild) return;
-    if (pwd.length < 4) { toast.error("Senha precisa ter ao menos 4 caracteres"); return; }
+    if (pwd.length < 6) { toast.error("Senha precisa ter ao menos 6 caracteres"); return; }
     setPwdBusy(true);
     try {
       const { data, error } = await supabase.functions.invoke("child-set-password", {
@@ -163,8 +163,8 @@ const Children = () => {
           </DialogHeader>
           <form onSubmit={setPassword} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="pwd">Senha (mínimo 4 caracteres)</Label>
-              <Input id="pwd" type="text" value={pwd} onChange={e => setPwd(e.target.value)} placeholder="Ex: 1234 ou abelha" autoFocus minLength={4} maxLength={72} required />
+              <Label htmlFor="pwd">Senha (mínimo 6 caracteres)</Label>
+              <Input id="pwd" type="text" value={pwd} onChange={e => setPwd(e.target.value)} placeholder="Ex: 123456 ou abelha123" autoFocus minLength={6} maxLength={72} required />
               <p className="text-xs text-muted-foreground">Combine algo simples com a criança. Ao trocar, qualquer sessão antiga é desconectada.</p>
             </div>
             <Button type="submit" variant="hero" className="w-full" disabled={pwdBusy}>

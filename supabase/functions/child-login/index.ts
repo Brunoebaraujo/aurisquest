@@ -18,6 +18,21 @@ Deno.serve(async (req) => {
 
     const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
 
+    // Rate limiting: máximo 5 tentativas malsucedidas por criança em 10 minutos.
+    const RATE_LIMIT_MAX_ATTEMPTS = 5;
+    const RATE_LIMIT_WINDOW_MINUTES = 10;
+    const windowStart = new Date(Date.now() - RATE_LIMIT_WINDOW_MINUTES * 60 * 1000).toISOString();
+
+    const { count: recentFailures } = await admin
+      .from("child_login_attempts")
+      .select("id", { count: "exact", head: true })
+      .eq("child_id", childId)
+      .gte("created_at", windowStart);
+
+    if ((recentFailures ?? 0) >= RATE_LIMIT_MAX_ATTEMPTS) {
+      return json({ error: "too_many_attempts" }, 429);
+    }
+
     const { data: child } = await admin
       .from("children")
       .select("id, name, family_id, password_hash, active")
@@ -25,6 +40,7 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (!child || !child.active || !child.password_hash) {
+      await admin.from("child_login_attempts").insert({ child_id: childId });
       return json({ error: "invalid_credentials" }, 401);
     }
 
@@ -36,7 +52,10 @@ Deno.serve(async (req) => {
     }
 
     const ok = await bcrypt.compare(password, child.password_hash);
-    if (!ok) return json({ error: "invalid_credentials" }, 401);
+    if (!ok) {
+      await admin.from("child_login_attempts").insert({ child_id: childId });
+      return json({ error: "invalid_credentials" }, 401);
+    }
 
     // Generate token
     const tokenBytes = new Uint8Array(32);
@@ -54,6 +73,9 @@ Deno.serve(async (req) => {
       token_hash: tokenHash,
     });
     if (insErr) return json({ error: insErr.message }, 500);
+
+    // Login bem-sucedido: zera o contador de tentativas dessa criança.
+    await admin.from("child_login_attempts").delete().eq("child_id", child.id);
 
     return json({
       token,
