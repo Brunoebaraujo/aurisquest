@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-build-test:
+    name: Lint, build & test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        # Não bloqueia o build: há débito técnico pré-existente (uso de `any`)
+        # sendo tratado na Fase 3 do plano de melhorias. Roda e reporta,
+        # mas não falha o job até esse débito ser resolvido.
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Type check
+        run: npx tsc --noEmit -p tsconfig.app.json
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
