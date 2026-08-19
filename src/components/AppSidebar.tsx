@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Gift as GiftIcon, LogOut, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus, Gift } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Gift as GiftIcon, LogOut, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus, Gift, Palette } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter,
@@ -98,6 +98,14 @@ export const AppSidebar = () => {
                     <NavLink to="/app/admin/recompensas">
                       <Gift className="h-4 w-4" />
                       {!collapsed && <span>Recompensas</span>}
+                    </NavLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={isActive("/app/admin/avatar-composer")}>
+                    <NavLink to="/app/admin/avatar-composer">
+                      <Palette className="h-4 w-4" />
+                      {!collapsed && <span>Avatar Composer</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

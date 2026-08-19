@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,6 +32,7 @@ import AdminUsage from "./pages/app/AdminUsage.tsx";
 import AdminAlerts from "./pages/app/AdminAlerts.tsx";
 import AdminRewards from "./pages/app/AdminRewards.tsx";
 import ProfileSelector from "./pages/app/ProfileSelector.tsx";
+import AdminAvatarComposer from "./pages/app/AdminAvatarComposer.tsx";
 
 const queryClient = new QueryClient();
 
@@ -40,7 +41,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -73,7 +74,9 @@ const App = () => (
               <Route path="admin/utilizacao" element={<AdminUsage />} />
               <Route path="admin/alertas" element={<AdminAlerts />} />
               <Route path="admin/recompensas" element={<AdminRewards />} />
+              <Route path="admin/avatar-composer" element={<AdminAvatarComposer />} />
             </Route>
+            <Route path="/admin/avatar-composer" element={<Navigate to="/app/admin/avatar-composer" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
