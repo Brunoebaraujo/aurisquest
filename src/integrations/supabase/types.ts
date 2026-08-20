@@ -229,6 +229,32 @@ export type Database = {
           },
         ]
       }
+      child_login_attempts: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_login_attempts_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       child_sessions: {
         Row: {
           child_id: string
@@ -370,12 +396,12 @@ export type Database = {
       cosmetic_items: {
         Row: {
           active: boolean
-          equipment_key: string | null
           category: Database["public"]["Enums"]["cosmetic_category"]
           chest_reveals_item_id: string | null
           created_at: string
           description: string | null
           ends_at: string | null
+          equipment_key: string | null
           id: string
           image_url: string
           name: string
@@ -390,12 +416,12 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          equipment_key?: string | null
           category: Database["public"]["Enums"]["cosmetic_category"]
           chest_reveals_item_id?: string | null
           created_at?: string
           description?: string | null
           ends_at?: string | null
+          equipment_key?: string | null
           id?: string
           image_url: string
           name: string
@@ -410,12 +436,12 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          equipment_key?: string | null
           category?: Database["public"]["Enums"]["cosmetic_category"]
           chest_reveals_item_id?: string | null
           created_at?: string
           description?: string | null
           ends_at?: string | null
+          equipment_key?: string | null
           id?: string
           image_url?: string
           name?: string
