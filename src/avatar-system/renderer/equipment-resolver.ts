@@ -1,6 +1,9 @@
 import type { Equipment, EquippedItem } from "@/components/cosmetics/EquippedAvatar";
 import type { AvatarLayer } from "../composer/composer.types";
 
+export type AvatarRenderSurface = "badge" | "portrait" | "characterScene";
+export type WardrobeSlot = "avatar" | "elmo" | "armadura" | "arma" | "pet";
+
 const normalize = (value = "") => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "_");
 const identityText = (item?: EquippedItem) => normalize([item?.name, item?.image_url].filter(Boolean).join(" "));
 
@@ -25,4 +28,20 @@ export function isLayerEquipped(layer: AvatarLayer, equipment: Equipment): boole
   if (layer.type === "helmetScene") return equipment.helmet?.equipmentId === "helmet_guardian_blue";
   if (layer.type === "pet") return equipment.pet?.equipmentId === "pet_guardian_fox";
   return false;
+}
+
+export function isLayerVisibleOnSurface(layer: AvatarLayer, equipment: Equipment, surface: AvatarRenderSurface): boolean {
+  if (!isLayerEquipped(layer, equipment)) return false;
+  if (surface === "badge") return layer.type === "avatarBase";
+  if (surface === "characterScene") return layer.type !== "helmetScene";
+  return true;
+}
+
+export function wardrobeSlotForLayer(layer: AvatarLayer): WardrobeSlot | null {
+  if (layer.type === "avatarBase") return "avatar";
+  if (["armor", "belt", "boots", "shield"].includes(layer.type)) return "armadura";
+  if (layer.type === "weapon") return "arma";
+  if (layer.type === "helmetScene") return "elmo";
+  if (layer.type === "pet") return "pet";
+  return null;
 }

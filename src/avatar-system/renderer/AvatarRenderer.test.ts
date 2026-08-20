@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { createElement } from "react";
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import type { AvatarLayer } from "../composer/composer.types";
 import { createGaelPreset } from "../composer/gaelPreset";
-import { inferEquipmentId, isLayerEquipped } from "./equipment-resolver";
+import { inferEquipmentId, isLayerEquipped, isLayerVisibleOnSurface, wardrobeSlotForLayer } from "./equipment-resolver";
 import { layerStyle } from "./AvatarRenderer";
 import { AvatarRenderer } from "./AvatarRenderer";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
@@ -16,4 +16,8 @@ describe("AvatarRenderer production mapping",()=>{
   it("converts logical transforms to responsive percentages",()=>{ const layer={...createGaelPreset().layers[0],trimBounds:{x:100,y:200,width:400,height:600},transform:{x:20,y:30,xNormalized:0,yNormalized:0,scaleX:.5,scaleY:.5,rotation:15,opacity:.8}} as AvatarLayer; const style=layerStyle(layer); expect(style.left).toBe(`${70/1024*100}%`); expect(style.top).toBe(`${130/1536*100}%`); expect(style.width).toBe(`${200/1024*100}%`); expect(style.transform).toBe("rotate(15deg)"); });
   it("renders the same composition at compact and profile sizes",()=>{ const view=render(createElement("div",{style:{width:76,height:76}},createElement(AvatarRenderer,{equipment}))); const compactLayers=view.container.querySelectorAll("[data-avatar-layer]"); expect(compactLayers.length).toBeGreaterThan(1); const compactLeft=(compactLayers[0] as HTMLElement).style.left; view.rerender(createElement("div",{style:{width:260,height:300}},createElement(AvatarRenderer,{equipment}))); expect(view.container.querySelectorAll("[data-avatar-layer]")).toHaveLength(compactLayers.length); expect((view.container.querySelector("[data-avatar-layer]") as HTMLElement).style.left).toBe(compactLeft); });
   it("gives modular profile avatars a 2:3 portrait viewport",()=>{ const view=render(createElement(EquippedAvatar,{equipment,size:210,variant:"portrait"})); const viewport=view.container.querySelector("[data-avatar-variant='portrait']") as HTMLElement; expect(viewport.style.width).toBe("210px"); expect(viewport.style.height).toBe("315px"); expect(viewport.querySelector("[data-avatar-layer]")).not.toBeNull(); });
+  it("keeps the helmet out of the character scene while retaining it in portrait policy",()=>{ const helmetLayer={...createGaelPreset().layers.find(layer=>layer.type==="helmetScene")!,visible:true}; const withHelmet={...equipment,helmet:{image_url:"helmet.png",name:"Guardian Helmet",rarity:"comum" as const,equipmentId:"helmet_guardian_blue"}}; expect(isLayerVisibleOnSurface(helmetLayer,withHelmet,"portrait")).toBe(true); expect(isLayerVisibleOnSurface(helmetLayer,withHelmet,"characterScene")).toBe(false); });
+  it("uses only the base avatar in compact badges",()=>{ const view=render(createElement(AvatarRenderer,{equipment,surface:"badge"})); expect(view.container.querySelectorAll("[data-avatar-layer]")).toHaveLength(1); expect(view.container.querySelector("[data-avatar-layer='avatar-base']")).not.toBeNull(); });
+  it("maps bundled render parts to the armor wardrobe slot",()=>{ const layers=createGaelPreset().layers; expect(wardrobeSlotForLayer(layers.find(layer=>layer.type==="armor")!)).toBe("armadura"); expect(wardrobeSlotForLayer(layers.find(layer=>layer.type==="belt")!)).toBe("armadura"); expect(wardrobeSlotForLayer(layers.find(layer=>layer.type==="shield")!)).toBe("armadura"); });
+  it("opens the matching wardrobe category from a rendered piece",()=>{ const selected:string[]=[]; const view=render(createElement(AvatarRenderer,{equipment,surface:"characterScene",onLayerSelect:(slot)=>selected.push(slot)})); fireEvent.click(view.getAllByLabelText("Abrir armadura")[0]); expect(selected).toEqual(["armadura"]); });
 });
