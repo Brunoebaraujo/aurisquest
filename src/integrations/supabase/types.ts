@@ -73,6 +73,7 @@ export type Database = {
       avatars: {
         Row: {
           active: boolean
+          avatar_key: string | null
           category: Database["public"]["Enums"]["avatar_category"]
           created_at: string
           description: string | null
@@ -91,6 +92,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          avatar_key?: string | null
           category: Database["public"]["Enums"]["avatar_category"]
           created_at?: string
           description?: string | null
@@ -109,6 +111,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          avatar_key?: string | null
           category?: Database["public"]["Enums"]["avatar_category"]
           created_at?: string
           description?: string | null
@@ -398,6 +401,7 @@ export type Database = {
           created_at: string
           description: string | null
           ends_at: string | null
+          equipment_key: string | null
           id: string
           image_url: string
           name: string
@@ -417,6 +421,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           ends_at?: string | null
+          equipment_key?: string | null
           id?: string
           image_url: string
           name: string
@@ -436,6 +441,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           ends_at?: string | null
+          equipment_key?: string | null
           id?: string
           image_url?: string
           name?: string
