@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,6 +59,7 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${String(d.getMonth()+1).padStar
 
 const ChildHome = () => {
   const nav = useNavigate();
+  const [searchParams] = useSearchParams();
   const [child, setChild] = useState<ChildSession | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -85,7 +86,10 @@ const ChildHome = () => {
   const [wardrobeOpen, setWardrobeOpen] = useState(false);
   const [wardrobeTab, setWardrobeTab] = useState<string | undefined>(undefined);
   const [inventoryOpen, setInventoryOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<string>("atividades");
+  const requestedTab = searchParams.get("tab");
+  const [activeTab, setActiveTab] = useState<string>(
+    requestedTab && ["atividades", "loja", "calendario", "ranking"].includes(requestedTab) ? requestedTab : "atividades",
+  );
   const activitiesRef = useRef<HTMLDivElement | null>(null);
   const calendarRef = useRef<HTMLDivElement | null>(null);
   const rankingRef = useRef<HTMLDivElement | null>(null);
@@ -187,6 +191,14 @@ const ChildHome = () => {
     if (!token) { nav("/entrar", { replace: true }); return; }
     refresh();
   }, [nav, refresh]);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab && ["atividades", "loja", "calendario", "ranking"].includes(tab)) {
+      setActiveTab(tab);
+    }
+    if (tab === "perfil") window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [searchParams]);
 
   const submit = async () => {
     if (!selected || !child) return;

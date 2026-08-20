@@ -22,6 +22,7 @@ import ChildLogin from "./pages/ChildLogin.tsx";
 import ChildLoginFamily from "./pages/ChildLoginFamily.tsx";
 import Responsibles from "./pages/app/Responsibles.tsx";
 import ChildHome from "./pages/ChildHome.tsx";
+import ChildEquipment from "./pages/ChildEquipment.tsx";
 import InviteAccept from "./pages/InviteAccept.tsx";
 import AdminFamilies from "./pages/app/AdminFamilies.tsx";
 import Groups from "./pages/app/Groups.tsx";
@@ -49,7 +50,8 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/entrar" element={<ChildLogin />} />
             <Route path="/familia/:familyToken/entrar" element={<ChildLoginFamily />} />
-            <Route path="/c" element={<ChildHome />} />
+            <Route path="/c" element={<ChildEquipment />} />
+            <Route path="/c/jornada" element={<ChildHome />} />
             <Route path="/convite/:token" element={<InviteAccept />} />
             <Route path="/grupo-convite/:token" element={<GroupInviteAccept />} />
             {/* legado: redireciona para nova tela de login */}

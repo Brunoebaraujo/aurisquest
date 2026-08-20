@@ -54,7 +54,11 @@ export function EquippedAvatar({
       <RarityFrame rarity={frameRarity} rounded={rounded} className="relative w-full h-full">
         <div className={cn("w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center", rounded, modular ? "overflow-visible" : "overflow-hidden")}>
           {modular ? (
-            <AvatarRenderer equipment={equipment} label={equipment.avatar?.name ?? "Avatar de Gael"} />
+            <AvatarRenderer
+              equipment={equipment}
+              label={equipment.avatar?.name ?? "Avatar de Gael"}
+              surface={portrait ? "portrait" : "badge"}
+            />
           ) : equipment.avatar ? (
             <img src={equipment.avatar.image_url} alt={equipment.avatar.name ?? "Avatar"} className="w-full h-full object-cover" />
           ) : (
