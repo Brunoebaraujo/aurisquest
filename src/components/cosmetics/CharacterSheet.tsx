@@ -295,27 +295,28 @@ export function CharacterSheet({
           <Sparkles className="w-3 h-3 text-accent" />
         </div>
 
-        {/* Top: 3-column grid with character in the middle */}
-        <div className="grid grid-cols-[minmax(64px,1fr)_minmax(140px,1.8fr)_minmax(64px,1fr)] gap-2 items-center">
-          <div className="flex flex-col gap-2">
+        {/* Mobile: portrait first, slots below. Desktop: slots flank the portrait. */}
+        <div className="grid grid-cols-2 sm:grid-cols-[minmax(88px,1fr)_minmax(210px,1.35fr)_minmax(88px,1fr)] gap-3 items-start">
+          <div className="order-2 sm:order-1 flex flex-col gap-2">
             {SLOTS_LEFT.map(renderSlot)}
           </div>
-          <div className="flex items-center justify-center py-2">
+          <div className="order-1 sm:order-2 col-span-2 sm:col-span-1 flex items-start justify-center pb-2 sm:py-2 min-h-[315px]">
             <button
               type="button"
               onClick={onAvatarClick}
-              className="transition-bounce hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full"
+              className="transition-bounce hover:scale-[1.02] active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-[2rem]"
               aria-label="Editar visual"
             >
               <EquippedAvatar
                 equipment={equipment}
-                size={180}
+                size={210}
                 fallbackName={name}
+                variant="portrait"
               />
             </button>
           </div>
 
-          <div className="flex flex-col gap-2">
+          <div className="order-3 flex flex-col gap-2">
             {SLOTS_RIGHT.map(renderSlot)}
           </div>
         </div>

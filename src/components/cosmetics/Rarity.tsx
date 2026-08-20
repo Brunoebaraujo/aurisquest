@@ -38,7 +38,7 @@ export function RarityFrame({
 }) {
   return (
     <div className={cn(rarityClass(rarity), "rarity-frame", rounded, "p-1 bg-card", className)}>
-      <div className={cn(rounded, "overflow-hidden")}>{children}</div>
+      <div className={cn(rounded, "w-full h-full overflow-hidden")}>{children}</div>
     </div>
   );
 }
