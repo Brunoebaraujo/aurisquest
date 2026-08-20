@@ -19,19 +19,28 @@ export function EquippedAvatar({
   size = 160,
   className,
   fallbackName,
+  variant = "circle",
 }: {
   equipment: Equipment;
   size?: number;
   className?: string;
   fallbackName?: string;
+  variant?: "circle" | "portrait";
 }) {
   const s = size;
   const itemSize = Math.round(s * 0.4);
   const frameRarity = equipment.frame?.rarity ?? equipment.avatar?.rarity ?? "comum";
   const modular = canRenderModularAvatar(equipment);
+  const portrait = modular && variant === "portrait";
+  const height = portrait ? Math.round(s * 1.5) : s;
+  const rounded = portrait ? "rounded-[2rem]" : "rounded-full";
 
   return (
-    <div className={cn("relative", className)} style={{ width: s, height: s }}>
+    <div
+      className={cn("relative", className)}
+      data-avatar-variant={portrait ? "portrait" : "circle"}
+      style={{ width: s, height }}
+    >
       {/* Aura */}
       {equipment.aura && (
         <img
@@ -42,8 +51,8 @@ export function EquippedAvatar({
         />
       )}
       {/* Avatar with frame */}
-      <RarityFrame rarity={frameRarity} rounded="rounded-full" className="relative w-full h-full">
-        <div className={cn("w-full h-full rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center", modular ? "overflow-visible" : "overflow-hidden")}>
+      <RarityFrame rarity={frameRarity} rounded={rounded} className="relative w-full h-full">
+        <div className={cn("w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center", rounded, modular ? "overflow-visible" : "overflow-hidden")}>
           {modular ? (
             <AvatarRenderer equipment={equipment} label={equipment.avatar?.name ?? "Avatar de Gael"} />
           ) : equipment.avatar ? (
