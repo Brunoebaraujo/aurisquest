@@ -73,7 +73,6 @@ export type Database = {
       avatars: {
         Row: {
           active: boolean
-          avatar_key: string | null
           category: Database["public"]["Enums"]["avatar_category"]
           created_at: string
           description: string | null
@@ -92,7 +91,6 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          avatar_key?: string | null
           category: Database["public"]["Enums"]["avatar_category"]
           created_at?: string
           description?: string | null
@@ -111,7 +109,6 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          avatar_key?: string | null
           category?: Database["public"]["Enums"]["avatar_category"]
           created_at?: string
           description?: string | null
@@ -225,6 +222,32 @@ export type Database = {
             columns: ["weapon_item_id"]
             isOneToOne: false
             referencedRelation: "cosmetic_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      child_login_attempts: {
+        Row: {
+          child_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          child_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          child_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "child_login_attempts_child_id_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
             referencedColumns: ["id"]
           },
         ]
@@ -370,7 +393,6 @@ export type Database = {
       cosmetic_items: {
         Row: {
           active: boolean
-          equipment_key: string | null
           category: Database["public"]["Enums"]["cosmetic_category"]
           chest_reveals_item_id: string | null
           created_at: string
@@ -390,7 +412,6 @@ export type Database = {
         }
         Insert: {
           active?: boolean
-          equipment_key?: string | null
           category: Database["public"]["Enums"]["cosmetic_category"]
           chest_reveals_item_id?: string | null
           created_at?: string
@@ -410,7 +431,6 @@ export type Database = {
         }
         Update: {
           active?: boolean
-          equipment_key?: string | null
           category?: Database["public"]["Enums"]["cosmetic_category"]
           chest_reveals_item_id?: string | null
           created_at?: string
