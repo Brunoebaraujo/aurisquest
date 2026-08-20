@@ -1,0 +1,351 @@
+{
+  "schemaVersion": 1,
+  "avatarStandard": "auris-avatar-standard-v1",
+  "avatarId": "gael",
+  "presetId": "gael-guardian-v1",
+  "presetName": "Gael Guardian Test Set v1",
+  "canvas": {
+    "width": 1024,
+    "height": 1536
+  },
+  "layers": [
+    {
+      "id": "avatar-base",
+      "name": "Gael Base",
+      "type": "avatarBase",
+      "placementType": "body",
+      "zIndex": 0,
+      "locked": true,
+      "visible": true,
+      "source": "/avatar-assets/gael_avatar_base_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "gael_avatar_base_v1.png",
+      "assetKey": "gael_avatar_base_v1",
+      "missing": false,
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "xNormalized": 0,
+        "yNormalized": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 237,
+        "y": 72,
+        "width": 550,
+        "height": 1351
+      }
+    },
+    {
+      "id": "boots-left",
+      "name": "Blue Guardian Boots — Left",
+      "type": "boots",
+      "placementType": "body",
+      "zIndex": 10,
+      "locked": false,
+      "visible": true,
+      "source": "/avatar-assets/boots_guardian_blue_avatar_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "boots_guardian_blue_avatar_v1.png",
+      "assetKey": "boots_guardian_blue_avatar_v1",
+      "missing": false,
+      "equipmentId": "boots_guardian_blue",
+      "renderPartId": "left",
+      "groupId": "boots_guardian_blue",
+      "sourceRegion": {
+        "x": 0,
+        "y": 0,
+        "width": 512,
+        "height": 1536
+      },
+      "transform": {
+        "x": 157.55455424660914,
+        "y": 484.5855402510862,
+        "xNormalized": 0.15386186938145424,
+        "yNormalized": 0.31548537776763425,
+        "scaleX": 0.6880507203080688,
+        "scaleY": 0.6880507203080671,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 149,
+        "y": 905,
+        "width": 262,
+        "height": 450
+      }
+    },
+    {
+      "id": "boots-right",
+      "name": "Blue Guardian Boots — Right",
+      "type": "boots",
+      "placementType": "body",
+      "zIndex": 11,
+      "locked": false,
+      "visible": true,
+      "source": "/avatar-assets/boots_guardian_blue_avatar_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "boots_guardian_blue_avatar_v1.png",
+      "assetKey": "boots_guardian_blue_avatar_v1",
+      "missing": false,
+      "equipmentId": "boots_guardian_blue",
+      "renderPartId": "right",
+      "groupId": "boots_guardian_blue",
+      "sourceRegion": {
+        "x": 512,
+        "y": 0,
+        "width": 512,
+        "height": 1536
+      },
+      "transform": {
+        "x": 159.49020764734348,
+        "y": 475.3720602863706,
+        "xNormalized": 0.15575215590560887,
+        "yNormalized": 0.30948701841560583,
+        "scaleX": 0.6983640615405342,
+        "scaleY": 0.6983640615405338,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 614,
+        "y": 911,
+        "width": 262,
+        "height": 444
+      }
+    },
+    {
+      "id": "armor",
+      "name": "Guardian Blue Armor",
+      "type": "armor",
+      "placementType": "body",
+      "zIndex": 20,
+      "locked": false,
+      "visible": true,
+      "source": "/avatar-assets/armor_guardian_blue_avatar_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "armor_guardian_blue_avatar_v1.pn.png",
+      "assetKey": "armor_guardian_blue_avatar_v1",
+      "missing": false,
+      "transform": {
+        "x": 181.30119946397875,
+        "y": 209.2387098659325,
+        "xNormalized": 0.17705195260154175,
+        "yNormalized": 0.1362231184022998,
+        "scaleX": 0.6338310861547195,
+        "scaleY": 0.6338310861547186,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 148,
+        "y": 404,
+        "width": 727,
+        "height": 582
+      }
+    },
+    {
+      "id": "belt",
+      "name": "Guardian Blue Belt",
+      "type": "belt",
+      "placementType": "body",
+      "zIndex": 30,
+      "locked": false,
+      "visible": true,
+      "source": "/avatar-assets/belt_guardian_blue_avatar_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "belt_guardian_blue_avatar_v1.png",
+      "assetKey": "belt_guardian_blue_avatar_v1",
+      "missing": false,
+      "transform": {
+        "x": 285.86945762595406,
+        "y": 527.6543039558321,
+        "xNormalized": 0.27916939221284576,
+        "yNormalized": 0.34352493747124485,
+        "scaleX": 0.4298449311524242,
+        "scaleY": 0.4298449311524246,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 230,
+        "y": 598,
+        "width": 562,
+        "height": 209
+      }
+    },
+    {
+      "id": "weapon",
+      "name": "Guardian Blue Sword",
+      "type": "weapon",
+      "placementType": "body",
+      "zIndex": 40,
+      "locked": false,
+      "visible": true,
+      "source": "/avatar-assets/sword_guardian_blue_avatar_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "sword_guardian_blue_avatar_v1.png",
+      "assetKey": "sword_guardian_blue_avatar_v1",
+      "missing": false,
+      "transform": {
+        "x": 335.89168791070574,
+        "y": 421.5382204421751,
+        "xNormalized": 0.3280192264752986,
+        "yNormalized": 0.2744389456003744,
+        "scaleX": 0.7173805281929572,
+        "scaleY": 0.7173805281929544,
+        "rotation": 142.96434769133361,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 76,
+        "y": 622,
+        "width": 354,
+        "height": 740
+      }
+    },
+    {
+      "id": "right-hand-mask",
+      "name": "Right Hand Front Mask",
+      "type": "occlusionMask",
+      "placementType": "body",
+      "zIndex": 50,
+      "locked": true,
+      "visible": false,
+      "source": "/avatar-assets/right_hand_front_mask_final.png",
+      "sourceKind": "project",
+      "sourceFileName": "right_hand_front_mask_final.png",
+      "assetKey": "right_hand_front_mask",
+      "missing": false,
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "xNormalized": 0,
+        "yNormalized": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 238,
+        "y": 839,
+        "width": 86,
+        "height": 102
+      }
+    },
+    {
+      "id": "shield",
+      "name": "Guardian Blue Shield",
+      "type": "shield",
+      "placementType": "body",
+      "zIndex": 60,
+      "locked": false,
+      "visible": true,
+      "source": "/avatar-assets/shield_guardian_blue_avatar_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "shield_guardian_blue_avatar_v1.png",
+      "assetKey": "shield_guardian_blue_avatar_v1",
+      "missing": false,
+      "transform": {
+        "x": 314.92516849276916,
+        "y": 377.84058401951836,
+        "xNormalized": 0.3075441098562199,
+        "yNormalized": 0.24598996355437394,
+        "scaleX": 0.5711128448549929,
+        "scaleY": 0.5711128448549928,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 563,
+        "y": 401,
+        "width": 360,
+        "height": 702
+      }
+    },
+    {
+      "id": "pet",
+      "name": "Guardian Fox",
+      "type": "pet",
+      "placementType": "scene",
+      "zIndex": 70,
+      "locked": false,
+      "visible": true,
+      "source": "/avatar-assets/pet_guardian_fox_scene_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "pet_guardian_fox_scene_v1.png",
+      "assetKey": "pet_guardian_fox_scene_v1",
+      "missing": false,
+      "transform": {
+        "x": 492.8644763054566,
+        "y": 756.5364801734879,
+        "xNormalized": 0.48131296514204747,
+        "yNormalized": 0.4925367709462812,
+        "scaleX": 0.4843616017539507,
+        "scaleY": 0.48436160175395065,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 416,
+        "y": 537,
+        "width": 586,
+        "height": 824
+      }
+    },
+    {
+      "id": "helmet-scene",
+      "name": "Guardian Helmet (Scene)",
+      "type": "helmetScene",
+      "placementType": "scene",
+      "zIndex": 80,
+      "locked": false,
+      "visible": true,
+      "source": "/avatar-assets/helmet_guardian_blue_inventory_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "helmet_guardian_blue_inventory_v1.png",
+      "assetKey": "helmet_guardian_blue_inventory_v1",
+      "missing": false,
+      "transform": {
+        "x": -43.879623322054655,
+        "y": 9.936315685820322,
+        "xNormalized": -0.042851194650444,
+        "yNormalized": 0.006468955524622605,
+        "scaleX": 0.33503845722121833,
+        "scaleY": 0.33503845722121817,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1254,
+      "nativeHeight": 1254,
+      "trimBounds": {
+        "x": 221,
+        "y": 66,
+        "width": 908,
+        "height": 1079
+      }
+    }
+  ]
+}

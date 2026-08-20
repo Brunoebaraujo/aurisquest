@@ -3,6 +3,7 @@ import type { Equipment } from "./EquippedAvatar";
 import { Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import { AvatarRenderer, canRenderModularAvatar } from "@/avatar-system/renderer/AvatarRenderer";
 
 function SlotCard({
   label, item, className,
@@ -59,6 +60,7 @@ export function ChildShowcase({
   const currentLevelMinXp = Math.max(safeTotalXp - (xpInLevel ?? 0), 0);
   const safeNextLevelTotalXp = nextLevelTotalXp ?? currentLevelMinXp + (xpToNext ?? 0);
   const safeXpRemaining = xpRemaining ?? Math.max(safeNextLevelTotalXp - safeTotalXp, 0);
+  const modular = canRenderModularAvatar(equipment);
 
   return (
     <div className="relative rounded-3xl bg-gradient-to-b from-primary/10 via-background to-secondary/5 border shadow-card p-6 md:p-10">
@@ -84,7 +86,9 @@ export function ChildShowcase({
             )}
             <RarityFrame rarity={frameRarity} rounded="rounded-[3rem]" className="relative">
               <div className="w-[220px] h-[260px] md:w-[260px] md:h-[300px] rounded-[2.5rem] bg-gradient-to-br from-primary/15 to-secondary/10 flex items-center justify-center overflow-hidden">
-                {equipment.avatar ? (
+                {modular ? (
+                  <AvatarRenderer equipment={equipment} label={`Avatar de ${name}`} />
+                ) : equipment.avatar ? (
                   <img src={equipment.avatar.image_url} alt={equipment.avatar.name ?? name} className="w-full h-full object-cover" />
                 ) : (
                   <span className="font-display font-bold text-primary text-7xl">{name[0]?.toUpperCase()}</span>
