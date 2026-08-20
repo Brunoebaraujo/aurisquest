@@ -3,7 +3,7 @@ import type { Rarity } from "@/components/cosmetics/Rarity";
 import type { Equipment } from "@/components/cosmetics/EquippedAvatar";
 import { inferEquipmentId } from "@/avatar-system/renderer/equipment-resolver";
 
-export type AvatarCatalog = CatalogItem & { category: string };
+export type AvatarCatalog = CatalogItem & { category: string; avatar_key?: string | null };
 
 export type DashboardCosmetics = {
   equipment?: {
@@ -26,9 +26,9 @@ export function buildEquipment(d: DashboardCosmetics): Equipment {
   const e = d.equipment ?? {};
   const av = d.avatars_catalog.find(a => a.id === e.avatar_id);
   const find = (id?: string | null) => (id ? d.items_catalog.find(i => i.id === id) : undefined);
-  const toEq = (kind: "helmet"|"armor"|"weapon"|"pet", it?: CatalogItem) => (it ? { image_url: it.image_url, rarity: it.rarity as Rarity, name: it.name, catalogId: it.id, equipmentId: inferEquipmentId(kind,it.name,it.image_url) } : null);
+  const toEq = (kind: "helmet"|"armor"|"weapon"|"pet", it?: CatalogItem) => (it ? { image_url: it.image_url, rarity: it.rarity as Rarity, name: it.name, catalogId: it.id, equipmentId: it.equipment_key ?? inferEquipmentId(kind,it.name,it.image_url) } : null);
   return {
-    avatar: av ? { image_url: av.image_url, rarity: av.rarity as Rarity, name: av.name, catalogId: av.id, equipmentId: inferEquipmentId("avatar",av.name,av.image_url) } : null,
+    avatar: av ? { image_url: av.image_url, rarity: av.rarity as Rarity, name: av.name, catalogId: av.id, equipmentId: av.avatar_key ?? inferEquipmentId("avatar",av.name,av.image_url) } : null,
     helmet: toEq("helmet",find(e.helmet_item_id)),
     armor: toEq("armor",find(e.armor_item_id)),
     weapon: toEq("weapon",find(e.weapon_item_id)),
