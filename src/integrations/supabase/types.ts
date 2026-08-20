@@ -73,6 +73,7 @@ export type Database = {
       avatars: {
         Row: {
           active: boolean
+          avatar_key: string | null
           category: Database["public"]["Enums"]["avatar_category"]
           created_at: string
           description: string | null
@@ -91,6 +92,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          avatar_key?: string | null
           category: Database["public"]["Enums"]["avatar_category"]
           created_at?: string
           description?: string | null
@@ -109,6 +111,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          avatar_key?: string | null
           category?: Database["public"]["Enums"]["avatar_category"]
           created_at?: string
           description?: string | null
@@ -367,6 +370,7 @@ export type Database = {
       cosmetic_items: {
         Row: {
           active: boolean
+          equipment_key: string | null
           category: Database["public"]["Enums"]["cosmetic_category"]
           chest_reveals_item_id: string | null
           created_at: string
@@ -386,6 +390,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          equipment_key?: string | null
           category: Database["public"]["Enums"]["cosmetic_category"]
           chest_reveals_item_id?: string | null
           created_at?: string
@@ -405,6 +410,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          equipment_key?: string | null
           category?: Database["public"]["Enums"]["cosmetic_category"]
           chest_reveals_item_id?: string | null
           created_at?: string

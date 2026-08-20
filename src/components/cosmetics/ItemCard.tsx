@@ -11,6 +11,7 @@ export type CatalogItem = {
   image_url: string;
   unlock_rule_type: string;
   unlock_threshold: number;
+  equipment_key?: string | null;
 };
 
 function unlockHint(t: string, n: number) {

@@ -50,7 +50,7 @@ const AppLayout = () => {
             <AuriIcon size={24} />
             <h1 className="font-display font-semibold text-lg">Auris Quest</h1>
           </header>
-          <main className="flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto">
+          <main className={pathname === "/app/admin/avatar-composer" ? "flex-1 p-4 md:p-6 w-full" : "flex-1 p-4 md:p-6 max-w-7xl w-full mx-auto"}>
             <Outlet />
           </main>
         </div>

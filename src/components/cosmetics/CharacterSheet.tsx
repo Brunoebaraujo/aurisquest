@@ -181,7 +181,7 @@ export function CharacterSheet({
   const pct = xpToNext > 0 ? Math.min(100, Math.round((xpInLevel / xpToNext) * 100)) : 0;
 
   const renderSlot = (s: SlotConfig) => {
-    const item = s.equipKey ? (equipment[s.equipKey] as any) : null;
+    const item = s.equipKey ? equipment[s.equipKey] : null;
     return (
       <SlotTile
         key={s.label}
@@ -235,7 +235,7 @@ export function CharacterSheet({
             aria-label="Editar visual"
           >
             <EquippedAvatar
-              equipment={{ avatar: equipment.avatar, frame: equipment.frame }}
+              equipment={equipment}
               size={76}
               fallbackName={name}
               className={cn(levelGlow && "ring-4 ring-primary/60 rounded-full animate-pulse")}
@@ -308,7 +308,7 @@ export function CharacterSheet({
               aria-label="Editar visual"
             >
               <EquippedAvatar
-                equipment={{ avatar: equipment.avatar, frame: equipment.frame }}
+                equipment={equipment}
                 size={180}
                 fallbackName={name}
               />
