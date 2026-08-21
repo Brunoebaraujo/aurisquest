@@ -12,6 +12,7 @@ import authBg from "@/assets/auth-bg.jpg";
 import wizardImg from "@/assets/wizard.png";
 import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
+import { buildEquipment } from "@/lib/cosmetics";
 
 type ChildRow = { id: string; name: string; avatar_url: string | null };
 
@@ -120,15 +121,17 @@ const ProfileSelector = () => {
                   >
                     <Card className="p-3 rounded-3xl border-0 shadow-xl hover:-translate-y-1 hover:shadow-glow transition-all bg-white/95 backdrop-blur flex flex-col items-center">
                       {(() => {
-                        const eq = cosmetics[c.id]?.equipment;
-                        const avatarUrl = eq?.avatar?.image_url ?? c.avatar_url;
-                        if (avatarUrl) {
+                        const childCosmetics = cosmetics[c.id];
+                        if (childCosmetics?.equipment?.avatar || c.avatar_url) {
                           return (
-                            <img
-                              src={avatarUrl}
-                              alt={c.name}
-                              className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover group-hover:scale-110 transition-transform border-4 border-white shadow-md"
-                            />
+                            <div className="group-hover:scale-110 transition-transform rounded-full border-4 border-white shadow-md">
+                              <EquippedAvatar
+                                equipment={childCosmetics ? buildEquipment(childCosmetics) : { avatar: c.avatar_url ? { image_url: c.avatar_url, rarity: "comum", name: c.name } : null }}
+                                size={80}
+                                fallbackName={c.name}
+                                variant="headshot"
+                              />
+                            </div>
                           );
                         }
                         return (

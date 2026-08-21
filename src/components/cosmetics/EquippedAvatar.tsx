@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { RarityFrame, type Rarity } from "./Rarity";
 import { AvatarRenderer, canRenderModularAvatar } from "@/avatar-system/renderer/AvatarRenderer";
+import { getAvatarHeadshotUrl } from "@/avatar-system/registry/avatar-headshot-registry";
 
 export type EquippedItem = { image_url: string; rarity: Rarity; name?: string; catalogId?: string; equipmentId?: string } | null;
 
@@ -25,20 +26,21 @@ export function EquippedAvatar({
   size?: number;
   className?: string;
   fallbackName?: string;
-  variant?: "circle" | "portrait";
+  variant?: "circle" | "headshot" | "portrait";
 }) {
   const s = size;
   const itemSize = Math.round(s * 0.4);
   const frameRarity = equipment.frame?.rarity ?? equipment.avatar?.rarity ?? "comum";
   const modular = canRenderModularAvatar(equipment);
   const portrait = modular && variant === "portrait";
+  const headshotUrl = modular && !portrait ? getAvatarHeadshotUrl(equipment) : undefined;
   const height = portrait ? Math.round(s * 1.5) : s;
   const rounded = portrait ? "rounded-[2rem]" : "rounded-full";
 
   return (
     <div
       className={cn("relative", className)}
-      data-avatar-variant={portrait ? "portrait" : "circle"}
+      data-avatar-variant={portrait ? "portrait" : headshotUrl ? "headshot" : "circle"}
       style={{ width: s, height }}
     >
       {/* Aura */}
@@ -53,7 +55,13 @@ export function EquippedAvatar({
       {/* Avatar with frame */}
       <RarityFrame rarity={frameRarity} rounded={rounded} className="relative w-full h-full">
         <div className={cn("w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center", rounded, modular ? "overflow-visible" : "overflow-hidden")}>
-          {modular ? (
+          {headshotUrl ? (
+            <img
+              src={headshotUrl}
+              alt={equipment.avatar?.name ? `Rosto de ${equipment.avatar.name}` : "Rosto do avatar"}
+              className="h-full w-full object-cover object-top"
+            />
+          ) : modular ? (
             <AvatarRenderer
               equipment={equipment}
               label={equipment.avatar?.name ?? "Avatar de Gael"}
