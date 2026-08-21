@@ -332,7 +332,7 @@ const ChildHome = () => {
           <Button variant="ghost" size="sm" onClick={() => setInventoryOpen(true)} title="Inventário" className="min-h-[44px] min-w-[44px]">
             <Package className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="sm" onClick={() => navigate("/c")} title="Equipamentos" aria-label="Abrir tela de equipamentos" className="min-h-[44px] min-w-[44px]">
+          <Button variant="ghost" size="sm" onClick={() => nav("/c")} title="Equipamentos" aria-label="Abrir tela de equipamentos" className="min-h-[44px] min-w-[44px]">
             <Shirt className="w-4 h-4" />
           </Button>
           <Button variant="ghost" size="sm" onClick={logout} title="Sair" className="min-h-[44px] min-w-[44px]">

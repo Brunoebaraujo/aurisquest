@@ -12,7 +12,6 @@ import authBg from "@/assets/auth-bg.jpg";
 import wizardImg from "@/assets/wizard.png";
 import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
-import { buildEquipment } from "@/lib/cosmetics";
 
 type ChildRow = { id: string; name: string; avatar_url: string | null };
 
@@ -126,7 +125,7 @@ const ProfileSelector = () => {
                           return (
                             <div className="group-hover:scale-110 transition-transform rounded-full border-4 border-white shadow-md">
                               <EquippedAvatar
-                                equipment={childCosmetics ? buildEquipment(childCosmetics) : { avatar: c.avatar_url ? { image_url: c.avatar_url, rarity: "comum", name: c.name } : null }}
+                                equipment={childCosmetics?.equipment ?? { avatar: c.avatar_url ? { image_url: c.avatar_url, rarity: "comum", name: c.name } : null }}
                                 size={80}
                                 fallbackName={c.name}
                                 variant="headshot"
