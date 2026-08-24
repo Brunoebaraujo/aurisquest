@@ -11,6 +11,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts";
 import { EquippedAvatar } from "@/components/cosmetics/EquippedAvatar";
 import { useFamilyCosmetics } from "@/hooks/useFamilyCosmetics";
 import { SideQuestInviteCard } from "@/components/sidequest/SideQuestInviteCard";
+import { spentAurisByChild } from "@/lib/aurisBalance";
 
 type ApprovedRow = { child_id: string; reward_auris: number; completed_at: string };
 type KidRow = { id: string; name: string; created_at: string };
@@ -54,7 +55,7 @@ const Dashboard = () => {
       if (!profile?.family_id) return;
       const startMonth = new Date(); startMonth.setDate(1); startMonth.setHours(0, 0, 0, 0);
 
-      const [famRes, kidsRes, actsRes, pendRes, monthRes, allApproved, paymentsRes] = await Promise.all([
+      const [famRes, kidsRes, actsRes, pendRes, monthRes, allApproved, paymentsRes, redemptionsRes] = await Promise.all([
         supabase.from("families").select("auris_per_real").eq("id", profile.family_id).maybeSingle(),
         supabase.from("children").select("id, name, created_at").eq("family_id", profile.family_id).eq("active", true),
         supabase.from("activities").select("id", { count: "exact", head: true }).eq("family_id", profile.family_id).eq("active", true),
@@ -62,6 +63,7 @@ const Dashboard = () => {
         supabase.from("submissions").select("reward_auris", { count: "exact" }).eq("family_id", profile.family_id).eq("status", "aprovado").gte("completed_at", startMonth.toISOString()),
         supabase.from("submissions").select("child_id, reward_auris, completed_at").eq("family_id", profile.family_id).eq("status", "aprovado"),
         supabase.from("payments").select("child_id, auris_redeemed").eq("family_id", profile.family_id),
+        supabase.from("reward_redemptions").select("child_id, auris_cost, status, legacy_payment_id").eq("family_id", profile.family_id),
       ]);
 
       setAurisPerReal(famRes.data?.auris_per_real ?? 1);
@@ -73,7 +75,8 @@ const Dashboard = () => {
         earnedTotals.set(r.child_id, (earnedTotals.get(r.child_id) ?? 0) + (r.reward_auris ?? 0));
         balances.set(r.child_id, (balances.get(r.child_id) ?? 0) + (r.reward_auris ?? 0));
       });
-      (paymentsRes.data ?? []).forEach(r => balances.set(r.child_id, (balances.get(r.child_id) ?? 0) - (r.auris_redeemed ?? 0)));
+      const spent = spentAurisByChild(paymentsRes.data ?? [], redemptionsRes.data ?? []);
+      spent.forEach((value, childId) => balances.set(childId, (balances.get(childId) ?? 0) - value));
 
       const top = (kidsRes.data ?? [])
         .map(k => ({ id: k.id, name: k.name, balance: balances.get(k.id) ?? 0, earned: earnedTotals.get(k.id) ?? 0 }))

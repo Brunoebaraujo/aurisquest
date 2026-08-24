@@ -15,6 +15,7 @@ import { ParentWardrobeDialog } from "@/components/cosmetics/ParentWardrobeDialo
 import { CharacterSheet, type RealSlotKey } from "@/components/cosmetics/CharacterSheet";
 import { SideQuestHistory } from "@/components/sidequest/SideQuestHistory";
 import type { SideQuestHistoryItem } from "@/hooks/useActiveSideQuest";
+import { spentAurisByChild } from "@/lib/aurisBalance";
 
 type Child = { id: string; name: string; avatar_url: string | null };
 type Mission = {
@@ -65,7 +66,7 @@ const ChildProfile = () => {
       if (!childId || !profile?.family_id) return;
       const fid = profile.family_id;
 
-      const [c, mList, mp, ma, sq, subs, pays] = await Promise.all([
+      const [c, mList, mp, ma, sq, subs, pays, redemptions] = await Promise.all([
         supabase.from("children").select("id, name, avatar_url").eq("id", childId).maybeSingle(),
         supabase.from("missions").select("*").eq("family_id", fid),
         supabase.from("mission_participants").select("mission_id").eq("child_id", childId).eq("family_id", fid),
@@ -79,6 +80,7 @@ const ChildProfile = () => {
           .limit(10),
         supabase.from("submissions").select("status, reward_auris").eq("child_id", childId).eq("family_id", fid),
         supabase.from("payments").select("auris_redeemed").eq("child_id", childId).eq("family_id", fid),
+        supabase.from("reward_redemptions").select("child_id, auris_cost, status, legacy_payment_id").eq("child_id", childId).eq("family_id", fid),
       ]);
       setChild(c.data as Child);
       const myMissionIds = new Set((mp.data ?? []).map((r: any) => r.mission_id));
@@ -96,7 +98,7 @@ const ChildProfile = () => {
         else if (s.status === "aprovado") appr += s.reward_auris ?? 0;
       });
       (ma.data ?? []).forEach((a: any) => { appr += a.bonus_auris ?? 0; });
-      const paid = (pays.data ?? []).reduce((sum: number, p: any) => sum + (p.auris_redeemed ?? 0), 0);
+      const paid = spentAurisByChild((pays.data ?? []).map(p => ({ ...p, child_id: childId })), redemptions.data ?? []).get(childId) ?? 0;
       setPendingAuris(pend);
       setApprovedAuris(appr);
       setPaidAuris(paid);

@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { formatAuris, formatDateTime } from "@/lib/format";
 import { AuriIcon } from "@/components/AuriIcon";
 import { CATEGORY_LABELS } from "@/components/rewards/RewardFormDialog";
+import { spentAurisByChild } from "@/lib/aurisBalance";
 
 type Child = { id: string; name: string };
 type Redemption = {
@@ -67,13 +68,8 @@ const Rewards = () => {
 
   // spent per child = legacy payments + non-legacy redemptions (aprovado/concluido)
   const spent = useMemo(() => {
-    const s: Record<string, number> = {};
-    children.forEach(c => s[c.id] = legacyPaid[c.id] ?? 0);
-    redemptions.forEach(r => {
-      if (!r.legacy_payment_id && (r.status === "aprovado" || r.status === "concluido")) {
-        s[r.child_id] = (s[r.child_id] ?? 0) + r.auris_cost;
-      }
-    });
+    const map = spentAurisByChild(Object.entries(legacyPaid).map(([child_id, auris_redeemed]) => ({ child_id, auris_redeemed })), redemptions);
+    const s: Record<string, number> = {}; children.forEach(c => s[c.id] = map.get(c.id) ?? 0);
     return s;
   }, [children, legacyPaid, redemptions]);
 

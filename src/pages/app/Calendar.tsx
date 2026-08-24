@@ -11,6 +11,7 @@ import { formatAuris } from "@/lib/format";
 import { AuriIcon } from "@/components/AuriIcon";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { spentAurisByChild, type AurisRedemption } from "@/lib/aurisBalance";
 
 type Child = { id: string; name: string };
 type Activity = { id: string; name: string };
@@ -54,6 +55,7 @@ const CalendarPage = () => {
   });
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [redemptions, setRedemptions] = useState<AurisRedemption[]>([]);
 
   useEffect(() => {
     if (!profile?.family_id) return;
@@ -69,16 +71,20 @@ const CalendarPage = () => {
   useEffect(() => {
     const load = async () => {
       if (!profile?.family_id) return;
-      const [subRes, payRes] = await Promise.all([
+      const [subRes, payRes, redemptionRes] = await Promise.all([
         supabase.from("submissions")
           .select("id, child_id, activity_id, status, reward_auris, completed_at, photo_url, review_note")
           .eq("family_id", profile.family_id),
         supabase.from("payments")
           .select("child_id, auris_redeemed, paid_at")
           .eq("family_id", profile.family_id),
+        supabase.from("reward_redemptions")
+          .select("child_id, auris_cost, status, legacy_payment_id")
+          .eq("family_id", profile.family_id),
       ]);
       setSubmissions((subRes.data ?? []) as Submission[]);
       setPayments((payRes.data ?? []) as Payment[]);
+      setRedemptions((redemptionRes.data ?? []) as AurisRedemption[]);
     };
     load();
   }, [profile?.family_id, cursor]);
@@ -95,10 +101,7 @@ const CalendarPage = () => {
       byChild.set(s.child_id, arr);
     });
 
-    const paymentsByChild = new Map<string, number>();
-    payments.forEach(p => {
-      paymentsByChild.set(p.child_id, (paymentsByChild.get(p.child_id) ?? 0) + p.auris_redeemed);
-    });
+    const paymentsByChild = spentAurisByChild(payments, redemptions);
 
     byChild.forEach((subs, childId) => {
       subs.sort((a, b) => new Date(a.completed_at).getTime() - new Date(b.completed_at).getTime());
@@ -118,7 +121,7 @@ const CalendarPage = () => {
     });
 
     return { fullyPaid: map, partial: partialMap };
-  }, [submissions, payments]);
+  }, [submissions, payments, redemptions]);
 
   // Build day buckets for current month
   const { days, monthBuckets } = useMemo(() => {
