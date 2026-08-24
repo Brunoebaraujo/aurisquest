@@ -27,26 +27,26 @@ export const isMayaEquipment = (equipment: Equipment) => equipment.avatar?.equip
 
 export function isLayerEquipped(layer: AvatarLayer, equipment: Equipment): boolean {
   if (!layer.visible) return false;
-  if (layer.type === "avatarBase") return layer.assetKey?.startsWith("maya_") ? isMayaEquipment(equipment) : isGaelEquipment(equipment);
-  if (isMayaEquipment(equipment)) {
-    if (layer.type === "armor") return equipment.armor?.equipmentId === "armor_guardian_pink";
-    if (layer.type === "generic" && layer.equipmentId === "armor_guardian_pink") return equipment.armor?.equipmentId === "armor_guardian_pink";
-    if (layer.type === "weapon" || layer.type === "occlusionMask") return equipment.weapon?.equipmentId === "staff_guardian_pink";
-    if (layer.type === "helmetScene") return equipment.helmet?.equipmentId === "tiara_guardian_pink";
-    if (layer.type === "generic" && !layer.equipmentId) return true;
+  if (layer.type === "avatarBase") return true;
+  if (!layer.equipmentId) {
+    if (layer.type === "generic") return true;
+    if (isGaelEquipment(equipment) && ["armor", "belt", "boots", "shield"].includes(layer.type)) return equipment.armor?.equipmentId === "armor_guardian_blue";
+    if (isGaelEquipment(equipment) && (layer.type === "weapon" || layer.type === "occlusionMask")) return equipment.weapon?.equipmentId === "sword_guardian_blue";
+    if (isGaelEquipment(equipment) && layer.type === "helmetScene") return equipment.helmet?.equipmentId === "helmet_guardian_blue";
+    if (isGaelEquipment(equipment) && layer.type === "pet") return equipment.pet?.equipmentId === "pet_guardian_fox";
     return false;
   }
-  if (["armor", "belt", "boots", "shield"].includes(layer.type)) return equipment.armor?.equipmentId === "armor_guardian_blue";
-  if (layer.type === "weapon" || layer.type === "occlusionMask") return equipment.weapon?.equipmentId === "sword_guardian_blue";
-  if (layer.type === "helmetScene") return equipment.helmet?.equipmentId === "helmet_guardian_blue";
-  if (layer.type === "pet") return equipment.pet?.equipmentId === "pet_guardian_fox";
+  if (["armor", "belt", "boots", "shield"].includes(layer.type) || layer.inventoryCategory === "armadura") return equipment.armor?.equipmentId === layer.equipmentId || (isGaelEquipment(equipment) && equipment.armor?.equipmentId === "armor_guardian_blue" && layer.equipmentId.endsWith("_guardian_blue"));
+  if (layer.type === "weapon" || layer.type === "occlusionMask" || layer.inventoryCategory === "arma") return equipment.weapon?.equipmentId === layer.equipmentId;
+  if (layer.type === "helmetScene" || layer.inventoryCategory === "elmo") return equipment.helmet?.equipmentId === layer.equipmentId;
+  if (layer.type === "pet" || layer.inventoryCategory === "pet") return equipment.pet?.equipmentId === layer.equipmentId;
   return false;
 }
 
 export function isLayerVisibleOnSurface(layer: AvatarLayer, equipment: Equipment, surface: AvatarRenderSurface): boolean {
   if (!isLayerEquipped(layer, equipment)) return false;
   if (surface === "badge") return layer.type === "avatarBase";
-  if (surface === "characterScene") return layer.type !== "helmetScene" || layer.equipmentId === "tiara_guardian_pink";
+  if (surface === "characterScene") return layer.type !== "helmetScene" || layer.placementType === "body";
   return true;
 }
 

@@ -8,6 +8,8 @@ const layouts: Record<string, AvatarComposition> = {
   maya: rawMayaGuardianLayout as AvatarComposition,
 };
 
+export function registerAvatarLayout(layout: AvatarComposition) { layouts[layout.avatarId] = layout; }
+
 export function avatarKeyFromEquipment(equipment: Equipment): string | undefined {
   if (equipment.avatar?.equipmentId) return equipment.avatar.equipmentId;
   const identity = `${equipment.avatar?.name ?? ""} ${equipment.avatar?.image_url ?? ""}`.toLowerCase();

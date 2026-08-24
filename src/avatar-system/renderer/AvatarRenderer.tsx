@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import type { Equipment } from "@/components/cosmetics/EquippedAvatar";
 import type { AvatarComposition, AvatarLayer } from "../composer/composer.types";
 import { gaelGuardianLayout, getAvatarLayout } from "../registry/avatar-layout-registry";
+import { usePublishedAvatarLayout } from "../registry/usePublishedAvatarLayout";
 import {
   isLayerVisibleOnSurface,
   type AvatarRenderSurface,
@@ -12,7 +13,7 @@ import {
 
 const assetUrl = (source: string) => `${import.meta.env.BASE_URL}${source.replace(/^\//, "")}`;
 
-export const canRenderModularAvatar = (equipment: Equipment) => getAvatarLayout(equipment) !== null;
+export const canRenderModularAvatar = (equipment: Equipment) => Boolean(equipment.avatar?.equipmentId);
 
 export function layerStyle(layer: AvatarLayer, canvas = gaelGuardianLayout.canvas): CSSProperties {
   const bounds = layer.trimBounds ?? layer.sourceRegion ?? { x: 0, y: 0, width: layer.nativeWidth ?? canvas.width, height: layer.nativeHeight ?? canvas.height };
@@ -71,7 +72,7 @@ export function AvatarRenderer({
   surface?: AvatarRenderSurface;
   onLayerSelect?: (slot: WardrobeSlot) => void;
 }) {
-  const layout = getAvatarLayout(equipment);
+  const layout = usePublishedAvatarLayout(equipment);
   if (!layout) return null;
 
   const layers = layout.layers

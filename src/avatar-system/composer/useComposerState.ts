@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AvatarComposition, AvatarLayer, StoredPreset } from "./composer.types";
-import { createGaelPreset } from "./gaelPreset";
-import rawMayaLayout from "../layouts/maya-guardian-v1.json";
-import { createMayaBodyPartsPreset } from "./mayaBodyPartsPreset";
 import { parseComposition, reindexLayers, syncNormalized } from "./composer.utils";
 
 const PRESET_KEY = "auris-avatar-composer-presets-v1";
@@ -11,6 +8,7 @@ export const createBlankPreset = (avatarId: string, presetName: string): AvatarC
   schemaVersion: 1,
   avatarStandard: "auris-avatar-standard-v1",
   avatarId,
+  avatarName: presetName,
   presetId: `${avatarId}-${Date.now()}`,
   presetName,
   canvas: { width: 1024, height: 1536 },
@@ -18,8 +16,8 @@ export const createBlankPreset = (avatarId: string, presetName: string): AvatarC
 });
 
 export function useComposerState() {
-  const [composition, setCompositionRaw] = useState<AvatarComposition>(() => createGaelPreset());
-  const [selectedId, setSelectedId] = useState<string | null>("avatar-base");
+  const [composition, setCompositionRaw] = useState<AvatarComposition>(() => createBlankPreset("novo_avatar", "Novo set"));
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [past, setPast] = useState<AvatarComposition[]>([]);
   const [future, setFuture] = useState<AvatarComposition[]>([]);
   const transactionStart = useRef<AvatarComposition | null>(null);
@@ -42,14 +40,7 @@ export function useComposerState() {
   const loadComposition = (value: AvatarComposition) => { commit(parseComposition(JSON.stringify(value))); setSelectedId(value.layers[0]?.id ?? null); };
   const createComposition = (avatarId: string, presetName: string) => { const next = createBlankPreset(avatarId, presetName); commit(next); setSelectedId(null); };
 
-  const presets = (): StoredPreset[] => {
-    const builtIns: StoredPreset[] = [
-      { id: "gael-guardian-v1", name: "Gael Guardian v1", composition: createGaelPreset(), updatedAt: "built-in" },
-      { id: "maya-guardian-v1", name: "Maya Guardian v1", composition: rawMayaLayout as AvatarComposition, updatedAt: "built-in" },
-      { id: "maya-body-parts-lab-v1", name: "Maya — Partes do Corpo", composition: createMayaBodyPartsPreset(), updatedAt: "built-in" },
-    ];
-    try { const local = JSON.parse(localStorage.getItem(PRESET_KEY) ?? "[]") as StoredPreset[]; return [...builtIns, ...local.filter(item => !builtIns.some(builtIn => builtIn.id === item.id))]; } catch { return builtIns; }
-  };
+  const presets = (): StoredPreset[] => { try { return JSON.parse(localStorage.getItem(PRESET_KEY) ?? "[]") as StoredPreset[]; } catch { return []; } };
   const savePreset = (name: string) => { const all = presets(); const id = composition.presetId || `preset-${Date.now()}`; const record = { id, name, composition: { ...composition, presetId: id, presetName: name }, updatedAt: new Date().toISOString() }; localStorage.setItem(PRESET_KEY, JSON.stringify([...all.filter(p => p.id !== id), record])); setCompositionRaw(record.composition); return record; };
   const deletePreset = (id: string) => localStorage.setItem(PRESET_KEY, JSON.stringify(presets().filter(p => p.id !== id)));
 

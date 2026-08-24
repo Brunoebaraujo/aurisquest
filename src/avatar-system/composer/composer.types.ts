@@ -13,6 +13,7 @@ export interface AvatarLayer {
   source: string; sourceKind?: "project" | "local"; sourceFileName?: string; nativeWidth?: number; nativeHeight?: number;
   trimBounds?: AlphaBounds; transform: LayerTransform; zIndex: number; visible: boolean;
   locked: boolean; missing?: boolean; warning?: string; anchorAssociation?: string;
+  inventoryName?: string; inventoryCategory?: "avatar" | "elmo" | "armadura" | "arma" | "pet"; inventoryRarity?: "comum" | "raro" | "epico" | "lendario";
   crop?: AlphaBounds; sourceRegion?: AlphaBounds;
 }
 
@@ -22,7 +23,7 @@ export interface InspectedAsset {
 }
 export interface AvatarComposition {
   schemaVersion: 1; avatarStandard: "auris-avatar-standard-v1"; avatarId: string;
-  presetId: string; presetName: string; canvas: { width: 1024; height: 1536 };
+  avatarName?: string; presetId: string; presetName: string; canvas: { width: 1024; height: 1536 };
   layers: AvatarLayer[];
 }
 export interface StoredPreset { id: string; name: string; composition: AvatarComposition; updatedAt: string }
