@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { createGaelPreset } from "./gaelPreset";
+import { createMayaBodyPartsPreset } from "./mayaBodyPartsPreset";
 import { alphaBoundsInRegion, bindAssetToComposition, createLayer, exportableComposition, makeTransform, parseComposition, serializeComposition, sortLayers, splitLayer, syncNormalized } from "./composer.utils";
 import type { InspectedAsset } from "./composer.types";
 
 const asset = (overrides: Partial<InspectedAsset> = {}): InspectedAsset => ({ source: "blob:test", sourceKind: "local", fileName: "test.png", width: 1024, height: 1536, trimBounds: { x: 100, y: 200, width: 800, height: 1000 }, leftTrimBounds: { x: 100, y: 200, width: 300, height: 1000 }, rightTrimBounds: { x: 600, y: 250, width: 300, height: 900 }, ...overrides });
 
 describe("avatar composer data model", () => {
+  it("provides a Maya body-parts lab with the full base hidden",()=>{ const lab=createMayaBodyPartsPreset(); expect(lab.layers.find(layer=>layer.id==="avatar-base")?.visible).toBe(false); expect(lab.layers.some(layer=>layer.id==="torso-base")).toBe(true); expect(lab.layers.some(layer=>layer.id==="right-hand-base")).toBe(true); expect(lab.layers.some(layer=>layer.id==="left-shoe-base")).toBe(true); });
   it("normalizes canonical pixel transforms", () => {
     const layer = createLayer({ name: "x", type: "generic", source: "x", transform: makeTransform(292, 894) });
     expect(syncNormalized(layer).transform.xNormalized).toBe(0.28515625);

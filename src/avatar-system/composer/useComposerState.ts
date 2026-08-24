@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AvatarComposition, AvatarLayer, StoredPreset } from "./composer.types";
 import { createGaelPreset } from "./gaelPreset";
 import rawMayaLayout from "../layouts/maya-guardian-v1.json";
+import { createMayaBodyPartsPreset } from "./mayaBodyPartsPreset";
 import { parseComposition, reindexLayers, syncNormalized } from "./composer.utils";
 
 const PRESET_KEY = "auris-avatar-composer-presets-v1";
@@ -45,6 +46,7 @@ export function useComposerState() {
     const builtIns: StoredPreset[] = [
       { id: "gael-guardian-v1", name: "Gael Guardian v1", composition: createGaelPreset(), updatedAt: "built-in" },
       { id: "maya-guardian-v1", name: "Maya Guardian v1", composition: rawMayaLayout as AvatarComposition, updatedAt: "built-in" },
+      { id: "maya-body-parts-lab-v1", name: "Maya — Partes do Corpo", composition: createMayaBodyPartsPreset(), updatedAt: "built-in" },
     ];
     try { const local = JSON.parse(localStorage.getItem(PRESET_KEY) ?? "[]") as StoredPreset[]; return [...builtIns, ...local.filter(item => !builtIns.some(builtIn => builtIn.id === item.id))]; } catch { return builtIns; }
   };
