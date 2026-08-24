@@ -1,52 +1,17 @@
 {
-  "schemaVersion": 1,
-  "avatarStandard": "auris-avatar-standard-v1",
-  "avatarId": "maya",
-  "presetId": "maya-guardian-v1",
-  "presetName": "Maya Guardian Pink Set v1",
+  "schemaVersion": 1, "avatarStandard": "auris-avatar-standard-v1", "avatarId": "maya", "presetId": "maya-guardian-v1", "presetName": "Maya Guardian Pink Set v1",
   "canvas": { "width": 1024, "height": 1536 },
   "layers": [
-    {
-      "id": "staff", "name": "Cajado da Maya", "type": "weapon", "placementType": "body", "equipmentId": "staff_guardian_pink", "zIndex": -10, "locked": false, "visible": true,
-      "source": "/avatar-assets/maya_staff_v1.png", "sourceKind": "project", "sourceFileName": "maya_staff_v1.png", "assetKey": "maya_staff_v1", "missing": false,
-      "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
-      "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 71, "y": 225, "width": 253, "height": 1035 }
-    },
-    {
-      "id": "avatar-base", "name": "Maya Base", "type": "avatarBase", "placementType": "body", "zIndex": 0, "locked": true, "visible": true,
-      "source": "/avatar-assets/maya_avatar_base_v1.png", "sourceKind": "project", "sourceFileName": "maya_avatar_base_v1.png", "assetKey": "maya_avatar_base_v1", "missing": false,
-      "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
-      "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 245, "y": 84, "width": 521, "height": 1304 }
-    },
-    {
-      "id": "armor", "name": "Armadura Rosa da Maya", "type": "armor", "placementType": "body", "equipmentId": "armor_guardian_pink", "zIndex": 20, "locked": false, "visible": true,
-      "source": "/avatar-assets/maya_armor_chest_v1.png", "sourceKind": "project", "sourceFileName": "maya_armor_chest_v1.png", "assetKey": "maya_armor_chest_v1", "missing": false,
-      "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
-      "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 260, "y": 394, "width": 505, "height": 506 }
-    },
-    {
-      "id": "head-neck-front", "name": "Cabeça e Pescoço da Maya", "type": "generic", "placementType": "body", "equipmentId": "armor_guardian_pink", "zIndex": 30, "locked": true, "visible": true,
-      "source": "/avatar-assets/maya_head_neck_front_v1.png", "sourceKind": "project", "sourceFileName": "maya_head_neck_front_v1.png", "assetKey": "maya_head_neck_front_v1", "missing": false,
-      "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
-      "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 326, "y": 84, "width": 351, "height": 416 }
-    },
-    {
-      "id": "tiara", "name": "Tiara Rosa da Maya", "type": "helmetScene", "placementType": "body", "equipmentId": "tiara_guardian_pink", "zIndex": 40, "locked": false, "visible": true,
-      "source": "/avatar-assets/maya_tiara_v1.png", "sourceKind": "project", "sourceFileName": "maya_tiara_v1.png", "assetKey": "maya_tiara_v1", "missing": false,
-      "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
-      "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 330, "y": 57, "width": 365, "height": 185 }
-    },
-    {
-      "id": "hands-front", "name": "Mãos Frontais da Maya", "type": "generic", "placementType": "body", "equipmentId": "armor_guardian_pink", "zIndex": 50, "locked": true, "visible": true,
-      "source": "/avatar-assets/maya_hands_front_v1.png", "sourceKind": "project", "sourceFileName": "maya_hands_front_v1.png", "assetKey": "maya_hands_front_v1", "missing": false,
-      "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
-      "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 245, "y": 746, "width": 521, "height": 132 }
-    },
-    {
-      "id": "right-hand-mask", "name": "Mão Direita da Maya", "type": "occlusionMask", "placementType": "body", "equipmentId": "staff_guardian_pink", "zIndex": 60, "locked": true, "visible": true,
-      "source": "/avatar-assets/maya_right_hand_front_mask.png", "sourceKind": "project", "sourceFileName": "maya_right_hand_front_mask.png", "assetKey": "maya_right_hand_front_mask", "missing": false,
-      "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
-      "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 177, "y": 625, "width": 130, "height": 145 }
-    }
+    {"id":"staff","name":"Cajado da Maya","type":"weapon","placementType":"body","equipmentId":"staff_guardian_pink","zIndex":-20,"locked":false,"visible":true,"source":"/avatar-assets/maya_staff_v1.png","sourceKind":"project","sourceFileName":"maya_staff_v1.png","assetKey":"maya_staff_v1","missing":false,"transform":{"x":22.030199026710577,"y":234.5223550736391,"xNormalized":0.021513866237022047,"yNormalized":0.15268382491773377,"scaleX":0.5625922184086501,"scaleY":0.5625922184086503,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":71,"y":225,"width":253,"height":1035}},
+    {"id":"hips-base","name":"Quadril Base","type":"generic","placementType":"body","zIndex":3,"locked":true,"visible":true,"source":"/avatar-assets/maya_hips_base_v1.png","sourceKind":"project","sourceFileName":"maya_hips_base_v1.png","assetKey":"maya_hips_base_v1","missing":false,"transform":{"x":0,"y":0,"xNormalized":0,"yNormalized":0,"scaleX":1,"scaleY":1,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":377,"y":720,"width":267,"height":136}},
+    {"id":"right-leg-base","name":"Perna Direita Base","type":"generic","placementType":"body","zIndex":4,"locked":true,"visible":true,"source":"/avatar-assets/maya_right_leg_base_v1.png","sourceKind":"project","sourceFileName":"maya_right_leg_base_v1.png","assetKey":"maya_right_leg_base_v1","missing":false,"transform":{"x":0,"y":0,"xNormalized":0,"yNormalized":0,"scaleX":1,"scaleY":1,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":324,"y":760,"width":197,"height":506}},
+    {"id":"left-leg-base","name":"Perna Esquerda Base","type":"generic","placementType":"body","zIndex":5,"locked":true,"visible":true,"source":"/avatar-assets/maya_left_leg_base_v1.png","sourceKind":"project","sourceFileName":"maya_left_leg_base_v1.png","assetKey":"maya_left_leg_base_v1","missing":false,"transform":{"x":0,"y":0,"xNormalized":0,"yNormalized":0,"scaleX":1,"scaleY":1,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":505,"y":760,"width":199,"height":506}},
+    {"id":"right-shoe-base","name":"Calçado Direito Base","type":"generic","placementType":"body","zIndex":6,"locked":true,"visible":true,"source":"/avatar-assets/maya_right_shoe_base_v1.png","sourceKind":"project","sourceFileName":"maya_right_shoe_base_v1.png","assetKey":"maya_right_shoe_base_v1","missing":false,"transform":{"x":-4.7610742068254694,"y":9.522148864103883,"xNormalized":-0.0046494865301029975,"yNormalized":0.006199315666734299,"scaleX":1,"scaleY":1,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":264,"y":1215,"width":151,"height":173}},
+    {"id":"left-shoe-base","name":"Calçado Esquerdo Base","type":"generic","placementType":"body","zIndex":7,"locked":true,"visible":true,"source":"/avatar-assets/maya_left_shoe_base_v1.png","sourceKind":"project","sourceFileName":"maya_left_shoe_base_v1.png","assetKey":"maya_left_shoe_base_v1","missing":false,"transform":{"x":0,"y":0,"xNormalized":0,"yNormalized":0,"scaleX":1,"scaleY":1,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":613,"y":1215,"width":148,"height":173}},
+    {"id":"armor","name":"Armadura Rosa da Maya","type":"armor","placementType":"body","equipmentId":"armor_guardian_pink","zIndex":20,"locked":false,"visible":true,"source":"/avatar-assets/maya_armor_chest_v1.png","sourceKind":"project","sourceFileName":"maya_armor_chest_v1.png","assetKey":"maya_armor_chest_v1","missing":false,"transform":{"x":-2.3805371034127347,"y":-30.946983808338075,"xNormalized":-0.0023247432650514988,"yNormalized":-0.020147775916886768,"scaleX":1,"scaleY":1,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":260,"y":394,"width":505,"height":506}},
+    {"id":"head-neck-front","name":"Cabeça e Pescoço da Maya","type":"generic","placementType":"body","zIndex":30,"locked":true,"visible":true,"source":"/avatar-assets/maya_head_neck_front_v1.png","sourceKind":"project","sourceFileName":"maya_head_neck_front_v1.png","assetKey":"maya_head_neck_front_v1","missing":false,"transform":{"x":4.761074206825356,"y":-7.105427357601002e-14,"xNormalized":0.0046494865301028865,"yNormalized":-4.625929269271486e-17,"scaleX":1,"scaleY":1,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":326,"y":84,"width":351,"height":416}},
+    {"id":"tiara","name":"Tiara Rosa da Maya","type":"helmetScene","placementType":"body","equipmentId":"tiara_guardian_pink","zIndex":40,"locked":false,"visible":true,"source":"/avatar-assets/maya_tiara_v1.png","sourceKind":"project","sourceFileName":"maya_tiara_v1.png","assetKey":"maya_tiara_v1","missing":false,"transform":{"x":126.84922013138402,"y":14.531447243253332,"xNormalized":0.1238761915345547,"yNormalized":0.009460577632326389,"scaleX":0.7450623290657306,"scaleY":0.7450623290657307,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":330,"y":57,"width":365,"height":185}},
+    {"id":"right-hand-base","name":"Mão Direita Base","type":"generic","placementType":"body","zIndex":50,"locked":true,"visible":true,"source":"/avatar-assets/maya_right_hand_base_v1.png","sourceKind":"project","sourceFileName":"maya_right_hand_base_v1.png","assetKey":"maya_right_hand_base_v1","missing":false,"transform":{"x":-9.522148413651024,"y":11.90268608012991,"xNormalized":-0.009298973060206078,"yNormalized":0.007749144583417911,"scaleX":1,"scaleY":1,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":245,"y":735,"width":91,"height":143}},
+    {"id":"left-hand-base","name":"Mão Esquerda Base","type":"generic","placementType":"body","zIndex":51,"locked":true,"visible":true,"source":"/avatar-assets/maya_left_hand_base_v1.png","sourceKind":"project","sourceFileName":"maya_left_hand_base_v1.png","assetKey":"maya_left_hand_base_v1","missing":false,"transform":{"x":16.66375972388869,"y":9.52214886410411,"xNormalized":0.016273202855360047,"yNormalized":0.006199315666734447,"scaleX":1,"scaleY":1,"rotation":0,"opacity":1},"nativeWidth":1024,"nativeHeight":1536,"trimBounds":{"x":680,"y":735,"width":86,"height":143}}
   ]
 }
