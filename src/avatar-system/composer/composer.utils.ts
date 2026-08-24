@@ -28,12 +28,12 @@ export function attachAssetToLayer(layer: AvatarLayer, asset: InspectedAsset, tr
   };
 }
 
-export function bindAssetToComposition(composition: AvatarComposition, selectedId: string | null, asset: InspectedAsset, mode: "replace" | "new" | "bootPair"): AvatarComposition {
+export function bindAssetToComposition(composition: AvatarComposition, selectedId: string | null, asset: InspectedAsset, mode: "replace" | "new" | "bootPair", newLayerType: AvatarLayer["type"] = "generic"): AvatarComposition {
   if (mode === "new" || !selectedId) {
-    return { ...composition, layers: [...composition.layers, createLayer({ name: asset.fileName.replace(/\.png$/i, ""), type: "generic", placementType: "scene", source: asset.source, sourceKind: "local", sourceFileName: asset.fileName, nativeWidth: asset.width, nativeHeight: asset.height, trimBounds: asset.trimBounds, warning: asset.warning, zIndex: composition.layers.length * 10 })] };
+    return { ...composition, layers: [...composition.layers, createLayer({ name: asset.fileName.replace(/\.png$/i, ""), type: newLayerType, placementType: newLayerType === "pet" || newLayerType === "helmetScene" || newLayerType === "generic" ? "scene" : "body", source: asset.source, sourceKind: "local", sourceFileName: asset.fileName, nativeWidth: asset.width, nativeHeight: asset.height, trimBounds: asset.trimBounds, warning: asset.warning, zIndex: composition.layers.length * 10 })] };
   }
   const target = composition.layers.find(layer => layer.id === selectedId);
-  if (!target) return bindAssetToComposition(composition, null, asset, "new");
+  if (!target) return bindAssetToComposition(composition, null, asset, "new", newLayerType);
   if (mode === "bootPair" && target.type === "boots" && target.equipmentId) {
     const half = asset.width / 2;
     const members = composition.layers.filter(layer => layer.type === "boots" && layer.equipmentId === target.equipmentId);

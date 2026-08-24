@@ -68,6 +68,7 @@ describe("avatar composer data model", () => {
     const result=bindAssetToComposition(preset,leftBefore.id,asset(),"bootPair"); const boots=result.layers.filter(layer=>layer.equipmentId==="boots_guardian_blue");
     expect(boots).toHaveLength(2); expect(boots.map(layer=>layer.id).sort()).toEqual(["boots-left","boots-right"]); expect(new Set(boots.map(layer=>layer.source))).toEqual(new Set(["blob:test"])); expect(new Set(boots.map(layer=>layer.equipmentId))).toEqual(new Set(["boots_guardian_blue"])); expect(boots.map(layer=>layer.renderPartId).sort()).toEqual(["left","right"]); expect(boots.find(layer=>layer.renderPartId==="right")!.transform.x).toBe(22); boots.find(layer=>layer.renderPartId==="left")!.transform.x=99; expect(boots.find(layer=>layer.renderPartId==="right")!.transform.x).toBe(22);
   });
+  it("creates a new uploaded layer using the selected type",()=>{ const result=bindAssetToComposition(createGaelPreset(),null,asset(),"new","weapon"); expect(result.layers.at(-1)?.type).toBe("weapon"); expect(result.layers.at(-1)?.placementType).toBe("body"); });
 
   it("preserves global registration and calculates alpha bounds per half", () => {
     const pixels=new Uint8ClampedArray(8*4*4); pixels[(1*8+1)*4+3]=255; pixels[(2*8+6)*4+3]=255;
