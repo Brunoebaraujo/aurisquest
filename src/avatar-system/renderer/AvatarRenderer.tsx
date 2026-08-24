@@ -61,7 +61,7 @@ function RenderLayer({ layer, layout, onSelect }: { layer: AvatarLayer; layout: 
 export function AvatarRenderer({
   equipment,
   className,
-  label = "Avatar de Gael",
+  label = "Avatar",
   surface = "portrait",
   onLayerSelect,
 }: {
