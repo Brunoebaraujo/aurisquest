@@ -25,13 +25,25 @@
       "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 260, "y": 394, "width": 505, "height": 506 }
     },
     {
-      "id": "tiara", "name": "Tiara Rosa da Maya", "type": "helmetScene", "placementType": "body", "equipmentId": "tiara_guardian_pink", "zIndex": 30, "locked": false, "visible": true,
+      "id": "head-neck-front", "name": "Cabeça e Pescoço da Maya", "type": "generic", "placementType": "body", "equipmentId": "armor_guardian_pink", "zIndex": 30, "locked": true, "visible": true,
+      "source": "/avatar-assets/maya_head_neck_front_v1.png", "sourceKind": "project", "sourceFileName": "maya_head_neck_front_v1.png", "assetKey": "maya_head_neck_front_v1", "missing": false,
+      "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
+      "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 326, "y": 84, "width": 351, "height": 416 }
+    },
+    {
+      "id": "tiara", "name": "Tiara Rosa da Maya", "type": "helmetScene", "placementType": "body", "equipmentId": "tiara_guardian_pink", "zIndex": 40, "locked": false, "visible": true,
       "source": "/avatar-assets/maya_tiara_v1.png", "sourceKind": "project", "sourceFileName": "maya_tiara_v1.png", "assetKey": "maya_tiara_v1", "missing": false,
       "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
       "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 330, "y": 57, "width": 365, "height": 185 }
     },
     {
-      "id": "right-hand-mask", "name": "Mão Direita da Maya", "type": "occlusionMask", "placementType": "body", "equipmentId": "staff_guardian_pink", "zIndex": 40, "locked": true, "visible": true,
+      "id": "hands-front", "name": "Mãos Frontais da Maya", "type": "generic", "placementType": "body", "equipmentId": "armor_guardian_pink", "zIndex": 50, "locked": true, "visible": true,
+      "source": "/avatar-assets/maya_hands_front_v1.png", "sourceKind": "project", "sourceFileName": "maya_hands_front_v1.png", "assetKey": "maya_hands_front_v1", "missing": false,
+      "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
+      "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 245, "y": 746, "width": 521, "height": 132 }
+    },
+    {
+      "id": "right-hand-mask", "name": "Mão Direita da Maya", "type": "occlusionMask", "placementType": "body", "equipmentId": "staff_guardian_pink", "zIndex": 60, "locked": true, "visible": true,
       "source": "/avatar-assets/maya_right_hand_front_mask.png", "sourceKind": "project", "sourceFileName": "maya_right_hand_front_mask.png", "assetKey": "maya_right_hand_front_mask", "missing": false,
       "transform": { "x": 0, "y": 0, "xNormalized": 0, "yNormalized": 0, "scaleX": 1, "scaleY": 1, "rotation": 0, "opacity": 1 },
       "nativeWidth": 1024, "nativeHeight": 1536, "trimBounds": { "x": 177, "y": 625, "width": 130, "height": 145 }

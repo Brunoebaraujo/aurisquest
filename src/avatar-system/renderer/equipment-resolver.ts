@@ -30,6 +30,7 @@ export function isLayerEquipped(layer: AvatarLayer, equipment: Equipment): boole
   if (layer.type === "avatarBase") return layer.assetKey?.startsWith("maya_") ? isMayaEquipment(equipment) : isGaelEquipment(equipment);
   if (isMayaEquipment(equipment)) {
     if (layer.type === "armor") return equipment.armor?.equipmentId === "armor_guardian_pink";
+    if (layer.type === "generic" && layer.equipmentId === "armor_guardian_pink") return equipment.armor?.equipmentId === "armor_guardian_pink";
     if (layer.type === "weapon" || layer.type === "occlusionMask") return equipment.weapon?.equipmentId === "staff_guardian_pink";
     if (layer.type === "helmetScene") return equipment.helmet?.equipmentId === "tiara_guardian_pink";
     return false;
