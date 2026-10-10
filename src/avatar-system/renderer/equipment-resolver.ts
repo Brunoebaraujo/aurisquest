@@ -11,6 +11,7 @@ export function inferEquipmentId(kind: "avatar" | "helmet" | "armor" | "weapon" 
   const value = normalize(`${name ?? ""} ${imageUrl ?? ""}`);
   if (kind === "avatar" && value.includes("gael")) return "gael";
   if (kind === "avatar" && value.includes("maya")) return "maya";
+  if (kind === "avatar" && value.includes("lorenzo")) return "lorenzo";
   if (kind === "helmet" && (value.includes("tiara") || value.includes("coroa"))) return "tiara_guardian_pink";
   if (kind === "armor" && (value.includes("rosa") || value.includes("pink") || value.includes("coracao") || value.includes("heart"))) return "armor_guardian_pink";
   if (kind === "weapon" && (value.includes("cajado") || value.includes("staff"))) return "staff_guardian_pink";
