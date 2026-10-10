@@ -25,4 +25,23 @@ describe("AvatarRenderer production mapping",()=>{
   it("uses only the base avatar in compact badges",()=>{ const view=render(createElement(AvatarRenderer,{equipment,surface:"badge"})); expect(view.container.querySelectorAll("[data-avatar-layer]")).toHaveLength(1); expect(view.container.querySelector("[data-avatar-layer='avatar-base']")).not.toBeNull(); });
   it("maps bundled render parts to the armor wardrobe slot",()=>{ const layers=createGaelPreset().layers; expect(wardrobeSlotForLayer(layers.find(layer=>layer.type==="armor")!)).toBe("armadura"); expect(wardrobeSlotForLayer(layers.find(layer=>layer.type==="belt")!)).toBe("armadura"); expect(wardrobeSlotForLayer(layers.find(layer=>layer.type==="shield")!)).toBe("armadura"); });
   it("opens the matching wardrobe category from a rendered piece",()=>{ const selected:string[]=[]; const view=render(createElement(AvatarRenderer,{equipment,surface:"characterScene",onLayerSelect:(slot)=>selected.push(slot)})); fireEvent.click(view.getAllByLabelText("Abrir armadura")[0]); expect(selected).toEqual(["armadura"]); });
+
+  it("registers Lorenzo's full-body base asset without modifying Gael or Maya", () => {
+    const lorenzo = { avatar: { image_url: "/avatar-assets/lorenzo_avatar_base_v1.png", name: "Lorenzo", rarity: "comum" as const, equipmentId: "lorenzo" } };
+    expect(inferEquipmentId("avatar", "Lorenzo", lorenzo.avatar.image_url)).toBe("lorenzo");
+    const layout = getAvatarLayout(lorenzo);
+    expect(layout?.avatarId).toBe("lorenzo");
+    expect(layout?.canvas).toEqual({ width: 1024, height: 1536 });
+    expect(layout?.layers).toHaveLength(1);
+    expect(layout?.layers[0]).toMatchObject({ id: "avatar-base", type: "avatarBase", source: "/avatar-assets/lorenzo_avatar_base_v1.png" });
+    expect(getAvatarLayout(equipment)?.avatarId).toBe("gael");
+  });
+  it("shows Lorenzo as a cropped headshot in badges and a full-body modular portrait", () => {
+    const lorenzo = { avatar: { image_url: "/avatar-assets/lorenzo_avatar_base_v1.png", name: "Lorenzo", rarity: "comum" as const, equipmentId: "lorenzo" } };
+    const badge = render(createElement(EquippedAvatar, { equipment: lorenzo, size: 96, variant: "headshot" }));
+    expect(badge.container.querySelector("[data-avatar-variant='headshot'] img")?.getAttribute("src")).toContain("lorenzo_avatar_base_v1.png");
+    expect((badge.container.querySelector("[data-avatar-variant='headshot'] img") as HTMLImageElement).style.transform).toBe("scale(2.25)");
+    const portrait = render(createElement(EquippedAvatar, { equipment: lorenzo, size: 192, variant: "portrait" }));
+    expect(portrait.container.querySelectorAll("[data-avatar-layer='avatar-base']")).toHaveLength(1);
+  });
 });

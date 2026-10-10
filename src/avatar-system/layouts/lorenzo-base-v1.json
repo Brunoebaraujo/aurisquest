@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "avatarStandard": "auris-avatar-standard-v1",
+  "avatarId": "lorenzo",
+  "avatarName": "Lorenzo",
+  "presetId": "lorenzo-base-v1",
+  "presetName": "Lorenzo Base v1",
+  "canvas": {
+    "width": 1024,
+    "height": 1536
+  },
+  "layers": [
+    {
+      "id": "avatar-base",
+      "name": "Lorenzo Base",
+      "type": "avatarBase",
+      "placementType": "body",
+      "zIndex": 0,
+      "locked": true,
+      "visible": true,
+      "source": "/avatar-assets/lorenzo_avatar_base_v1.png",
+      "sourceKind": "project",
+      "sourceFileName": "lorenzo_avatar_base_v1.png",
+      "assetKey": "lorenzo_avatar_base_v1",
+      "missing": false,
+      "transform": {
+        "x": 0,
+        "y": 0,
+        "xNormalized": 0,
+        "yNormalized": 0,
+        "scaleX": 1,
+        "scaleY": 1,
+        "rotation": 0,
+        "opacity": 1
+      },
+      "nativeWidth": 1024,
+      "nativeHeight": 1536,
+      "trimBounds": {
+        "x": 215,
+        "y": 47,
+        "width": 602,
+        "height": 1433
+      }
+    }
+  ]
+}

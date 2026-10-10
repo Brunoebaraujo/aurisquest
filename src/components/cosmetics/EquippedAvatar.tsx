@@ -34,6 +34,8 @@ export function EquippedAvatar({
   const modular = canRenderModularAvatar(equipment);
   const portrait = modular && variant === "portrait";
   const headshotUrl = modular && !portrait ? getAvatarHeadshotUrl(equipment) : undefined;
+  // Lorenzo uses a face crop of the existing full-body PNG until a dedicated headshot is published.
+  const lorenzoHeadshot = headshotUrl === "/avatar-assets/lorenzo_avatar_base_v1.png";
   const height = portrait ? Math.round(s * 1.5) : s;
   const rounded = portrait ? "rounded-[2rem]" : "rounded-full";
 
@@ -54,12 +56,13 @@ export function EquippedAvatar({
       )}
       {/* Avatar with frame */}
       <RarityFrame rarity={frameRarity} rounded={rounded} className="relative w-full h-full">
-        <div className={cn("w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center", rounded, modular ? "overflow-visible" : "overflow-hidden")}>
+        <div className={cn("w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center", rounded, modular && !lorenzoHeadshot ? "overflow-visible" : "overflow-hidden")}>
           {headshotUrl ? (
             <img
               src={headshotUrl}
               alt={equipment.avatar?.name ? `Rosto de ${equipment.avatar.name}` : "Rosto do avatar"}
               className="h-full w-full object-cover object-top"
+              style={lorenzoHeadshot ? { transform: "scale(2.25)", transformOrigin: "50% 10%" } : undefined}
             />
           ) : modular ? (
             <AvatarRenderer
