@@ -9,14 +9,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-const SAMPLE_ACTIVITIES = [
-  { name: "Escovar os dentes", description: "De manhã e à noite", reward_auris: 5, category: "Higiene", frequency_hint: "diaria" },
-  { name: "Arrumar a cama", description: "Logo ao acordar", reward_auris: 10, category: "Casa", frequency_hint: "diaria" },
-  { name: "Fazer a lição de casa", description: "Sem reclamar 😉", reward_auris: 20, category: "Estudos", frequency_hint: "diaria" },
-  { name: "Guardar os brinquedos", description: "Antes de dormir", reward_auris: 10, category: "Casa", frequency_hint: "diaria" },
-  { name: "Ajudar na cozinha", description: "Lavar louça ou pôr a mesa", reward_auris: 15, category: "Casa", frequency_hint: "semanal" },
-];
-
 type Kid = { name: string; age: string };
 
 const Onboarding = () => {
@@ -46,9 +38,23 @@ const Onboarding = () => {
         .from("families").insert({ name: familyName.trim(), created_by: user.id }).select().single();
       if (famErr || !fam) { setBusy(false); toast.error("Erro ao criar família: " + famErr?.message); return; }
       familyId = fam.id;
-      await supabase.from("profiles").update({ family_id: familyId }).eq("id", user.id);
-      // Atividades de exemplo
-      await supabase.from("activities").insert(SAMPLE_ACTIVITIES.map(a => ({ ...a, family_id: familyId!, active: true })));
+      const { error: profileErr } = await supabase.from("profiles").update({ family_id: familyId }).eq("id", user.id);
+      if (profileErr) {
+        setBusy(false);
+        toast.error("Não foi possível vincular sua família: " + profileErr.message);
+        return;
+      }
+      // The database trigger creates the five default activities exactly once.
+      // Do not duplicate them client-side or silently report success if the seed failed.
+      const { count: activityCount, error: activitiesErr } = await supabase
+        .from("activities").select("id", { count: "exact", head: true }).eq("family_id", familyId);
+      if (activitiesErr || !activityCount) {
+        setBusy(false);
+        toast.error("Família criada, mas as atividades iniciais não foram carregadas. Verifique a configuração do banco de dados.");
+        await refreshProfile();
+        nav("/app/activities");
+        return;
+      }
     }
 
     // Crianças
@@ -112,7 +118,7 @@ const Onboarding = () => {
 
             {!fromInvite && (
               <div className="rounded-2xl bg-muted p-4 text-sm text-muted-foreground">
-                ✨ Vamos criar 5 atividades de exemplo. Você pode editar depois.
+                ✨ Sua família começará com 5 atividades padrão. Você poderá editar ou excluir qualquer uma delas.
               </div>
             )}
 
