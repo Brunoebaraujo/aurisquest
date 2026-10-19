@@ -8,10 +8,11 @@ security definer
 set search_path = public
 as $$
   insert into public.activities (
-    family_id, name, description, tier, category, frequency_hint, active, icon_key
+    family_id, name, description, tier, reward_auris, category, frequency_hint, active, icon_key
   )
   select _family_id, suggested.name, suggested.description,
-         suggested.tier::public.activity_tier, suggested.category,
+         suggested.tier::public.activity_tier,
+         case when suggested.tier = 'rotina' then 1 else 3 end, suggested.category,
          suggested.frequency_hint, true, suggested.icon_key
   from (
     values
@@ -27,8 +28,24 @@ as $$
   );
 $$;
 
--- Repair families that have no activities at the migration date only.
--- Families with customized activities are not changed.
+-- Install family creation trigger (not present in the deployed schema). 
+create or replace function public.seed_comportamento_activities_after_family_insert()
+returns trigger language plpgsql security definer set search_path = public as $
+begin
+  perform public.seed_comportamento_activities_for_family(new.id);
+  return new;
+end; $;
+
+drop trigger if exists seed_comportamento_activities_after_family_insert on public.families;
+create trigger seed_comportamento_activities_after_family_insert
+  after insert on public.families for each row
+  execute function public.seed_comportamento_activities_after_family_insert();
+
+-- Repair empty families and the Senna family, preserving all existing activities.
 select public.seed_comportamento_activities_for_family(f.id)
 from public.families f
-where not exists (select 1 from public.activities a where a.family_id = f.id);
+where not exists (select 1 from public.activities a where a.family_id = f.id)
+   or lower(trim(f.name)) = 'senna';
+
+revoke execute on function public.seed_comportamento_activities_for_family(uuid) from public, anon, authenticated;
+revoke execute on function public.seed_comportamento_activities_after_family_insert() from public, anon, authenticated;
