@@ -191,7 +191,7 @@ const Activities = () => {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" data-tour="activities-section">
         {filteredList.map(a => (
           <Card key={a.id} className={`border-0 shadow-card rounded-2xl ${!a.active ? "opacity-60" : ""}`}>
             <CardContent className="p-5">

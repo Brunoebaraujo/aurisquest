@@ -788,6 +788,33 @@ export type Database = {
           },
         ]
       }
+      guardian_tutorial_progress: {
+        Row: {
+          current_phase: string
+          current_step: number
+          status: string
+          tutorial_version: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_phase?: string
+          current_step?: number
+          status?: string
+          tutorial_version?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_phase?: string
+          current_step?: number
+          status?: string
+          tutorial_version?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       reward_redemptions: {
         Row: {
           auris_cost: number

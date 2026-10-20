@@ -239,6 +239,7 @@ const Missions = () => {
           return (
             <Card
               key={m.id}
+              data-tour={m.name === "Dentes Fortes" ? "starter-mission-card" : undefined}
               role="button"
               tabIndex={0}
               onClick={() => setRankingMission(m)}
