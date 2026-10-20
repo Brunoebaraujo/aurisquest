@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Check, Plus, Trash2, Sparkles, Shield, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,8 @@ import { AuriIcon } from "@/components/AuriIcon";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { GuardianTour } from "@/components/guardian/GuardianTour";
+import { useGuardianTour } from "@/hooks/useGuardianTour";
 
 const STEPS = ["Fundar o Reino", "Convocar os Heróis", "Definir as Quests", "Preparar o Tesouro", "Abrir os Portões"];
 const RECOMMENDED = ["Arrumar a cama", "Escovar os dentes", "Organizar os brinquedos", "Realizar a tarefa escolar", "Praticar uma boa ação"];
@@ -19,6 +21,8 @@ const REWARD_OPTIONS = [
   { name: "30 minutos de tempo de tela", category: "screen_time", cost: 20, description: "Tempo de tela adicional, conforme combinado com o responsável." },
   { name: "Escolher um passeio em família", category: "experience", cost: 30, description: "Escolha uma atividade simples para fazer juntos." },
 ] as const;
+const GUIDE_STEP_FOR_FORM_STEP = [0, 1, 2, 4, 5];
+const FORM_STEP_FOR_GUIDE_STEP = [0, 1, 2, 2, 3, 4];
 
 const Onboarding = () => {
   const { user, profile, refreshProfile } = useAuth();
@@ -29,11 +33,27 @@ const Onboarding = () => {
   const [missionEnabled, setMissionEnabled] = useState(true);
   const [rewardChoice, setRewardChoice] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [guideStep, setGuideStep] = useState(0);
+  const guardian = useGuardianTour(user?.id, "onboarding");
+  const changeGuideStep = useCallback((nextGuideStep: number) => {
+    setGuideStep(nextGuideStep);
+    setStep(FORM_STEP_FOR_GUIDE_STEP[nextGuideStep] ?? 0);
+  }, []);
+
+  useEffect(() => {
+    if (guardian.progress?.current_phase === "onboarding" && guardian.progress.status === "in_progress") {
+      changeGuideStep(guardian.progress.current_step);
+    }
+  }, [changeGuideStep, guardian.progress]);
 
   const next = () => {
     if (step === 0 && !familyName.trim()) { toast.error("Informe o nome do Reino."); return; }
     if (step === 1 && !kids.some(k => k.trim())) { toast.error("Adicione ao menos um herói."); return; }
-    setStep(s => Math.min(4, s + 1));
+    setStep(current => {
+      const nextStep = Math.min(4, current + 1);
+      setGuideStep(GUIDE_STEP_FOR_FORM_STEP[nextStep]);
+      return nextStep;
+    });
   };
 
   const finish = async () => {
@@ -122,6 +142,8 @@ const Onboarding = () => {
       }
 
       await refreshProfile();
+      // The interactive app tour is offered only after this responsible user finishes onboarding.
+      await guardian.save({ current_phase: "app", current_step: 0, status: "not_started" });
       toast.success("Seu Reino está pronto! Configure as senhas dos heróis em Crianças.");
       navigate("/app/quem-entra", { replace: true });
     } catch (error) {
@@ -145,13 +167,13 @@ const Onboarding = () => {
             <Progress value={(step + 1) * 20} />
           </div>
 
-          {step === 0 && <div className="space-y-3">
+          {step === 0 && <div className="space-y-3" data-tour="onboarding-family-name">
             <p className="text-sm">Todo grande reino começa com um nome. Como vamos chamar sua família?</p>
             <Label htmlFor="kingdom">Nome da família</Label>
             <Input id="kingdom" maxLength={80} value={familyName} onChange={e => setFamilyName(e.target.value)} placeholder="Ex.: Família Sena" autoFocus />
           </div>}
 
-          {step === 1 && <div className="space-y-3">
+          {step === 1 && <div className="space-y-3" data-tour="onboarding-children">
             <p className="text-sm">Quem serão os primeiros heróis deste reino? Use apenas o nome ou apelido.</p>
             {kids.map((name, index) => <div className="flex gap-2" key={index}>
               <Input aria-label={`Nome do herói ${index + 1}`} maxLength={60} placeholder="Nome do herói" value={name}
@@ -164,16 +186,16 @@ const Onboarding = () => {
 
           {step === 2 && <div className="space-y-3">
             <p className="text-sm">Seu reino já começará com cinco atividades editáveis, sem precisar cadastrar cada uma.</p>
-            <div className="rounded-xl bg-muted p-3 space-y-2">{RECOMMENDED.map(n => <div key={n} className="flex items-center gap-2 text-sm"><Check size={16} className="text-success" />{n}</div>)}</div>
+            <div className="rounded-xl bg-muted p-3 space-y-2" data-tour="onboarding-default-activities">{RECOMMENDED.map(n => <div key={n} className="flex items-center gap-2 text-sm"><Check size={16} className="text-success" />{n}</div>)}</div>
             <p className="text-xs text-muted-foreground">A pontuação segue os níveis existentes do Auris Quest. Você poderá alterar ou excluir as atividades no painel.</p>
-            <div className="border rounded-xl p-3 space-y-2">
+            <div className="border rounded-xl p-3 space-y-2" data-tour="onboarding-starter-mission">
               <label className="flex gap-3 items-center text-sm font-medium"><Checkbox checked={missionEnabled} onCheckedChange={value => setMissionEnabled(value === true)} /> Ativar missão inicial: Dentes Fortes</label>
               <p className="text-xs text-muted-foreground">Escovar os dentes durante 7 dias consecutivos. As conclusões precisam ser aprovadas. Ao cumprir a meta, cada participante recebe a medalha da missão e bônus Bronze de 5 Auris.</p>
               <p className="text-xs text-muted-foreground">Atividade = ação diária. Missão = sequência de conquistas. A missão é opcional e pode ser excluída depois.</p>
             </div>
           </div>}
 
-          {step === 3 && <div className="space-y-3">
+          {step === 3 && <div className="space-y-3" data-tour="onboarding-reward-selector">
             <p className="text-sm">Os Auris conquistados podem ser trocados por recompensas. Escolha a primeira oferta do Mercador.</p>
             {REWARD_OPTIONS.map((reward, index) => <button type="button" key={reward.name}
               className={`w-full rounded-xl p-3 text-left border flex justify-between items-center gap-3 ${rewardChoice === index ? "border-primary bg-primary/5" : "border-border"}`}
@@ -195,13 +217,14 @@ const Onboarding = () => {
           </div>}
 
           <div className="flex gap-2 pt-2">
-            {step > 0 && <Button type="button" variant="outline" disabled={busy} onClick={() => setStep(s => s - 1)}><ArrowLeft size={16} /> Voltar</Button>}
+            {step > 0 && <Button type="button" variant="outline" disabled={busy} onClick={() => setStep(current => { const previous = current - 1; setGuideStep(GUIDE_STEP_FOR_FORM_STEP[previous]); return previous; })}><ArrowLeft size={16} /> Voltar</Button>}
             {step < 4
               ? <Button type="button" variant="hero" className="flex-1" onClick={next}>Continuar <ArrowRight size={16} /></Button>
-              : <Button type="button" variant="hero" className="flex-1" disabled={busy} onClick={finish}>{busy ? "Criando Reino..." : "Abrir os Portões"} <Sparkles size={16} /></Button>}
+              : <span className="flex-1" data-tour="onboarding-activate"><Button type="button" variant="hero" className="w-full" disabled={busy} onClick={finish}>{busy ? "Criando Reino..." : "Abrir os Portões"} <Sparkles size={16} /></Button></span>}
           </div>
         </CardContent>
       </Card>
+      <GuardianTour phase="onboarding" externalStep={guideStep} onExternalStepChange={changeGuideStep} />
     </div>
   );
 };

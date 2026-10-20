@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Gift as GiftIcon, LogOut, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus, Gift, Palette } from "lucide-react";
+import { LayoutDashboard, Users, ListChecks, ClipboardCheck, Gift as GiftIcon, LogOut, CalendarDays, Award, Shield, UsersRound, BarChart3, AlertTriangle, UserPlus, Gift, Palette, CircleHelp } from "lucide-react";
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar, SidebarHeader, SidebarFooter,
@@ -116,6 +116,10 @@ export const AppSidebar = () => {
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border p-2">
+        <Button variant="ghost" size="sm" onClick={() => window.dispatchEvent(new Event("guardian-tour:restart"))} className="justify-start" aria-label="Repetir a Primeira Jornada">
+          <CircleHelp className="w-4 h-4" />
+          {!collapsed && <span>Repetir a Primeira Jornada</span>}
+        </Button>
         <Button variant="ghost" size="sm" onClick={signOut} className="justify-start">
           <LogOut className="w-4 h-4" />
           {!collapsed && <span>Sair</span>}

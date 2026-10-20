@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Onboarding from "@/pages/Onboarding";
 import { useActiveProfile } from "@/hooks/useActiveProfile";
 import { AuriIcon } from "@/components/AuriIcon";
+import { GuardianTour } from "@/components/guardian/GuardianTour";
 
 const AppLayout = () => {
   const { user, profile, loading } = useAuth();
@@ -55,6 +56,7 @@ const AppLayout = () => {
           </main>
         </div>
       </div>
+      <GuardianTour phase="app" />
     </SidebarProvider>
   );
 };

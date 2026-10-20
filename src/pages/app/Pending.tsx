@@ -179,7 +179,7 @@ const Pending = () => {
         <h2 className="text-2xl font-display font-bold">Pendências</h2>
         <p className="text-muted-foreground text-sm">Aprove ou recuse atividades e Daily Side Quests enviadas pelas crianças.</p>
       </div>
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap" data-tour="pending-moderation">
         {tabs.map(t => (
           <Button key={t.key} variant={tab === t.key ? "hero" : "outline"} size="sm" onClick={() => setTab(t.key)}>
             <t.icon className="w-4 h-4" /> {t.label}

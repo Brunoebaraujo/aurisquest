@@ -139,7 +139,7 @@ const Rewards = () => {
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button asChild variant="hero">
-            <Link to="/app/recompensas/catalogo"><ListPlus className="w-4 h-4" /> Catálogo</Link>
+            <Link data-tour="merchant-catalog-link" to="/app/recompensas/catalogo"><ListPlus className="w-4 h-4" /> Catálogo</Link>
           </Button>
           <Button variant="outline" onClick={() => setRateOpen(true)}>
             <Settings className="w-4 h-4" /> Taxa: {aurisPerReal} <AuriIcon size={14} /> = R$1
